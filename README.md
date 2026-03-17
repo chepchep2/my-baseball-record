@@ -10,7 +10,7 @@
 - `docs/`
   - PRD, 시나리오, 설계, 와이어프레임, 구현 계획 문서
 - `frontend/`
-  - React + JavaScript 기반 프론트엔드 초기 구현
+  - Next.js 기반 프론트엔드 구현 위치
 - `backend/`
   - 백엔드 구현 예정 위치
 

@@ -4,9 +4,9 @@
 
 **Goal:** 개인 선수 전용 모바일 웹 기록 관리 서비스 v1의 프론트엔드/백엔드 구현 범위, 공통 계약, 인증 구조, 구현 순서를 하나의 상위 문서에서 고정한다.
 
-**Architecture:** 사용자는 구글 로그인으로 인증을 시작하고, 백엔드는 구글 인증 성공 후 앱 내부 `access token / refresh token`을 발급해 세션을 관리한다. 프론트엔드는 기록 확인 요약 화면을 기본 홈으로 하고 상세 기록 화면으로 깊이를 나누는 모바일 웹 SPA를 구현하며, 백엔드는 인증, 경기 기록 저장, 통합 기록 조회 API를 제공한다.
+**Architecture:** 사용자는 구글 로그인으로 인증을 시작하고, 백엔드는 구글 인증 성공 후 앱 내부 `access token / refresh token`을 발급해 세션을 관리한다. 프론트엔드는 기록 확인 요약 화면을 기본 홈으로 두고 상세 기록 화면으로 깊이를 나누는 모바일 웹을 구현하며, 백엔드는 인증, 경기 기록 저장, 통합 기록 조회 API를 제공한다.
 
-**Tech Stack:** Frontend: React, JavaScript, Vite. Backend: Java, Spring Boot, Spring Security, Spring Data JPA, Validation, PostgreSQL. Shared: Google OAuth login, JWT access token, refresh token, JSON API.
+**Tech Stack:** Frontend: Next.js, React, JavaScript, App Router. Backend: Java, Spring Boot, Spring Security, Spring Data JPA, Validation, PostgreSQL. Shared: Google OAuth login, JWT access token, refresh token, JSON API.
 
 **Auth Policy:** Google 로그인만 지원한다. Google 계정 1개는 앱 계정 1개와 연결되며, 서로 다른 Google 계정은 서로 다른 앱 계정으로 취급한다. v1은 계정 연결과 계정 병합을 지원하지 않는다.
 
@@ -58,7 +58,7 @@ v1에서 제외한다.
 
 - 구글 로그인 시작과 복귀 처리
 - 앱 세션 상태 관리
-- 보호 라우트
+- 보호 페이지 진입 제어
 - 기록 확인 요약 화면
 - 상세 기록 화면
 - 빈 상태, 로딩, 조회 실패, 인증 만료 화면 처리
@@ -118,6 +118,11 @@ v1에서 제외한다.
 - 앱 내부 세션 저장은 백엔드 발급 토큰 기준으로 한다.
 - 인증이 없는 상태에서 `/records`, `/games/new` 접근 시 인증 화면으로 보낸다.
 - 앱 세션 발급 성공 후 기본 홈은 `/records`다.
+
+## Frontend Runtime Note
+
+- 프론트 구현은 Next.js App Router 기준으로 진행한다.
+- 배포는 Vercel을 우선 검토한다.
 
 ## Read And Write Model
 

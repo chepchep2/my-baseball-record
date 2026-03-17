@@ -1,60 +1,107 @@
-# My Baseball Record
+# Documentation Hub
 
-`마이베이스볼레코드` 프로젝트의 기획 및 문서 저장소입니다.
+`마이베이스볼레코드` 문서 허브입니다.
 
-현재 저장소는 구현 코드 저장소가 아니라, 서비스 방향성, 인터뷰, 시나리오, 화면 기획, 설계 문서를 정리하고 공유하기 위한 용도로 사용합니다.
+이 디렉터리의 문서는 `개인 선수 전용 모바일 웹 기록 관리 서비스`라는 기준 아래에서 읽고 관리합니다.
+문서의 목적은 제품 방향, 사용자 흐름, 설계, 구현 계획을 한 기준으로 연결하는 데 있습니다.
 
-## Current Status
+## Current Product Direction
 
-- 현재 단계: 기획 및 설계
-- 현재 저장소 역할: 문서 정리 및 공유
-- 구현 저장소:
-  - 프론트엔드: 추후 별도 repo 생성 예정
-  - 백엔드: 추후 별도 repo 생성 예정
+- 제품 유형: 개인 선수 전용 모바일 웹 기록 관리 서비스
+- 핵심 문제: 흩어진 기록을 한곳에 모아 시즌 성적을 쉽게 확인하기 어렵다
+- 핵심 가치: 내 야구 기록을 계속 모으고 관리할 수 있다
+- 기본 진입 경험: 기록 확인 요약 화면
+- 재방문 트리거: 경기 후 기록 추가
+- 우선 판단 기준: 입력 속도보다 기록 관리의 명확성
 
-## Planned Repositories
+## Reading Order
 
-프로젝트는 문서, 프론트엔드, 백엔드를 역할별로 분리한 별도 저장소로 운영합니다.
+문서를 처음 읽는 경우 아래 순서로 읽는 것을 기준으로 한다.
 
-- `my-baseball-record-docs`
-  - 기획, 인터뷰, 시나리오, 화면 기획, 설계, 구현 계획 등 문서 저장소
-- `my-baseball-record-frontend`
-  - React 기반 프론트엔드 애플리케이션 저장소
-- `my-baseball-record-backend`
-  - Spring Boot 기반 백엔드 API 저장소
+1. [PRD](./prd.md)
+2. [Mobile Web Docs Redesign Design](./superpowers/specs/2026-03-17-mobile-web-docs-redesign-design.md)
+3. [Scenario V1](./superpowers/specs/2026-03-17-scenario-v1.md)
+4. [Baseball Record V1 Design](./superpowers/specs/2026-03-16-baseball-record-v1-design.md)
+5. [Screen Planning V1](./superpowers/specs/2026-03-17-screen-planning-v1.md)
+6. [Frontend ASCII Wireframes](./superpowers/specs/2026-03-17-frontend-ascii-wireframes.md)
+7. 이후 구현 개요 문서
+8. 이후 프론트엔드/백엔드 상세 구현 계획 문서
 
-## Recommended Reading Order
+## Document Authority
 
-멘토 또는 협업자가 빠르게 읽으시려면 아래 순서가 가장 좋습니다.
+문서 간 내용이 충돌하면 아래 순서로 우선한다.
 
-1. [Scenario V1](docs/superpowers/specs/2026-03-17-scenario-v1.md)
-2. [Screen Planning V1](docs/superpowers/specs/2026-03-17-screen-planning-v1.md)
-3. [Baseball Record V1 Design](docs/superpowers/specs/2026-03-16-baseball-record-v1-design.md)
-4. [PRD](docs/prd.md)
+1. [docs/prd.md](./prd.md)
+2. 시나리오 문서
+3. 설계 문서
+4. 전체 구현 개요 문서
+5. 프론트엔드/백엔드 상세 구현 계획 문서
 
-## Key Documents
+즉 하위 문서는 상위 문서와 충돌하는 범위, 사용자 정의, 플랫폼 원칙, 기능 범위를 새로 만들 수 없다.
 
-### Core Planning
+## Document Roles
 
-- [Scenario V1](docs/superpowers/specs/2026-03-17-scenario-v1.md)
-- [Screen Planning V1](docs/superpowers/specs/2026-03-17-screen-planning-v1.md)
-- [Baseball Record V1 Design](docs/superpowers/specs/2026-03-16-baseball-record-v1-design.md)
-- [Backend Plan](docs/superpowers/plans/2026-03-16-baseball-record-v1-backend.md)
-- [PRD](docs/prd.md)
+### 1. Product Scope
 
-### Interview Docs
+- [docs/prd.md](./prd.md)
 
-- [Interview Script](docs/interviews/2026-03-16-interview-script.md)
-- [Self Interview Summary](docs/interviews/2026-03-16-self-interview-summary.md)
-- [Interview 01](docs/interviews/2026-03-15-interview-01.md)
+이 문서는 제품 범위의 단일 기준 문서다.
+아래 내용을 이 문서가 소유한다.
 
-## Repository Structure
+- 문제 정의
+- 대상 사용자
+- 핵심 가치
+- 포함 범위
+- 제외 범위
+- 모바일 웹 원칙
+- 성공 기준
 
-- `docs/`: 기획, 인터뷰, 시나리오, 화면 기획, 설계, 구현 계획 문서
-- `design/`: 화면 구상, 와이어프레임, 디자인 자료
+### 2. Redesign Direction
 
-## Naming
+- [2026-03-17-mobile-web-docs-redesign-design.md](./superpowers/specs/2026-03-17-mobile-web-docs-redesign-design.md)
 
-- 서비스 이름(작업명): `마이베이스볼레코드`
-- 영문 작업명: `My Baseball Record`
-- 폴더명: `my-baseball-record`
+이 문서는 기존 문서를 어떻게 다시 정렬할지 설명하는 메타 문서다.
+문서 개편 방향과 재작성 순서를 정리하며, 제품 범위의 기준 문서는 아니다.
+
+### 3. Scenario
+
+- [2026-03-17-scenario-v1.md](./superpowers/specs/2026-03-17-scenario-v1.md)
+
+이 문서는 대표 사용자가 어떤 상황에서 서비스를 열고,
+어떤 흐름으로 핵심 가치를 느끼는지 설명한다.
+제품 범위를 새로 정의하지 않는다.
+
+### 4. Product Design
+
+- [2026-03-16-baseball-record-v1-design.md](./superpowers/specs/2026-03-16-baseball-record-v1-design.md)
+- [2026-03-17-screen-planning-v1.md](./superpowers/specs/2026-03-17-screen-planning-v1.md)
+- [2026-03-17-frontend-ascii-wireframes.md](./superpowers/specs/2026-03-17-frontend-ascii-wireframes.md)
+
+이 문서군은 모바일 웹 기준의 정보구조, 화면 목적, 상태, 입력 흐름, 조회 구조를 설명한다.
+제품 범위는 PRD를 따른다.
+
+### 5. Implementation Plans
+
+향후 아래 문서들이 추가되거나 재작성된다.
+
+- 프론트엔드와 백엔드를 함께 설명하는 구현 개요 문서
+- 프론트엔드 상세 구현 계획 문서
+- 백엔드 상세 구현 계획 문서
+
+이 문서들은 상위 문서를 구현 단위로 분해하는 역할만 한다.
+제품 범위를 새로 정의하지 않는다.
+
+## Current Cleanup Direction
+
+현재 문서 개편 작업의 핵심 방향은 아래와 같다.
+
+- 데스크톱 기준 문서를 모바일 웹 기준으로 전환
+- 개인 선수 전용 범위를 문서 전반에 명시
+- `기록 확인 중심 + 입력은 핵심 행동` 구조로 재정렬
+- `docs/mvp.md` 내용을 PRD로 흡수하고 중복 문서를 제거
+- 구현 계획 문서가 제품 범위를 넘어가지 않도록 재작성
+
+## Notes
+
+- 루트 [README.md](../README.md)는 저장소 소개와 구조 설명만 담당한다.
+- 자세한 문서 읽기와 문서 역할 설명은 이 `docs/README.md`를 기준으로 한다.

@@ -1,0 +1,74 @@
+<h2>모바일 기록 화면 방향</h2>
+<p class="subtitle">개인 선수용 모바일 웹 기준입니다. 경기 직후 입력과 나중 정리 둘 다 고려하되, 기록 조회 화면의 구조를 먼저 고릅니다.</p>
+
+<div class="cards">
+  <div class="card" data-choice="a" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div class="mockup">
+        <div class="mockup-header">A. 요약 우선형</div>
+        <div class="mockup-body">
+          <div class="label">모바일 상단</div>
+          <div class="mock-nav">이번 시즌 기록</div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;margin:12px 0;">
+            <button class="mock-button">타자</button>
+            <button class="mock-button">투수</button>
+            <button class="mock-button">이번 시즌</button>
+          </div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;">
+            <button class="mock-button">전체</button>
+            <button class="mock-button">리그</button>
+            <button class="mock-button">비공식</button>
+          </div>
+          <div class="placeholder" style="height:64px;">핵심 지표 4개</div>
+          <div class="placeholder" style="height:64px;margin-top:10px;">핵심 지표 4개</div>
+          <div class="placeholder" style="height:110px;margin-top:12px;">상세 지표 접기/펼치기</div>
+          <div style="position:relative;margin-top:14px;padding:12px;border:2px dashed #999;border-radius:12px;text-align:center;">
+            하단 고정 CTA: 경기 추가
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>A. 요약 우선형</h3>
+      <p>기록 화면에 들어오면 핵심 지표를 바로 보고, 상세는 접어서 필요할 때만 봅니다. 조회 중심 경험에 강합니다.</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="b" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div class="mockup">
+        <div class="mockup-header">B. 입력 유도형</div>
+        <div class="mockup-body">
+          <div class="label">모바일 상단</div>
+          <div class="mock-nav">이번 시즌 기록</div>
+          <div class="placeholder" style="height:72px;margin:12px 0;">이번 시즌 한줄 요약 + 최근 입력 유도</div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;">
+            <button class="mock-button">타자</button>
+            <button class="mock-button">투수</button>
+            <button class="mock-button">이번 시즌</button>
+          </div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;">
+            <button class="mock-button">전체</button>
+            <button class="mock-button">리그</button>
+            <button class="mock-button">비공식</button>
+          </div>
+          <div class="placeholder" style="height:56px;">핵심 지표 2개</div>
+          <div class="placeholder" style="height:56px;margin-top:10px;">핵심 지표 2개</div>
+          <div class="placeholder" style="height:56px;margin-top:10px;">핵심 지표 2개</div>
+          <div style="position:relative;margin-top:14px;padding:12px;border:2px dashed #999;border-radius:12px;text-align:center;">
+            하단 고정 CTA: 경기 추가
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>B. 입력 유도형</h3>
+      <p>기록이 적을 때 바로 입력을 유도하고, 지표는 더 가볍게 보여줍니다. 현장 입력 흐름에 강하지만 조회 밀도는 낮아집니다.</p>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>추천</h3>
+  <p class="subtitle">현재 조건이라면 A가 더 맞습니다. v1 핵심 가치는 통합 조회이고, 입력은 중요하지만 조회 화면이 입력 랜딩이 되면 기록 제품의 정체성이 흐려질 가능성이 큽니다.</p>
+</div>

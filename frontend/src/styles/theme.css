@@ -1,0 +1,11 @@
+:root {
+  color-scheme: light;
+  --color-background: #f7f1e4;
+  --color-surface: rgba(255, 252, 245, 0.9);
+  --color-border: rgba(64, 43, 23, 0.14);
+  --color-text: #1f1308;
+  --color-muted: #6f5c4c;
+  --color-accent: #b4441d;
+  --shadow-card: 0 18px 40px rgba(78, 52, 24, 0.12);
+  --font-body: "Pretendard", "Noto Sans KR", "Apple SD Gothic Neo", sans-serif;
+}

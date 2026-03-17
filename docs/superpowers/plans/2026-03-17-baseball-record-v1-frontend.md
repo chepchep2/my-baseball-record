@@ -4,7 +4,7 @@
 
 **Goal:** Baseball Record v1 프론트엔드를 Next.js 기반 모바일 웹으로 구성해 Google 로그인, 기록 확인 요약 화면, 상세 기록 화면, 경기 원자적 저장 흐름, 시즌/통산 기록 조회를 백엔드 API와 연결한다.
 
-**Architecture:** Next.js App Router를 기준으로 인증 화면, 기록 확인 요약 화면, 상세 기록 화면, 경기 입력 화면을 구성한다. 기본 보호 홈은 `/records`로 두고, 인증 없는 접근은 로그인 화면으로 보낸다. 기록 화면은 `요약 화면 -> 상세 기록 화면` 구조를 유지하고, 경기 입력은 `경기 정보 -> 기록 입력`의 단계형 흐름으로 구성한다.
+**Architecture:** Next.js App Router를 기준으로 인증 화면, 기록 확인 요약 화면, 내 정보 화면, 상세 기록 화면, 경기 입력 화면을 구성한다. 기본 보호 홈은 `/records`로 두고, 인증 없는 접근은 로그인 화면으로 보낸다. 기록 화면은 `요약 화면 -> 상세 기록 화면` 구조를 유지하고, 경기 입력은 `경기 정보 -> 기록 입력`의 단계형 흐름으로 구성한다.
 
 **Tech Stack:** Next.js, React, JavaScript, App Router, TanStack Query, React Hook Form, Zod, Vitest, React Testing Library, Mock Service Worker
 
@@ -32,6 +32,7 @@
 - 앱 세션 저장과 갱신
 - 보호 페이지 진입 제어
 - 기록 확인 요약 화면
+- 내 정보 화면
 - 상세 기록 화면
 - 빈 상태
 - 조회 로딩/실패 상태
@@ -56,7 +57,7 @@
 - 인증 화면은 `Google로 시작하기` 단일 행동만 제공한다.
 - 인증이 없으면 `/records`, `/games/new`에 접근할 수 없다.
 - 인증 성공 후 기본 홈은 `/records`다.
-- 로그아웃 UI는 기록 확인 요약 화면을 아래로 내렸을 때 보이는 하단 저강도 영역에 둔다.
+- 로그아웃 UI는 기록 확인 요약 화면 상단의 프로필 메뉴 안에 둔다.
 - 초기 배포는 Vercel을 기본 전제로 둔다.
 
 ## File Structure
@@ -74,6 +75,7 @@
 
 - Create: `frontend/src/app/auth/page.jsx`
 - Create: `frontend/src/app/records/page.jsx`
+- Create: `frontend/src/app/account/page.jsx`
 - Create: `frontend/src/app/records/details/page.jsx`
 - Create: `frontend/src/app/games/new/page.jsx`
 
@@ -150,6 +152,7 @@
 반영 내용:
 - `/auth`
 - `/records`
+- `/account`
 - `/records/details`
 - `/games/new`
 
@@ -227,21 +230,27 @@ git commit -m "기능: 구글 로그인과 앱 세션 구조 구현"
 - 요약 지표
 - `경기 추가`
 - `기록 보기`
-- 로그아웃 하단 영역
+- 상단 프로필 메뉴 (`내 정보`, `로그아웃`)
 
 - [ ] **Step 2: 상세 기록 화면을 구현한다**
 
 반영 내용:
-- 시즌/통산/시즌 선택
-- 경기 유형 필터
-- 타자/투수 전환
+- 시즌/통산 + 시즌 선택
+- 타자/투수 + 경기 유형 선택
 - 대표 지표
 - 상세 지표
 - 하단 뒤로 버튼
 
-- [ ] **Step 3: 빈 상태/조회 실패/세션 만료 상태를 구현한다**
+- [ ] **Step 3: 내 정보 화면을 구현한다**
 
-- [ ] **Step 4: 커밋한다**
+반영 내용:
+- `내 정보`
+- `로그인 방식 / Google`
+- 하단 뒤로 버튼
+
+- [ ] **Step 4: 빈 상태/조회 실패/세션 만료 상태를 구현한다**
+
+- [ ] **Step 5: 커밋한다**
 
 ```bash
 git add frontend/src/app/records frontend/src/features/records frontend/src/lib/http/statsApi.js
@@ -266,6 +275,13 @@ git commit -m "기능: 기록 요약 화면과 상세 기록 화면 구현"
 - [ ] **Step 1: 경기 정보 단계 UI를 구현한다**
 
 - [ ] **Step 2: 타자/투수 기록 입력 단계를 구현한다**
+
+반영 내용:
+- `타자 기록 / 투수 기록` 전환
+- 한 번에 한 `구성`만 노출
+- `이전 구성 / 다음 구성` 이동
+- 타자 기본 구성 6개, 추가 구성 8개
+- 날짜 변경 시 시즌 자동 동기화
 
 - [ ] **Step 3: 저장 실패와 이탈 경고 상태를 구현한다**
 

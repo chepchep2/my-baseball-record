@@ -188,7 +188,7 @@ v1 인증은 `구글 로그인 + 앱 내부 access token / refresh token 기반 
 ### Logout Rule
 
 로그아웃은 단순 클라이언트 토큰 제거가 아니라 refresh token 무효화를 포함한다.
-위치는 기록 확인 요약 화면을 아래로 내렸을 때 보이는 하단 저강도 영역을 기본으로 한다.
+위치는 기록 확인 요약 화면 상단의 프로필 메뉴를 기본으로 한다.
 
 ### Google Login Direction
 

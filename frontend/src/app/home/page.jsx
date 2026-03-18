@@ -1,5 +1,7 @@
 import Link from "next/link";
 import AppPageLayout from "@/components/layout/AppPageLayout";
+import BottomTabBar from "@/components/navigation/BottomTabBar";
+import PageHeader from "@/components/layout/PageHeader";
 
 const batterSummary = [
   ["경기수", "24"],
@@ -40,31 +42,29 @@ export default async function HomePage({ searchParams }) {
   const summaryCards = recordType === "batter" ? batterSummary : pitcherSummary;
 
   return (
-    <AppPageLayout>
+    <AppPageLayout showTabs={false} frameClassName="home-center-frame">
         <section className="panel summary-panel">
-          <div className="page-title-block">
-            <p className="eyebrow">My Baseball Record</p>
-            <h1 className="page-title">
-              시즌 기록 <span className="title-context">({currentYear} 시즌)</span>
-            </h1>
-          </div>
+          <div className="home-summary-content">
+            <PageHeader title="시즌 기록" context={`(${currentYear} 시즌)`} />
 
-          <div className="summary-switch-row" role="tablist" aria-label="기록 축 전환">
-            <Link
-              className={recordType === "batter" ? "tab-button active" : "tab-button"}
-              href="/home?type=batter"
-            >
-              타자
-            </Link>
-            <Link
-              className={recordType === "pitcher" ? "tab-button active" : "tab-button"}
-              href="/home?type=pitcher"
-            >
-              투수
-            </Link>
-          </div>
+            <div className="summary-switch-row" role="tablist" aria-label="기록 축 전환">
+              <Link
+                className={recordType === "batter" ? "tab-button active" : "tab-button"}
+                href="/home?type=batter"
+              >
+                타자
+              </Link>
+              <Link
+                className={recordType === "pitcher" ? "tab-button active" : "tab-button"}
+                href="/home?type=pitcher"
+              >
+                투수
+              </Link>
+            </div>
 
-          <SummaryGrid items={summaryCards} />
+            <SummaryGrid items={summaryCards} />
+          </div>
+          <BottomTabBar className="in-panel" />
         </section>
     </AppPageLayout>
   );

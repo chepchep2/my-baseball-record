@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import AppPageLayout from "@/components/layout/AppPageLayout";
+import BottomTabBar from "@/components/navigation/BottomTabBar";
+import PageHeader from "@/components/layout/PageHeader";
 import {
   batterGroups,
   buildDraftKey,
@@ -100,8 +102,7 @@ export default function GameForm({ mode = "create", gameId = null }) {
 
   const handleSave = () => {
     clearDraft(draftKey);
-    const targetGameId = gameId || "103";
-    window.location.href = `/games/${targetGameId}`;
+    window.location.href = isEditMode && gameId ? `/games/${gameId}` : "/home";
   };
 
   if (!ready) {
@@ -109,12 +110,9 @@ export default function GameForm({ mode = "create", gameId = null }) {
   }
 
   return (
-    <AppPageLayout showTabs={!isEditMode}>
+    <AppPageLayout showTabs={false} frameClassName="form-center-frame">
         <section className="panel form-panel">
-          <div className="page-title-block form-title-block">
-            <p className="eyebrow">My Baseball Record</p>
-            <h1 className="page-title">{isEditMode ? "경기 수정" : "경기 생성 및 기록 입력"}</h1>
-          </div>
+          <PageHeader title={isEditMode ? "경기 수정" : "경기 생성 및 기록 입력"} />
 
           {form.step === "info" ? (
             <>
@@ -125,7 +123,7 @@ export default function GameForm({ mode = "create", gameId = null }) {
                     type="date"
                     value={form.gameDate}
                     max={todayValue}
-                    readOnly={isEditMode}
+                    disabled={isEditMode}
                     onChange={(event) => updateTopField("gameDate", event.target.value > todayValue ? todayValue : event.target.value)}
                   />
                 </label>
@@ -143,53 +141,41 @@ export default function GameForm({ mode = "create", gameId = null }) {
                 </label>
               </div>
 
-              <button
-                type="button"
-                className="inline-link left-align"
-                onClick={() => updateTopField("showOptionalInfo", !form.showOptionalInfo)}
-              >
-                {form.showOptionalInfo ? "선택 정보 닫기" : "선택 정보 더 입력하기"}
-              </button>
+              <div className="form-grid advanced-grid">
+                <label className="field">
+                  <span>시즌</span>
+                  <input type="text" value={form.seasonYear} readOnly />
+                </label>
+                <label className="field">
+                  <span>소속 팀</span>
+                  <input
+                    type="text"
+                    placeholder="선택 입력"
+                    value={form.teamName}
+                    onChange={(event) => updateTopField("teamName", event.target.value)}
+                  />
+                </label>
+                <label className="field">
+                  <span>상대 팀</span>
+                  <input
+                    type="text"
+                    placeholder="선택 입력"
+                    value={form.opponentName}
+                    onChange={(event) => updateTopField("opponentName", event.target.value)}
+                  />
+                </label>
+                <label className="field full-width">
+                  <span>메모</span>
+                  <textarea
+                    rows="3"
+                    placeholder="선택 입력"
+                    value={form.memo}
+                    onChange={(event) => updateTopField("memo", event.target.value)}
+                  />
+                </label>
+              </div>
 
-              {form.showOptionalInfo ? (
-                <div className="form-grid advanced-grid">
-                  <label className="field">
-                    <span>시즌</span>
-                    <input type="text" value={form.seasonYear} readOnly />
-                  </label>
-                  <label className="field">
-                    <span>소속 팀</span>
-                    <input
-                      type="text"
-                      placeholder="선택 입력"
-                      value={form.teamName}
-                      onChange={(event) => updateTopField("teamName", event.target.value)}
-                    />
-                  </label>
-                  <label className="field">
-                    <span>상대 팀</span>
-                    <input
-                      type="text"
-                      placeholder="선택 입력"
-                      value={form.opponentName}
-                      onChange={(event) => updateTopField("opponentName", event.target.value)}
-                    />
-                  </label>
-                  <label className="field full-width">
-                    <span>메모</span>
-                    <textarea
-                      rows="3"
-                      placeholder="선택 입력"
-                      value={form.memo}
-                      onChange={(event) => updateTopField("memo", event.target.value)}
-                    />
-                  </label>
-                </div>
-              ) : null}
-
-              <div className="draft-notice">작성 중인 내용이 임시 저장되었습니다.</div>
-
-              <div className="footer-action-row">
+              <div className="footer-action-row form-edit-actions">
                 <Link className="ghost-button as-link full-width-button" href={isEditMode ? `/games/${gameId}` : "/home"}>
                   취소
                 </Link>
@@ -317,9 +303,7 @@ export default function GameForm({ mode = "create", gameId = null }) {
                 </section>
               )}
 
-              <div className="draft-notice">작성 중인 내용이 임시 저장되었습니다.</div>
-
-              <div className="footer-action-row">
+              <div className="footer-action-row form-edit-actions">
                 <button
                   type="button"
                   className="ghost-button full-width-button"
@@ -333,6 +317,8 @@ export default function GameForm({ mode = "create", gameId = null }) {
               </div>
             </>
           )}
+
+          {!isEditMode ? <BottomTabBar className="in-panel" /> : null}
         </section>
       {showRecoveryModal ? (
         <div className="confirmation-overlay" role="presentation">

@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import styles from "./GameDetailView.module.css";
+import BottomTabBar from "@/components/navigation/BottomTabBar";
 import {
   formatCalendarDate,
   formatGameTypeLabel,
@@ -182,6 +183,8 @@ export default function GameDetailView({ game }) {
               <div className={styles.emptyState}>이 기록 유형은 현재 경기에서 비어 있습니다.</div>
             )}
           </section>
+
+          <BottomTabBar className="in-panel" />
         </div>
       </section>
 

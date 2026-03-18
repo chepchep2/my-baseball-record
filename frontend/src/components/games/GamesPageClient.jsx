@@ -4,6 +4,8 @@ import { useState } from "react";
 import GameCalendar from "@/components/calendar/GameCalendar";
 import GameCards from "@/components/games/GameCards";
 import AppPageLayout from "@/components/layout/AppPageLayout";
+import BottomTabBar from "@/components/navigation/BottomTabBar";
+import PageHeader from "@/components/layout/PageHeader";
 import {
   buildGameCountMap,
   clampDateValueToMonth,
@@ -39,12 +41,9 @@ export default function GamesPageClient({ games, initialTodayValue }) {
   };
 
   return (
-    <AppPageLayout>
+    <AppPageLayout showTabs={false} frameClassName="games-center-frame">
         <section className="panel games-panel">
-          <div className="page-title-block">
-            <p className="eyebrow">My Baseball Record</p>
-            <h1 className="page-title">경기</h1>
-          </div>
+          <PageHeader title="경기" />
 
           <GameCalendar
             monthValue={visibleMonthValue}
@@ -55,9 +54,11 @@ export default function GamesPageClient({ games, initialTodayValue }) {
             onNextMonth={() => moveMonth(1)}
             onSelectDate={setSelectedDate}
           />
-        </section>
 
-        <GameCards selectedDate={selectedDate} games={selectedGames} />
+          <GameCards selectedDate={selectedDate} games={selectedGames} />
+
+          <BottomTabBar className="in-panel" />
+        </section>
     </AppPageLayout>
   );
 }

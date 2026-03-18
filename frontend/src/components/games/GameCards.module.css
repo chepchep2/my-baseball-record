@@ -1,3 +1,8 @@
+.section {
+  display: grid;
+  gap: 12px;
+}
+
 .list {
   display: grid;
   gap: 12px;
@@ -38,8 +43,8 @@
   text-overflow: ellipsis;
 }
 
-.empty {
-  padding: 28px 20px;
+.emptySection {
+  padding: 12px 0 0;
   text-align: center;
 }
 

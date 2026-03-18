@@ -16,18 +16,26 @@ function isActive(pathname, href) {
     return pathname === "/home";
   }
 
+  if (href === "/games/new") {
+    return pathname === "/games/new";
+  }
+
   if (href === "/games") {
+    if (pathname === "/games/new" || /^\/games\/[^/]+\/edit$/.test(pathname)) {
+      return false;
+    }
+
     return pathname === "/games" || /^\/games\/[^/]+$/.test(pathname);
   }
 
   return pathname === href;
 }
 
-export default function BottomTabBar() {
+export default function BottomTabBar({ className = "" }) {
   const pathname = usePathname();
 
   return (
-    <nav className="bottom-tab-bar" aria-label="하단 탭">
+    <nav className={`bottom-tab-bar ${className}`.trim()} aria-label="하단 탭">
       {TABS.map((tab) => (
         <Link
           key={tab.href}

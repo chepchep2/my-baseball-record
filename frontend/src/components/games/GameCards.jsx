@@ -12,14 +12,14 @@ import {
 export default function GameCards({ selectedDate, games }) {
   if (games.length === 0) {
     return (
-      <section className={`panel ${styles.empty}`}>
+      <section className={styles.emptySection}>
         <p className={styles.emptyText}>이 날짜에 기록된 경기가 없습니다.</p>
       </section>
     );
   }
 
   return (
-    <section className="panel detail-screen-panel" aria-label={`${formatCalendarDate(selectedDate)} 경기 목록`}>
+    <section className={styles.section} aria-label={`${formatCalendarDate(selectedDate)} 경기 목록`}>
       <div className={styles.titleRow}>
         <h2 className={styles.title}>{formatCalendarDate(selectedDate)}</h2>
         <span className={styles.count}>총 {games.length}경기</span>

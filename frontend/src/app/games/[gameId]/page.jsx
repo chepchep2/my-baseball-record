@@ -8,7 +8,7 @@ export default async function GameDetailPage({ params }) {
 
   if (!game) {
     return (
-      <AppPageLayout>
+      <AppPageLayout showTabs={false}>
           <section className="panel detail-screen-panel">
             <div className="page-title-block">
               <p className="eyebrow">My Baseball Record</p>
@@ -21,7 +21,7 @@ export default async function GameDetailPage({ params }) {
   }
 
   return (
-    <AppPageLayout>
+    <AppPageLayout showTabs={false}>
         <GameDetailView game={game} />
     </AppPageLayout>
   );

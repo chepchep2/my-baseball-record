@@ -3,6 +3,8 @@
 import { useMemo } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import AppPageLayout from "@/components/layout/AppPageLayout";
+import BottomTabBar from "@/components/navigation/BottomTabBar";
+import PageHeader from "@/components/layout/PageHeader";
 
 const batterSummary = [
   ["경기수", "24"],
@@ -89,12 +91,9 @@ export default function RecordsPageClient() {
   const detailMetrics = recordType === "batter" ? batterDetails : pitcherDetails;
 
   return (
-    <AppPageLayout>
+    <AppPageLayout showTabs={false}>
         <section className="panel detail-screen-panel">
-          <div className="page-title-block detail-title-block">
-            <p className="eyebrow">My Baseball Record</p>
-            <h1 className="page-title">누적 기록</h1>
-          </div>
+          <PageHeader title="누적 기록" />
 
           <div className="detail-filter-stack">
             <div className="detail-top-row">
@@ -169,6 +168,8 @@ export default function RecordsPageClient() {
               </div>
             ))}
           </section>
+
+          <BottomTabBar className="in-panel" />
         </section>
     </AppPageLayout>
   );

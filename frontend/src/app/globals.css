@@ -489,6 +489,14 @@ textarea {
   box-sizing: border-box;
 }
 
+.field input[type="date"] {
+  appearance: none;
+  -webkit-appearance: none;
+  display: block;
+  max-width: 100%;
+  min-width: 0;
+}
+
 .full-width {
   grid-column: 1 / -1;
 }

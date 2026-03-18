@@ -10,7 +10,7 @@
 - 제품 유형: 개인 선수 전용 모바일 웹 기록 관리 서비스
 - 핵심 문제: 흩어진 기록을 한곳에 모아 시즌 성적을 쉽게 확인하기 어렵다
 - 핵심 가치: 내 야구 기록을 계속 모으고 관리할 수 있다
-- 기본 진입 경험: 기록 확인 요약 화면
+- 기본 진입 경험: 홈 화면
 - 재방문 트리거: 경기 후 기록 추가
 - 우선 판단 기준: 입력 속도보다 기록 관리의 명확성
 
@@ -19,13 +19,14 @@
 문서를 처음 읽는 경우 아래 순서로 읽는 것을 기준으로 한다.
 
 1. [PRD](./prd.md)
-2. [Mobile Web Docs Redesign Design](./superpowers/specs/2026-03-17-mobile-web-docs-redesign-design.md)
-3. [Scenario V1](./superpowers/specs/2026-03-17-scenario-v1.md)
-4. [Baseball Record V1 Design](./superpowers/specs/2026-03-16-baseball-record-v1-design.md)
-5. [Screen Planning V1](./superpowers/specs/2026-03-17-screen-planning-v1.md)
-6. [Frontend ASCII Wireframes](./superpowers/specs/2026-03-17-frontend-ascii-wireframes.md)
-7. 이후 구현 개요 문서
-8. 이후 프론트엔드/백엔드 상세 구현 계획 문서
+2. [Scenario V1](./superpowers/specs/2026-03-17-scenario-v1.md)
+3. [Baseball Record V1 Design](./superpowers/specs/2026-03-16-baseball-record-v1-design.md)
+4. [Screen Planning V1](./superpowers/specs/2026-03-17-screen-planning-v1.md)
+5. [Frontend ASCII Wireframes](./superpowers/specs/2026-03-17-frontend-ascii-wireframes.md)
+6. [API Contract](./superpowers/specs/2026-03-17-api-contract-v1.md)
+7. [Overview Plan](./superpowers/plans/2026-03-17-baseball-record-v1-overview.md)
+8. [Frontend Plan](./superpowers/plans/2026-03-17-baseball-record-v1-frontend.md)
+9. [Backend Plan](./superpowers/plans/2026-03-17-baseball-record-v1-backend.md)
 
 ## Document Authority
 
@@ -56,14 +57,7 @@
 - 모바일 웹 원칙
 - 성공 기준
 
-### 2. Redesign Direction
-
-- [2026-03-17-mobile-web-docs-redesign-design.md](./superpowers/specs/2026-03-17-mobile-web-docs-redesign-design.md)
-
-이 문서는 기존 문서를 어떻게 다시 정렬할지 설명하는 메타 문서다.
-문서 개편 방향과 재작성 순서를 정리하며, 제품 범위의 기준 문서는 아니다.
-
-### 3. Scenario
+### 2. Scenario
 
 - [2026-03-17-scenario-v1.md](./superpowers/specs/2026-03-17-scenario-v1.md)
 
@@ -71,7 +65,7 @@
 어떤 흐름으로 핵심 가치를 느끼는지 설명한다.
 제품 범위를 새로 정의하지 않는다.
 
-### 4. Product Design
+### 3. Product Design
 
 - [2026-03-16-baseball-record-v1-design.md](./superpowers/specs/2026-03-16-baseball-record-v1-design.md)
 - [2026-03-17-screen-planning-v1.md](./superpowers/specs/2026-03-17-screen-planning-v1.md)
@@ -80,7 +74,7 @@
 이 문서군은 모바일 웹 기준의 정보구조, 화면 목적, 상태, 입력 흐름, 조회 구조를 설명한다.
 제품 범위는 PRD를 따른다.
 
-### 5. Implementation Plans
+### 4. Implementation Plans
 
 향후 아래 문서들이 추가되거나 재작성된다.
 
@@ -97,11 +91,12 @@
 
 - 데스크톱 기준 문서를 모바일 웹 기준으로 전환
 - 개인 선수 전용 범위를 문서 전반에 명시
-- `기록 확인 중심 + 입력은 핵심 행동` 구조로 재정렬
-- `docs/mvp.md` 내용을 PRD로 흡수하고 중복 문서를 제거
-- 구현 계획 문서가 제품 범위를 넘어가지 않도록 재작성
+- 하단 탭바 중심 구조로 재정렬
+- 홈 / 기록 / 생성 / 경기 / 내 정보 구조 반영
+- 개별 경기 상세와 수정/삭제 흐름을 v1 범위에 포함
 
 ## Notes
 
 - 루트 [README.md](../README.md)는 저장소 소개와 구조 설명만 담당한다.
 - 자세한 문서 읽기와 문서 역할 설명은 이 `docs/README.md`를 기준으로 한다.
+- `2026-03-17-mobile-web-docs-redesign-design.md`는 이전 문서 재정렬 메모이며, 현재 읽기 순서의 기준 문서는 아니다.

@@ -1,9 +1,9 @@
 import Link from "next/link";
+import AppPageLayout from "@/components/layout/AppPageLayout";
 
 export default function AccountPage() {
   return (
-    <main className="page-shell">
-      <section className="page-frame record-page">
+    <AppPageLayout>
         <section className="panel detail-screen-panel">
           <div className="page-title-block">
             <p className="eyebrow">My Baseball Record</p>
@@ -18,12 +18,11 @@ export default function AccountPage() {
           </section>
 
           <div className="footer-action-row">
-            <Link className="ghost-button as-link full-width-button" href="/records">
-              뒤로
+            <Link className="ghost-button as-link full-width-button" href="/auth">
+              로그아웃
             </Link>
           </div>
         </section>
-      </section>
-    </main>
+    </AppPageLayout>
   );
 }

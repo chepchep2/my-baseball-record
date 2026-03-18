@@ -57,11 +57,11 @@ textarea {
 
 .page-shell {
   min-height: 100vh;
-  padding: 20px 16px 48px;
+  padding: 20px 16px 68px;
 }
 
 .page-frame {
-  width: min(720px, 100%);
+  width: min(430px, 100%);
   margin: 0 auto;
 }
 
@@ -463,6 +463,23 @@ textarea {
 
 .ghost-pair {
   visibility: hidden;
+}
+
+.bottom-tab-bar {
+  position: fixed;
+  bottom: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(430px, calc(100% - 32px));
+  height: 60px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  z-index: 100;
+  box-shadow: var(--shadow-card);
 }
 
 .form-grid,

@@ -1,0 +1,109 @@
+.layout {
+  display: grid;
+  gap: 18px;
+}
+
+.headerRow {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: flex-start;
+}
+
+.headerActions {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.menuWrap {
+  position: relative;
+}
+
+.menuButton {
+  width: 40px;
+  height: 40px;
+  border-radius: 999px;
+  border: 1px solid var(--color-border);
+  background: rgba(255, 255, 255, 0.62);
+  color: var(--color-text);
+  cursor: pointer;
+  font-size: 1.2rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.menuButton:hover {
+  background: rgba(255, 255, 255, 0.8);
+}
+
+.recordSection {
+  display: grid;
+  gap: 12px;
+}
+
+.recordsGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.modalOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(33, 30, 22, 0.38);
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  z-index: 40;
+}
+
+.modalCard {
+  width: min(100%, 380px);
+  border-radius: 24px;
+  border: 1px solid var(--color-border);
+  background: #fffdf8;
+  box-shadow: 0 22px 44px rgba(72, 64, 43, 0.18);
+  padding: 20px;
+  display: grid;
+  gap: 16px;
+}
+
+.modalTitle {
+  margin: 0;
+  font-size: 1.12rem;
+}
+
+.modalText {
+  margin: 0;
+  color: var(--color-muted);
+  line-height: 1.55;
+}
+
+.modalActions {
+  display: flex;
+  gap: 10px;
+}
+
+.emptyState {
+  border: 1px dashed var(--color-border);
+  border-radius: 20px;
+  padding: 16px;
+  color: var(--color-muted);
+}
+
+@media (max-width: 640px) {
+  .headerRow {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .headerActions {
+    justify-content: space-between;
+  }
+
+  .recordsGrid {
+    grid-template-columns: 1fr;
+  }
+}

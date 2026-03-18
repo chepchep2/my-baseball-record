@@ -25,7 +25,7 @@ export default function AuthPage() {
           </p>
         </div>
 
-        <Link className="google-button" href="/records">
+        <Link className="google-button" href="/home">
           <span className="google-mark" aria-hidden="true">
             G
           </span>

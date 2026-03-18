@@ -358,6 +358,61 @@ textarea {
     background: rgba(66, 107, 72, 0.08);
 }
 
+.confirmation-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(34, 32, 24, 0.24);
+    display: grid;
+    place-items: center;
+    padding: 16px;
+    z-index: 120;
+}
+
+.confirmation-modal {
+    width: min(430px, 100%);
+    border: 1px solid var(--color-border);
+    border-radius: 28px;
+    background: var(--color-surface-strong);
+    box-shadow: var(--shadow-card);
+    padding: 22px 18px 18px;
+    display: grid;
+    gap: 14px;
+}
+
+.confirmation-title {
+    margin: 0;
+    font-size: clamp(1.02rem, 3.4vw, 1.45rem);
+    line-height: 1.2;
+    white-space: nowrap;
+}
+
+.confirmation-copy {
+    margin: 0;
+    color: var(--color-muted);
+    line-height: 1.5;
+}
+
+.form-error-banner {
+    border: 1px solid rgba(164, 74, 57, 0.18);
+    border-radius: 18px;
+    background: rgba(255, 244, 240, 0.92);
+    color: #7a2f21;
+    padding: 12px 14px;
+    display: grid;
+    gap: 8px;
+}
+
+.form-error-banner strong {
+    font-size: 0.95rem;
+}
+
+.form-error-list {
+    margin: 0;
+    padding-left: 18px;
+    display: grid;
+    gap: 4px;
+}
+
 .primary-button,
 .secondary-button,
 .ghost-button {
@@ -551,24 +606,12 @@ textarea {
 }
 
 @media (min-width: 641px) {
-    .home-center-frame {
-        min-height: calc(100vh - 88px);
-        align-content: center;
-    }
-
-    .form-center-frame {
-        min-height: calc(100vh - 88px);
-        align-content: center;
-    }
-
-    .account-center-frame {
-        min-height: calc(100vh - 88px);
-        align-content: center;
-    }
-
+    .home-center-frame,
+    .form-center-frame,
+    .account-center-frame,
     .games-center-frame {
-        min-height: calc(100vh - 88px);
-        align-content: center;
+        min-height: auto;
+        align-content: start;
     }
 }
 

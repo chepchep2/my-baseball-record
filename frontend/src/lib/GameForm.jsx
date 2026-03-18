@@ -21,6 +21,91 @@ function getFieldValue(record, key) {
   return record[key] ?? "";
 }
 
+function sanitizeNumericInput(value) {
+  return value.replace(/[^\d]/g, "");
+}
+
+function toCount(value) {
+  if (value === "") {
+    return null;
+  }
+
+  const parsed = Number.parseInt(value, 10);
+  return Number.isNaN(parsed) ? null : parsed;
+}
+
+function validateGameForm(form) {
+  const errors = [];
+
+  const plateAppearances = toCount(form.batter.plateAppearances);
+  const atBats = toCount(form.batter.atBats);
+  const singles = toCount(form.batter.singles) ?? 0;
+  const doubles = toCount(form.batter.doubles) ?? 0;
+  const triples = toCount(form.batter.triples) ?? 0;
+  const homeRuns = toCount(form.batter.homeRuns) ?? 0;
+  const totalHits = singles + doubles + triples + homeRuns;
+  const batterWalks = toCount(form.batter.walks);
+  const batterStrikeOuts = toCount(form.batter.strikeOuts);
+  const batterHitByPitch = toCount(form.batter.hitByPitch);
+  const batterSacrificeHits = toCount(form.batter.sacrificeHits);
+
+  if (plateAppearances !== null && atBats !== null && atBats > plateAppearances) {
+    errors.push("타수는 타석보다 클 수 없습니다.");
+  }
+
+  if (atBats !== null && totalHits > atBats) {
+    errors.push("1루타, 2루타, 3루타, 홈런 합은 타수보다 클 수 없습니다.");
+  }
+
+  if (plateAppearances !== null) {
+    if (batterWalks !== null && batterWalks > plateAppearances) {
+      errors.push("볼넷은 타석보다 클 수 없습니다.");
+    }
+
+    if (batterStrikeOuts !== null && batterStrikeOuts > plateAppearances) {
+      errors.push("삼진은 타석보다 클 수 없습니다.");
+    }
+
+    if (batterHitByPitch !== null && batterHitByPitch > plateAppearances) {
+      errors.push("사구는 타석보다 클 수 없습니다.");
+    }
+
+    if (batterSacrificeHits !== null && batterSacrificeHits > plateAppearances) {
+      errors.push("희타는 타석보다 클 수 없습니다.");
+    }
+  }
+
+  const runsAllowed = toCount(form.pitcher.runsAllowed);
+  const earnedRuns = toCount(form.pitcher.earnedRuns);
+  const innings = toCount(form.pitcher.innings) ?? 0;
+  const additionalOuts =
+    form.pitcher.additionalOuts === "" ? null : Number.parseInt(String(form.pitcher.additionalOuts), 10);
+  const pitcherStrikeOuts = toCount(form.pitcher.strikeOuts);
+  const maxPitcherStrikeOuts =
+    additionalOuts === null || Number.isNaN(additionalOuts) ? null : innings * 3 + additionalOuts;
+
+  if (runsAllowed !== null && earnedRuns !== null && earnedRuns > runsAllowed) {
+    errors.push("자책은 실점보다 클 수 없습니다.");
+  }
+
+  if (
+    form.pitcher.additionalOuts !== "" &&
+    !["0", "1", "2"].includes(String(form.pitcher.additionalOuts))
+  ) {
+    errors.push("추가 아웃 수는 0, 1, 2만 입력할 수 있습니다.");
+  }
+
+  if (
+    pitcherStrikeOuts !== null &&
+    maxPitcherStrikeOuts !== null &&
+    pitcherStrikeOuts > maxPitcherStrikeOuts
+  ) {
+    errors.push("삼진 수는 이닝과 추가 아웃 수로 기록한 아웃 개수보다 클 수 없습니다.");
+  }
+
+  return errors;
+}
+
 function getReadonlyGame(mode, gameId) {
   if (mode !== "edit") {
     return null;
@@ -35,6 +120,7 @@ export default function GameForm({ mode = "create", gameId = null }) {
   const readonlyGame = useMemo(() => getReadonlyGame(mode, gameId), [gameId, mode]);
   const [form, setForm] = useState(() => getInitialFormValues(mode, gameId));
   const [showRecoveryModal, setShowRecoveryModal] = useState(false);
+  const [validationErrors, setValidationErrors] = useState([]);
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
@@ -84,6 +170,7 @@ export default function GameForm({ mode = "create", gameId = null }) {
       }
       return next;
     });
+    setValidationErrors([]);
   };
 
   const updateRecordField = (recordKey, fieldKey, value) => {
@@ -94,6 +181,7 @@ export default function GameForm({ mode = "create", gameId = null }) {
         [fieldKey]: value,
       },
     }));
+    setValidationErrors([]);
   };
 
   const isEditMode = mode === "edit";
@@ -101,6 +189,12 @@ export default function GameForm({ mode = "create", gameId = null }) {
   const currentPitcherGroup = pitcherGroups[form.pitcherGroupIndex];
 
   const handleSave = () => {
+    const nextErrors = validateGameForm(form);
+    if (nextErrors.length > 0) {
+      setValidationErrors(nextErrors);
+      return;
+    }
+
     clearDraft(draftKey);
     window.location.href = isEditMode && gameId ? `/games/${gameId}` : "/home";
   };
@@ -220,7 +314,13 @@ export default function GameForm({ mode = "create", gameId = null }) {
                             min="0"
                             value={getFieldValue(form.batter, fieldKey)}
                             placeholder="입력"
-                            onChange={(event) => updateRecordField("batter", fieldKey, event.target.value)}
+                            onChange={(event) =>
+                              updateRecordField(
+                                "batter",
+                                fieldKey,
+                                sanitizeNumericInput(event.target.value),
+                              )
+                            }
                           />
                         </label>
                       ))}
@@ -272,7 +372,13 @@ export default function GameForm({ mode = "create", gameId = null }) {
                               min="0"
                               value={getFieldValue(form.pitcher, fieldKey)}
                               placeholder="입력"
-                              onChange={(event) => updateRecordField("pitcher", fieldKey, event.target.value)}
+                              onChange={(event) =>
+                                updateRecordField(
+                                  "pitcher",
+                                  fieldKey,
+                                  sanitizeNumericInput(event.target.value),
+                                )
+                              }
                             />
                           )}
                         </label>
@@ -302,6 +408,17 @@ export default function GameForm({ mode = "create", gameId = null }) {
                   </div>
                 </section>
               )}
+
+              {validationErrors.length > 0 ? (
+                <div className="form-error-banner" role="alert" aria-live="polite">
+                  <strong>입력값을 확인해주세요.</strong>
+                  <ul className="form-error-list">
+                    {validationErrors.map((error) => (
+                      <li key={error}>{error}</li>
+                    ))}
+                  </ul>
+                </div>
+              ) : null}
 
               <div className="footer-action-row form-edit-actions">
                 <button

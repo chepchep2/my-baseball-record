@@ -4,7 +4,7 @@ plugins {
 	id 'io.spring.dependency-management' version '1.1.7'
 }
 
-group = 'com.chepchep2.mybaseballrecord'
+group = 'com.chepchep2'
 version = '0.0.1-SNAPSHOT'
 description = 'My Baseball Record Backend'
 

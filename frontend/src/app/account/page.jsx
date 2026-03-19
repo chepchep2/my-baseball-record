@@ -15,6 +15,9 @@ export default function AccountPage() {
   const handleLogout = async () => {
     setPending(true);
     try {
+      if (typeof window !== "undefined") {
+        window.sessionStorage.setItem("auth.redirectAfterLogin", "/home");
+      }
       await logout();
       window.location.assign("/auth?from=logout");
     } finally {

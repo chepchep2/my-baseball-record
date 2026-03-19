@@ -10,6 +10,12 @@ function getNextPath() {
     return "/home";
   }
 
+  const forcedRedirect = window.sessionStorage.getItem("auth.redirectAfterLogin");
+  if (forcedRedirect && forcedRedirect.startsWith("/")) {
+    window.sessionStorage.removeItem("auth.redirectAfterLogin");
+    return forcedRedirect;
+  }
+
   const params = new URLSearchParams(window.location.search);
   if (params.get("from") === "logout") {
     return "/home";

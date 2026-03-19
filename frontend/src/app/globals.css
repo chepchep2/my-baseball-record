@@ -729,6 +729,10 @@ textarea {
     box-sizing: border-box;
 }
 
+.field textarea {
+    resize: none;
+}
+
 .field input:disabled,
 .field select:disabled,
 .field textarea:disabled {

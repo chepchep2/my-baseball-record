@@ -1,9 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import styles from "./GameDetailView.module.css";
 import BottomTabBar from "@/components/navigation/BottomTabBar";
+import { isGameDeleted, markGameDeleted } from "@/lib/game-deletions";
 import {
   formatCalendarDate,
   formatGameTypeLabel,
@@ -62,15 +64,30 @@ function DetailPairs({ items }) {
 }
 
 export default function GameDetailView({ game }) {
+  const router = useRouter();
   const [selectedRecordType, setSelectedRecordType] = useState(
     game.participationType === "PITCHER" ? "pitcher" : "batter",
   );
   const [menuOpen, setMenuOpen] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const batterItems = game.batter ? statItemsForBatter(game.batter) : [];
   const pitcherItems = game.pitcher ? statItemsForPitcher(game.pitcher) : [];
   const visibleItems = selectedRecordType === "pitcher" ? pitcherItems : batterItems;
+
+  useEffect(() => {
+    if (isGameDeleted(game.id)) {
+      router.replace("/games");
+    }
+  }, [game.id, router]);
+
+  const handleDelete = () => {
+    setIsDeleting(true);
+    markGameDeleted(game.id);
+    setShowDeleteModal(false);
+    router.replace("/games");
+  };
 
   return (
     <>
@@ -214,7 +231,8 @@ export default function GameDetailView({ game }) {
               <button
                 type="button"
                 className="primary-button full-width-button"
-                onClick={() => setShowDeleteModal(false)}
+                onClick={handleDelete}
+                disabled={isDeleting}
               >
                 삭제
               </button>

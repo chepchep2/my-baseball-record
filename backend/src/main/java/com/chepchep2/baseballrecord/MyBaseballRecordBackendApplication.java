@@ -1,4 +1,4 @@
-package com.chepchep2.mybaseballrecord;
+package com.chepchep2.baseballrecord;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

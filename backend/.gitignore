@@ -36,5 +36,7 @@ out/
 ### VS Code ###
 .vscode/
 
-# Local environment files
+### Local environment files ###
 .env
+.env.*
+!.env.example

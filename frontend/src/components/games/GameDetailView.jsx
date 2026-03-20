@@ -1,11 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import styles from "./GameDetailView.module.css";
 import BottomTabBar from "@/components/navigation/BottomTabBar";
-import { isGameDeleted, markGameDeleted } from "@/lib/game-deletions";
+import { useAuthSession } from "@/features/auth/session/useAuthSession";
+import { deleteGame } from "@/features/games/api/games-api";
 import {
   formatCalendarDate,
   formatGameTypeLabel,
@@ -65,29 +66,31 @@ function DetailPairs({ items }) {
 
 export default function GameDetailView({ game }) {
   const router = useRouter();
+  const { apiClient } = useAuthSession();
   const [selectedRecordType, setSelectedRecordType] = useState(
     game.participationType === "PITCHER" ? "pitcher" : "batter",
   );
   const [menuOpen, setMenuOpen] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState("");
 
   const batterItems = game.batter ? statItemsForBatter(game.batter) : [];
   const pitcherItems = game.pitcher ? statItemsForPitcher(game.pitcher) : [];
   const visibleItems = selectedRecordType === "pitcher" ? pitcherItems : batterItems;
 
-  useEffect(() => {
-    if (isGameDeleted(game.id)) {
-      router.replace("/games");
-    }
-  }, [game.id, router]);
-
-  const handleDelete = () => {
+  async function handleDelete() {
     setIsDeleting(true);
-    markGameDeleted(game.id);
-    setShowDeleteModal(false);
-    router.replace("/games");
-  };
+    setDeleteError("");
+
+    try {
+      await deleteGame(apiClient, game.id);
+      router.push("/games");
+    } catch (error) {
+      setDeleteError(error?.message || "삭제에 실패했습니다.");
+      setIsDeleting(false);
+    }
+  }
 
   return (
     <>
@@ -197,7 +200,7 @@ export default function GameDetailView({ game }) {
             {visibleItems.length > 0 ? (
               <DetailPairs items={visibleItems} />
             ) : (
-              <div className={styles.emptyState}>이 기록 유형은 현재 경기에서 비어 있습니다.</div>
+              <p className="section-copy">이 기록 유형은 현재 경기에서 비어 있습니다.</p>
             )}
           </section>
 
@@ -220,10 +223,16 @@ export default function GameDetailView({ game }) {
             <p className={styles.modalText} id="game-delete-description">
               삭제 후에는 복구할 수 없습니다.
             </p>
+            {deleteError ? (
+              <p className={styles.modalText} role="alert">
+                {deleteError}
+              </p>
+            ) : null}
             <div className={styles.modalActions}>
               <button
                 type="button"
                 className="ghost-button full-width-button"
+                disabled={isDeleting}
                 onClick={() => setShowDeleteModal(false)}
               >
                 취소
@@ -231,10 +240,10 @@ export default function GameDetailView({ game }) {
               <button
                 type="button"
                 className="primary-button full-width-button"
-                onClick={handleDelete}
                 disabled={isDeleting}
+                onClick={handleDelete}
               >
-                삭제
+                {isDeleting ? "삭제 중..." : "삭제"}
               </button>
             </div>
           </div>

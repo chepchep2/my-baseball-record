@@ -2,20 +2,22 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import AppPageLayout from "@/components/layout/AppPageLayout";
 import BottomTabBar from "@/components/navigation/BottomTabBar";
 import PageHeader from "@/components/layout/PageHeader";
+import { useAuthSession } from "@/features/auth/session/useAuthSession";
+import { createGame, getGameDetail, updateGame } from "@/features/games/api/games-api";
+import { toCreateGamePayload, toUpdateGamePayload } from "@/features/games/model/game-form-payload";
 import {
   batterGroups,
   buildDraftKey,
   buildEmptyGameForm,
   buildFormFromGame,
-  DRAFT_USER_ID,
-  getInitialFormValues,
   pitcherGroups,
 } from "@/lib/game-form-data";
 import { clearDraft, readDraft, shouldAutoRestoreDraft, writeDraft } from "@/lib/game-draft";
-import { getGameById, getTodayValue, mockGames } from "@/lib/mock-games";
+import { getTodayValue } from "@/lib/mock-games";
 
 function getFieldValue(record, key) {
   return record[key] ?? "";
@@ -34,8 +36,16 @@ function toCount(value) {
   return Number.isNaN(parsed) ? null : parsed;
 }
 
+function hasAnyRecordInput(record) {
+  return Object.values(record).some((value) => value !== "" && value !== null && value !== undefined);
+}
+
 function validateGameForm(form) {
   const errors = [];
+
+  if (!hasAnyRecordInput(form.batter) && !hasAnyRecordInput(form.pitcher)) {
+    errors.push("타자 기록 또는 투수 기록 중 하나는 입력해야 합니다.");
+  }
 
   const plateAppearances = toCount(form.batter.plateAppearances);
   const atBats = toCount(form.batter.atBats);
@@ -106,39 +116,84 @@ function validateGameForm(form) {
   return errors;
 }
 
-function getReadonlyGame(mode, gameId) {
-  if (mode !== "edit") {
-    return null;
-  }
-
-  return getGameById(mockGames, gameId);
-}
-
 export default function GameForm({ mode = "create", gameId = null }) {
+  const router = useRouter();
+  const { apiClient, isBootstrapping, user } = useAuthSession();
+  const isEditMode = mode === "edit";
   const todayValue = getTodayValue();
-  const draftKey = useMemo(() => buildDraftKey(mode, DRAFT_USER_ID, gameId), [gameId, mode]);
-  const readonlyGame = useMemo(() => getReadonlyGame(mode, gameId), [gameId, mode]);
-  const [form, setForm] = useState(() => getInitialFormValues(mode, gameId));
+  const draftUserId = user?.id ?? user?.email ?? "anonymous";
+  const draftKey = useMemo(() => buildDraftKey(mode, draftUserId, gameId), [draftUserId, gameId, mode]);
+  const [form, setForm] = useState(() => buildEmptyGameForm());
   const [showRecoveryModal, setShowRecoveryModal] = useState(false);
   const [validationErrors, setValidationErrors] = useState([]);
   const [ready, setReady] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
+    let active = true;
+
+    if (isBootstrapping) {
+      return () => {
+        active = false;
+      };
+    }
+
+    if (!isEditMode) {
+      setReady(true);
+      return () => {
+        active = false;
+      };
+    }
+
+    async function loadEditGame() {
+      if (!gameId) {
+        return;
+      }
+
+      try {
+        const game = await getGameDetail(apiClient, gameId);
+        if (!active) {
+          return;
+        }
+
+        setForm(buildFormFromGame(game));
+      } catch (error) {
+        if (!active) {
+          return;
+        }
+
+        setValidationErrors([error?.message || "경기 정보를 불러오지 못했습니다."]);
+      } finally {
+        if (active) {
+          setReady(true);
+        }
+      }
+    }
+
+    loadEditGame();
+
+    return () => {
+      active = false;
+    };
+  }, [apiClient, gameId, isBootstrapping, isEditMode]);
+
+  useEffect(() => {
+    if (!ready) {
+      return;
+    }
+
     const nextDraft = readDraft(draftKey);
     if (!nextDraft) {
-      setReady(true);
       return;
     }
 
     if (shouldAutoRestoreDraft(draftKey)) {
       setForm(nextDraft);
-      setReady(true);
       return;
     }
 
     setShowRecoveryModal(true);
-    setReady(true);
-  }, [draftKey]);
+  }, [draftKey, ready]);
 
   useEffect(() => {
     if (!ready) {
@@ -158,7 +213,17 @@ export default function GameForm({ mode = "create", gameId = null }) {
 
   const handleDiscard = () => {
     clearDraft(draftKey);
-    setForm(mode === "edit" && readonlyGame ? buildFormFromGame(readonlyGame) : buildEmptyGameForm());
+    if (isEditMode && gameId) {
+      getGameDetail(apiClient, gameId)
+        .then((game) => {
+          setForm(buildFormFromGame(game));
+        })
+        .catch(() => {
+          setForm(buildEmptyGameForm());
+        });
+    } else {
+      setForm(buildEmptyGameForm());
+    }
     setShowRecoveryModal(false);
   };
 
@@ -184,19 +249,31 @@ export default function GameForm({ mode = "create", gameId = null }) {
     setValidationErrors([]);
   };
 
-  const isEditMode = mode === "edit";
   const currentBatterGroup = batterGroups[form.batterGroupIndex];
   const currentPitcherGroup = pitcherGroups[form.pitcherGroupIndex];
 
-  const handleSave = () => {
+  const handleSave = async () => {
     const nextErrors = validateGameForm(form);
     if (nextErrors.length > 0) {
       setValidationErrors(nextErrors);
       return;
     }
 
-    clearDraft(draftKey);
-    window.location.href = isEditMode && gameId ? `/games/${gameId}` : "/home";
+    setIsSubmitting(true);
+
+    try {
+      const savedGame = isEditMode && gameId
+        ? await updateGame(apiClient, gameId, toUpdateGamePayload(form))
+        : await createGame(apiClient, toCreateGamePayload(form));
+
+      clearDraft(draftKey);
+      router.push(`/games/${savedGame.id}`);
+    } catch (error) {
+      const fieldErrors = error?.fieldErrors?.map((fieldError) => fieldError.message).filter(Boolean) || [];
+      setValidationErrors(fieldErrors.length > 0 ? fieldErrors : [error?.message || "저장에 실패했습니다."]);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   if (!ready) {
@@ -428,8 +505,13 @@ export default function GameForm({ mode = "create", gameId = null }) {
                 >
                   뒤로
                 </button>
-                <button type="button" className="primary-button full-width-button" onClick={handleSave}>
-                  저장
+                <button
+                  type="button"
+                  className="primary-button full-width-button"
+                  onClick={handleSave}
+                  disabled={isSubmitting}
+                >
+                  {isSubmitting ? "저장 중..." : "저장"}
                 </button>
               </div>
             </>

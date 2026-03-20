@@ -1,63 +1,12 @@
 "use client";
 
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import AppPageLayout from "@/components/layout/AppPageLayout";
 import BottomTabBar from "@/components/navigation/BottomTabBar";
 import PageHeader from "@/components/layout/PageHeader";
-
-const batterSummary = [
-  ["경기수", "24"],
-  ["타수", "88"],
-  ["총안타", "31"],
-  ["타율", ".352"],
-  ["OPS", ".898"],
-];
-
-const pitcherSummary = [
-  ["경기수", "9"],
-  ["이닝", "24.1"],
-  ["ERA", "2.18"],
-  ["WHIP", "1.03"],
-  ["삼진", "22"],
-  ["승", "3"],
-];
-
-const batterDetails = [
-  ["타석", "96"],
-  ["타수", "88"],
-  ["총안타", "31"],
-  ["홈런", "3"],
-  ["타점", "18"],
-  ["득점", "14"],
-  ["1루타", "12"],
-  ["2루타", "5"],
-  ["3루타", "1"],
-  ["도루", "4"],
-  ["도루자", "1"],
-  ["희생타", "2"],
-  ["볼넷", "9"],
-  ["사구", "2"],
-  ["삼진", "7"],
-];
-
-const pitcherDetails = [
-  ["경기수", "9"],
-  ["이닝", "24.1"],
-  ["ERA", "2.18"],
-  ["WHIP", "1.03"],
-  ["삼진", "22"],
-  ["승", "3"],
-  ["패", "1"],
-  ["세이브", "0"],
-  ["홀드", "1"],
-  ["실점", "7"],
-  ["자책", "6"],
-  ["피안타", "18"],
-  ["볼넷", "5"],
-  ["사구", "1"],
-  ["피안타율", ".214"],
-];
+import { useAuthSession } from "@/features/auth/session/useAuthSession";
+import { getStats } from "@/features/stats/api/stats-api";
 
 function pairRows(metrics) {
   const rows = [];
@@ -71,10 +20,18 @@ export default function RecordsPageClient() {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const { apiClient } = useAuthSession();
   const currentYear = new Date().getFullYear();
   const recordType = searchParams.get("type") === "pitcher" ? "pitcher" : "batter";
   const scope = searchParams.get("scope") ?? `${currentYear}`;
   const gameFilter = searchParams.get("gameType") ?? "all";
+  const [statsView, setStatsView] = useState({
+    summaryItems: [],
+    detailItems: [],
+    isEmpty: false,
+  });
+  const [isLoading, setIsLoading] = useState(true);
+  const [errorMessage, setErrorMessage] = useState(null);
 
   const yearOptions = useMemo(
     () => ["career", `${currentYear}`, `${currentYear - 1}`, `${currentYear - 2}`],
@@ -87,11 +44,52 @@ export default function RecordsPageClient() {
     router.replace(`${pathname}?${next.toString()}`);
   };
 
-  const summaryMetrics = recordType === "batter" ? batterSummary : pitcherSummary;
-  const detailMetrics = recordType === "batter" ? batterDetails : pitcherDetails;
+  useEffect(() => {
+    let active = true;
+
+    async function loadStats() {
+      setIsLoading(true);
+      setErrorMessage(null);
+
+      try {
+        const nextScope = scope === "career" ? "career" : "season";
+        const seasonYear = nextScope === "season" ? Number.parseInt(scope, 10) || currentYear : undefined;
+        const nextGameFilter = gameFilter === "nonOfficial" ? "non_official" : gameFilter;
+
+        const result = await getStats(apiClient, {
+          scope: nextScope,
+          seasonYear,
+          recordType,
+          gameFilter: nextGameFilter,
+        });
+
+        if (!active) {
+          return;
+        }
+
+        setStatsView(result);
+      } catch (error) {
+        if (!active) {
+          return;
+        }
+
+        setErrorMessage(error?.message || "기록을 불러오지 못했습니다.");
+      } finally {
+        if (active) {
+          setIsLoading(false);
+        }
+      }
+    }
+
+    loadStats();
+
+    return () => {
+      active = false;
+    };
+  }, [apiClient, currentYear, gameFilter, recordType, scope]);
 
   return (
-    <AppPageLayout showTabs={false}>
+    <AppPageLayout showTabs={false} frameClassName="records-center-frame">
         <section className="panel detail-screen-panel">
           <PageHeader title="누적 기록" />
 
@@ -145,29 +143,39 @@ export default function RecordsPageClient() {
           </div>
 
           <p className="detail-section-label">대표 지표</p>
-          <section className="inline-summary-grid" aria-label="대표 지표">
-            {summaryMetrics.map(([label, value]) => (
-              <article key={label} className="inline-summary-item">
-                <span>{label}</span>
-                <strong>{value}</strong>
-              </article>
-            ))}
-          </section>
-
-          <p className="detail-section-label">상세 지표</p>
-          <section className="detail-metric-list" aria-label="상세 지표">
-            {pairRows(detailMetrics).map((row, index) => (
-              <div key={`${row[0][0]}-${index}`} className="detail-row">
-                {row.map(([label, value]) => (
-                  <div key={label} className="detail-pair">
+          {isLoading ? (
+            <p className="section-copy">기록을 불러오는 중입니다...</p>
+          ) : errorMessage ? (
+            <p className="section-copy">{errorMessage}</p>
+          ) : statsView.isEmpty ? (
+            <p className="section-copy">아직 기록이 없습니다. 첫 경기를 저장해 보세요.</p>
+          ) : (
+            <>
+              <section className="inline-summary-grid" aria-label="대표 지표">
+                {statsView.summaryItems.map(([label, value]) => (
+                  <article key={label} className="inline-summary-item">
                     <span>{label}</span>
                     <strong>{value}</strong>
+                  </article>
+                ))}
+              </section>
+
+              <p className="detail-section-label">상세 지표</p>
+              <section className="detail-metric-list" aria-label="상세 지표">
+                {pairRows(statsView.detailItems).map((row, index) => (
+                  <div key={`${row[0][0]}-${index}`} className="detail-row">
+                    {row.map(([label, value]) => (
+                      <div key={label} className="detail-pair">
+                        <span>{label}</span>
+                        <strong>{value}</strong>
+                      </div>
+                    ))}
+                    {row.length === 1 ? <div className="ghost-pair" aria-hidden="true" /> : null}
                   </div>
                 ))}
-                {row.length === 1 ? <div className="ghost-pair" aria-hidden="true" /> : null}
-              </div>
-            ))}
-          </section>
+              </section>
+            </>
+          )}
 
           <BottomTabBar className="in-panel" />
         </section>

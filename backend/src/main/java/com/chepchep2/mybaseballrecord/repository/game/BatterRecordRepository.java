@@ -7,6 +7,4 @@ import java.util.Optional;
 
 public interface BatterRecordRepository extends JpaRepository<BatterRecord, Long> {
     Optional<BatterRecord> findByGameId(Long gameId);
-
-    void deleteByGameId(Long gameId);
 }

@@ -1,15 +1,11 @@
 package com.chepchep2.mybaseballrecord.controller.game;
 
 import com.chepchep2.mybaseballrecord.dto.game.request.GameCreateRequest;
-import com.chepchep2.mybaseballrecord.dto.game.request.GameUpdateRequest;
 import com.chepchep2.mybaseballrecord.dto.game.response.GameDetailResponse;
 import com.chepchep2.mybaseballrecord.service.game.GameCommandService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -27,20 +23,5 @@ public class GameCommandController {
     public ResponseEntity<GameDetailResponse> create(@Valid @RequestBody GameCreateRequest request) {
         GameDetailResponse response = gameCommandService.create(request);
         return ResponseEntity.status(201).body(response);
-    }
-
-    @PutMapping("/{gameId}")
-    public ResponseEntity<GameDetailResponse> update(
-            @PathVariable long gameId,
-            @Valid @RequestBody GameUpdateRequest request
-    ) {
-        GameDetailResponse response = gameCommandService.update(gameId, request);
-        return ResponseEntity.ok(response);
-    }
-
-    @DeleteMapping("/{gameId}")
-    public ResponseEntity<Void> delete(@PathVariable long gameId) {
-        gameCommandService.delete(gameId);
-        return ResponseEntity.noContent().build();
     }
 }

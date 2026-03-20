@@ -114,16 +114,4 @@ public class GameRecord {
     public ParticipationType participationType() {
         return participationType;
     }
-
-    public void updateMutableFields(
-            String teamName,
-            String opponentName,
-            String memo,
-            ParticipationType participationType
-    ) {
-        this.teamName = teamName;
-        this.opponentName = opponentName;
-        this.memo = memo;
-        this.participationType = participationType;
-    }
 }

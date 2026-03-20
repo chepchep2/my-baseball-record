@@ -759,10 +759,7 @@ textarea {
         flex: 1 1 auto;
         display: flex;
         flex-direction: column;
-    }
-
-    .detail-center-frame .detail-screen-panel > * {
-        flex: 1 1 auto;
+        justify-content: flex-start;
     }
 
     .games-center-frame .games-panel {
@@ -808,7 +805,6 @@ textarea {
 
 .field select {
     font-size: 16px;
-    font-weight: 600;
 }
 
 .field select option {

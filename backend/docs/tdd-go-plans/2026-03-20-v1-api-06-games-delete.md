@@ -41,7 +41,10 @@
 - Method: `DELETE`
 - URL: `http://localhost:8080/api/games/{gameId}`
 - Headers:
-  - 필요 시 `Authorization: Bearer {{access_token}}`
+  - `Authorization: Bearer {{access_token}}`
+- 주의:
+  - 현재 단계에서 Security 설정이 `permitAll`이면 Authorization 없이도 통과 가능하다.
+  - 수동 검증 기준은 Authorization 헤더 포함 요청으로 고정한다.
 - 성공: `204`, body 없음
 - 실패: 미존재 id 정책 응답 확인
 

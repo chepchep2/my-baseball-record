@@ -29,6 +29,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/api/games").permitAll()
                         .requestMatchers(HttpMethod.PUT, "/api/games/**").permitAll()
                         .requestMatchers(HttpMethod.DELETE, "/api/games/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/stats").permitAll()
                         .anyRequest().authenticated()
                 )
                 .httpBasic(AbstractHttpConfigurer::disable)

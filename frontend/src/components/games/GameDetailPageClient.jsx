@@ -54,7 +54,7 @@ export default function GameDetailPageClient({ gameId }) {
 
   if (isLoading) {
     return (
-      <AppPageLayout showTabs={false}>
+      <AppPageLayout showTabs={false} frameClassName="detail-center-frame">
         <section className="panel detail-screen-panel">
           <div className="page-title-block">
             <p className="eyebrow">My Baseball Record</p>
@@ -68,7 +68,7 @@ export default function GameDetailPageClient({ gameId }) {
 
   if (notFound) {
     return (
-      <AppPageLayout showTabs={false}>
+      <AppPageLayout showTabs={false} frameClassName="detail-center-frame">
         <section className="panel detail-screen-panel">
           <div className="page-title-block">
             <p className="eyebrow">My Baseball Record</p>
@@ -82,7 +82,7 @@ export default function GameDetailPageClient({ gameId }) {
 
   if (errorMessage) {
     return (
-      <AppPageLayout showTabs={false}>
+      <AppPageLayout showTabs={false} frameClassName="detail-center-frame">
         <section className="panel detail-screen-panel">
           <div className="page-title-block">
             <p className="eyebrow">My Baseball Record</p>
@@ -95,7 +95,7 @@ export default function GameDetailPageClient({ gameId }) {
   }
 
   return (
-    <AppPageLayout showTabs={false}>
+    <AppPageLayout showTabs={false} frameClassName="detail-center-frame">
       <GameDetailView game={game} />
     </AppPageLayout>
   );

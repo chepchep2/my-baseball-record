@@ -89,7 +89,7 @@ export default function RecordsPageClient() {
   }, [apiClient, currentYear, gameFilter, recordType, scope]);
 
   return (
-    <AppPageLayout showTabs={false}>
+    <AppPageLayout showTabs={false} frameClassName="records-center-frame">
         <section className="panel detail-screen-panel">
           <PageHeader title="누적 기록" />
 

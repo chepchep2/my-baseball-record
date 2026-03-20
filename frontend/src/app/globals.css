@@ -769,6 +769,11 @@ textarea {
     box-sizing: border-box;
 }
 
+.field select {
+    font-size: 1rem;
+    font-weight: 600;
+}
+
 .field input:disabled,
 .field select:disabled,
 .field textarea:disabled {

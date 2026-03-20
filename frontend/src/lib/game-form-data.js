@@ -1,4 +1,4 @@
-import { getGameById, getTodayValue, mockGames } from "@/lib/mock-games";
+import { getTodayValue } from "@/lib/mock-games";
 
 export const DRAFT_USER_ID = "demo-user";
 export const DRAFT_TTL_MS = 7 * 24 * 60 * 60 * 1000;
@@ -139,17 +139,6 @@ export function buildFormFromGame(game) {
       ...(game.pitcher ?? {}),
     },
   };
-}
-
-export function getInitialFormValues(mode, gameId) {
-  if (mode === "edit" && gameId) {
-    const game = getGameById(mockGames, gameId);
-    if (game) {
-      return buildFormFromGame(game);
-    }
-  }
-
-  return buildEmptyGameForm();
 }
 
 export function buildDraftKey(mode, userId, gameId) {

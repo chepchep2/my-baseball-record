@@ -200,7 +200,7 @@ export default function GameDetailView({ game }) {
             {visibleItems.length > 0 ? (
               <DetailPairs items={visibleItems} />
             ) : (
-              <div className={styles.emptyState}>이 기록 유형은 현재 경기에서 비어 있습니다.</div>
+              <p className="section-copy">이 기록 유형은 현재 경기에서 비어 있습니다.</p>
             )}
           </section>
 

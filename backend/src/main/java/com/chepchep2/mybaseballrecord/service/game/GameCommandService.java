@@ -43,37 +43,37 @@ public class GameCommandService {
 
         ParticipationType participationType = resolveParticipationType(request);
         GameRecord savedGame = gameRecordRepository.save(
-                new GameRecord(
-                        request.gameInfo().playedAt(),
-                        seasonYear,
-                        request.gameInfo().gameType(),
-                        request.gameInfo().teamName(),
-                        request.gameInfo().opponentName(),
-                        request.gameInfo().memo(),
-                        participationType
-                )
+                GameRecord.builder()
+                        .playedAt(request.gameInfo().playedAt())
+                        .seasonYear(seasonYear)
+                        .gameType(request.gameInfo().gameType())
+                        .teamName(request.gameInfo().teamName())
+                        .opponentName(request.gameInfo().opponentName())
+                        .memo(request.gameInfo().memo())
+                        .participationType(participationType)
+                        .build()
         );
 
         GameBatterResponse batterResponse = null;
         if (request.batter() != null) {
             BatterRecord savedBatter = batterRecordRepository.save(
-                    new BatterRecord(
-                            savedGame.id(),
-                            request.batter().plateAppearances(),
-                            request.batter().atBats(),
-                            request.batter().singles(),
-                            request.batter().doubles(),
-                            request.batter().triples(),
-                            request.batter().homeRuns(),
-                            request.batter().walks(),
-                            request.batter().strikeOuts(),
-                            request.batter().hitByPitch(),
-                            request.batter().runsBattedIn(),
-                            request.batter().runs(),
-                            request.batter().stolenBases(),
-                            request.batter().caughtStealing(),
-                            request.batter().sacrificeHits()
-                    )
+                    BatterRecord.builder()
+                            .gameId(savedGame.id())
+                            .plateAppearances(request.batter().plateAppearances())
+                            .atBats(request.batter().atBats())
+                            .singles(request.batter().singles())
+                            .doubles(request.batter().doubles())
+                            .triples(request.batter().triples())
+                            .homeRuns(request.batter().homeRuns())
+                            .walks(request.batter().walks())
+                            .strikeOuts(request.batter().strikeOuts())
+                            .hitByPitch(request.batter().hitByPitch())
+                            .runsBattedIn(request.batter().runsBattedIn())
+                            .runs(request.batter().runs())
+                            .stolenBases(request.batter().stolenBases())
+                            .caughtStealing(request.batter().caughtStealing())
+                            .sacrificeHits(request.batter().sacrificeHits())
+                            .build()
             );
             batterResponse = toBatterResponse(savedBatter);
         }
@@ -81,23 +81,23 @@ public class GameCommandService {
         GamePitcherResponse pitcherResponse = null;
         if (request.pitcher() != null) {
             PitcherRecord savedPitcher = pitcherRecordRepository.save(
-                    new PitcherRecord(
-                            savedGame.id(),
-                            request.pitcher().innings(),
-                            request.pitcher().additionalOuts(),
-                            request.pitcher().runsAllowed(),
-                            request.pitcher().earnedRuns(),
-                            request.pitcher().hitsAllowed(),
-                            request.pitcher().walks(),
-                            request.pitcher().hitByPitch(),
-                            request.pitcher().homeRunsAllowed(),
-                            request.pitcher().strikeOuts(),
-                            request.pitcher().battersFaced(),
-                            request.pitcher().wins(),
-                            request.pitcher().losses(),
-                            request.pitcher().saves(),
-                            request.pitcher().holds()
-                    )
+                    PitcherRecord.builder()
+                            .gameId(savedGame.id())
+                            .innings(request.pitcher().innings())
+                            .additionalOuts(request.pitcher().additionalOuts())
+                            .runsAllowed(request.pitcher().runsAllowed())
+                            .earnedRuns(request.pitcher().earnedRuns())
+                            .hitsAllowed(request.pitcher().hitsAllowed())
+                            .walks(request.pitcher().walks())
+                            .hitByPitch(request.pitcher().hitByPitch())
+                            .homeRunsAllowed(request.pitcher().homeRunsAllowed())
+                            .strikeOuts(request.pitcher().strikeOuts())
+                            .battersFaced(request.pitcher().battersFaced())
+                            .wins(request.pitcher().wins())
+                            .losses(request.pitcher().losses())
+                            .saves(request.pitcher().saves())
+                            .holds(request.pitcher().holds())
+                            .build()
             );
             pitcherResponse = toPitcherResponse(savedPitcher);
         }
@@ -141,23 +141,23 @@ public class GameCommandService {
                                     request.batter().sacrificeHits()
                             ),
                             () -> batterRecordRepository.save(
-                                    new BatterRecord(
-                                            gameId,
-                                            request.batter().plateAppearances(),
-                                            request.batter().atBats(),
-                                            request.batter().singles(),
-                                            request.batter().doubles(),
-                                            request.batter().triples(),
-                                            request.batter().homeRuns(),
-                                            request.batter().walks(),
-                                            request.batter().strikeOuts(),
-                                            request.batter().hitByPitch(),
-                                            request.batter().runsBattedIn(),
-                                            request.batter().runs(),
-                                            request.batter().stolenBases(),
-                                            request.batter().caughtStealing(),
-                                            request.batter().sacrificeHits()
-                                    )
+                                    BatterRecord.builder()
+                                            .gameId(gameId)
+                                            .plateAppearances(request.batter().plateAppearances())
+                                            .atBats(request.batter().atBats())
+                                            .singles(request.batter().singles())
+                                            .doubles(request.batter().doubles())
+                                            .triples(request.batter().triples())
+                                            .homeRuns(request.batter().homeRuns())
+                                            .walks(request.batter().walks())
+                                            .strikeOuts(request.batter().strikeOuts())
+                                            .hitByPitch(request.batter().hitByPitch())
+                                            .runsBattedIn(request.batter().runsBattedIn())
+                                            .runs(request.batter().runs())
+                                            .stolenBases(request.batter().stolenBases())
+                                            .caughtStealing(request.batter().caughtStealing())
+                                            .sacrificeHits(request.batter().sacrificeHits())
+                                            .build()
                             )
                     );
         } else {
@@ -184,23 +184,23 @@ public class GameCommandService {
                                     request.pitcher().holds()
                             ),
                             () -> pitcherRecordRepository.save(
-                                    new PitcherRecord(
-                                            gameId,
-                                            request.pitcher().innings(),
-                                            request.pitcher().additionalOuts(),
-                                            request.pitcher().runsAllowed(),
-                                            request.pitcher().earnedRuns(),
-                                            request.pitcher().hitsAllowed(),
-                                            request.pitcher().walks(),
-                                            request.pitcher().hitByPitch(),
-                                            request.pitcher().homeRunsAllowed(),
-                                            request.pitcher().strikeOuts(),
-                                            request.pitcher().battersFaced(),
-                                            request.pitcher().wins(),
-                                            request.pitcher().losses(),
-                                            request.pitcher().saves(),
-                                            request.pitcher().holds()
-                                    )
+                                    PitcherRecord.builder()
+                                            .gameId(gameId)
+                                            .innings(request.pitcher().innings())
+                                            .additionalOuts(request.pitcher().additionalOuts())
+                                            .runsAllowed(request.pitcher().runsAllowed())
+                                            .earnedRuns(request.pitcher().earnedRuns())
+                                            .hitsAllowed(request.pitcher().hitsAllowed())
+                                            .walks(request.pitcher().walks())
+                                            .hitByPitch(request.pitcher().hitByPitch())
+                                            .homeRunsAllowed(request.pitcher().homeRunsAllowed())
+                                            .strikeOuts(request.pitcher().strikeOuts())
+                                            .battersFaced(request.pitcher().battersFaced())
+                                            .wins(request.pitcher().wins())
+                                            .losses(request.pitcher().losses())
+                                            .saves(request.pitcher().saves())
+                                            .holds(request.pitcher().holds())
+                                            .build()
                             )
                     );
         } else {

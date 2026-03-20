@@ -10,6 +10,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
+import lombok.Builder;
 
 import java.time.Instant;
 import java.time.LocalDate;
@@ -50,6 +51,7 @@ public class GameRecord {
     @Column(name = "updated_at", nullable = false)
     private Instant updatedAt;
 
+    @Builder
     public GameRecord(
             LocalDate playedAt,
             Integer seasonYear,

@@ -6,6 +6,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import lombok.Builder;
 
 @Entity
 @Table(name = "batter_record")
@@ -59,6 +60,7 @@ public class BatterRecord {
     @Column(name = "sacrifice_hits", nullable = false)
     private int sacrificeHits;
 
+    @Builder
     public BatterRecord(
             Long gameId,
             int plateAppearances,

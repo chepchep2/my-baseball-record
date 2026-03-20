@@ -6,6 +6,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import lombok.Builder;
 
 @Entity
 @Table(name = "pitcher_record")
@@ -59,6 +60,7 @@ public class PitcherRecord {
     @Column(name = "holds", nullable = false)
     private int holds;
 
+    @Builder
     public PitcherRecord(
             Long gameId,
             int innings,

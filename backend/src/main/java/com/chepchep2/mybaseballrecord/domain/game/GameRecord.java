@@ -41,6 +41,9 @@ public class GameRecord {
     @Column(name = "memo", length = 1000)
     private String memo;
 
+    @Column(name = "user_id")
+    private Long userId;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "participation_type", nullable = false, length = 20)
     private ParticipationType participationType;
@@ -59,6 +62,7 @@ public class GameRecord {
             String teamName,
             String opponentName,
             String memo,
+            Long userId,
             ParticipationType participationType
     ) {
         this.playedAt = playedAt;
@@ -67,6 +71,7 @@ public class GameRecord {
         this.teamName = teamName;
         this.opponentName = opponentName;
         this.memo = memo;
+        this.userId = userId;
         this.participationType = participationType;
     }
 
@@ -111,6 +116,10 @@ public class GameRecord {
 
     public String memo() {
         return memo;
+    }
+
+    public Long userId() {
+        return userId;
     }
 
     public ParticipationType participationType() {

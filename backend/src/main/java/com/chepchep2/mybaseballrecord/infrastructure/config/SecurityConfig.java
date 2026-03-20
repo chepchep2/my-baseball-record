@@ -1,23 +1,32 @@
 package com.chepchep2.mybaseballrecord.infrastructure.config;
 
+import com.chepchep2.mybaseballrecord.infrastructure.auth.JwtAccessTokenAuthenticationFilter;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
+import java.time.Clock;
 import java.util.List;
 
 @Configuration
 public class SecurityConfig {
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain securityFilterChain(
+            HttpSecurity http,
+            @Value("${auth.jwt.secret}") String jwtSecret,
+            Clock clock
+    ) throws Exception {
         http
                 .cors(Customizer.withDefaults())
                 .csrf(AbstractHttpConfigurer::disable)
@@ -26,15 +35,35 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/api/auth/google").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/auth/refresh").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/auth/logout").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/api/games").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/games/**").permitAll()
-                        .requestMatchers(HttpMethod.PUT, "/api/games/**").permitAll()
-                        .requestMatchers(HttpMethod.DELETE, "/api/games/**").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/stats").permitAll()
                         .anyRequest().authenticated()
                 )
+                .exceptionHandling(ex -> ex
+                        .authenticationEntryPoint((request, response, authException) -> {
+                            String authError = (String) request.getAttribute(JwtAccessTokenAuthenticationFilter.AUTH_ERROR_ATTRIBUTE);
+                            boolean invalidToken = JwtAccessTokenAuthenticationFilter.AUTH_ERROR_INVALID_ACCESS_TOKEN.equals(authError);
+                            String code = invalidToken ? "ACCESS_TOKEN_INVALID" : "ACCESS_TOKEN_REQUIRED";
+                            String message = invalidToken
+                                    ? "access token is invalid."
+                                    : "access token is required.";
+
+                            response.setStatus(401);
+                            response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+                            response.getWriter().write("""
+                                    {
+                                      "code": "%s",
+                                      "message": "%s",
+                                      "fieldErrors": [],
+                                      "retryable": false
+                                    }
+                                    """.formatted(code, message).trim());
+                        })
+                )
                 .httpBasic(AbstractHttpConfigurer::disable)
-                .formLogin(AbstractHttpConfigurer::disable);
+                .formLogin(AbstractHttpConfigurer::disable)
+                .addFilterBefore(
+                        new JwtAccessTokenAuthenticationFilter(jwtSecret, clock),
+                        UsernamePasswordAuthenticationFilter.class
+                );
 
         return http.build();
     }

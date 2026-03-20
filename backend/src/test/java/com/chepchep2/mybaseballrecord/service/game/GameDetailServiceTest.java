@@ -9,6 +9,7 @@ import com.chepchep2.mybaseballrecord.exception.game.GameNotFoundException;
 import com.chepchep2.mybaseballrecord.repository.game.BatterRecordRepository;
 import com.chepchep2.mybaseballrecord.repository.game.GameRecordRepository;
 import com.chepchep2.mybaseballrecord.repository.game.PitcherRecordRepository;
+import com.chepchep2.mybaseballrecord.service.auth.CurrentUserProvider;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -34,6 +35,9 @@ class GameDetailServiceTest {
 
     @Mock
     private PitcherRecordRepository pitcherRecordRepository;
+
+    @Mock
+    private CurrentUserProvider currentUserProvider;
 
     @InjectMocks
     private GameQueryService gameQueryService;
@@ -77,7 +81,8 @@ class GameDetailServiceTest {
                 .holds(0)
                 .build();
 
-        when(gameRecordRepository.findById(101L)).thenReturn(Optional.of(game));
+        when(currentUserProvider.getCurrentUserId()).thenReturn(1L);
+        when(gameRecordRepository.findByIdAndUserId(101L, 1L)).thenReturn(Optional.of(game));
         when(batterRecordRepository.findByGameId(101L)).thenReturn(Optional.of(batter));
         when(pitcherRecordRepository.findByGameId(101L)).thenReturn(Optional.of(pitcher));
 
@@ -94,7 +99,8 @@ class GameDetailServiceTest {
     @DisplayName("타자/투수 기록이 없으면 null로 반환한다")
     void getDetailReturnsNullWhenSubRecordsMissing() throws Exception {
         GameRecord game = createGame(102L);
-        when(gameRecordRepository.findById(102L)).thenReturn(Optional.of(game));
+        when(currentUserProvider.getCurrentUserId()).thenReturn(1L);
+        when(gameRecordRepository.findByIdAndUserId(102L, 1L)).thenReturn(Optional.of(game));
         when(batterRecordRepository.findByGameId(102L)).thenReturn(Optional.empty());
         when(pitcherRecordRepository.findByGameId(102L)).thenReturn(Optional.empty());
 
@@ -107,7 +113,8 @@ class GameDetailServiceTest {
     @Test
     @DisplayName("경기가 없으면 GAME_NOT_FOUND 예외를 던진다")
     void getDetailThrowsWhenGameMissing() {
-        when(gameRecordRepository.findById(999L)).thenReturn(Optional.empty());
+        when(currentUserProvider.getCurrentUserId()).thenReturn(1L);
+        when(gameRecordRepository.findByIdAndUserId(999L, 1L)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> gameQueryService.getDetail(999L))
                 .isInstanceOf(GameNotFoundException.class);
@@ -121,6 +128,7 @@ class GameDetailServiceTest {
                 .teamName("블루스톰")
                 .opponentName("레전드")
                 .memo("비 오는 날 경기")
+                .userId(1L)
                 .participationType(ParticipationType.BOTH)
                 .build();
         var idField = GameRecord.class.getDeclaredField("id");

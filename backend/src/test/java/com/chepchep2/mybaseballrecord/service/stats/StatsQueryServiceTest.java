@@ -14,6 +14,7 @@ import com.chepchep2.mybaseballrecord.exception.stats.InvalidStatsQueryException
 import com.chepchep2.mybaseballrecord.repository.game.BatterRecordRepository;
 import com.chepchep2.mybaseballrecord.repository.game.GameRecordRepository;
 import com.chepchep2.mybaseballrecord.repository.game.PitcherRecordRepository;
+import com.chepchep2.mybaseballrecord.service.auth.CurrentUserProvider;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -41,6 +42,9 @@ class StatsQueryServiceTest {
 
     @Mock
     private PitcherRecordRepository pitcherRecordRepository;
+
+    @Mock
+    private CurrentUserProvider currentUserProvider;
 
     @Mock
     private java.time.Clock clock;
@@ -72,7 +76,8 @@ class StatsQueryServiceTest {
 
         when(clock.getZone()).thenReturn(ZoneId.of("UTC"));
         when(clock.instant()).thenReturn(ZonedDateTime.parse("2026-03-20T00:00:00Z").toInstant());
-        when(gameRecordRepository.findAllBySeasonYear(2026)).thenReturn(List.of(game));
+        when(currentUserProvider.getCurrentUserId()).thenReturn(1L);
+        when(gameRecordRepository.findAllByUserIdAndSeasonYear(1L, 2026)).thenReturn(List.of(game));
         when(batterRecordRepository.findAllByGameIdIn(List.of(1L))).thenReturn(List.of(batter));
 
         BatterStatsResponse response = (BatterStatsResponse) statsQueryService.query(
@@ -115,7 +120,8 @@ class StatsQueryServiceTest {
                 .holds(0)
                 .build();
 
-        when(gameRecordRepository.findAll()).thenReturn(List.of(leagueGame, nonOfficialGame));
+        when(currentUserProvider.getCurrentUserId()).thenReturn(1L);
+        when(gameRecordRepository.findAllByUserId(1L)).thenReturn(List.of(leagueGame, nonOfficialGame));
         when(pitcherRecordRepository.findAllByGameIdIn(List.of(10L))).thenReturn(List.of(pitcherLeague));
 
         PitcherStatsResponse response = (PitcherStatsResponse) statsQueryService.query(
@@ -138,6 +144,7 @@ class StatsQueryServiceTest {
     @Test
     @DisplayName("scope=season에서 seasonYear 누락이면 예외를 던진다")
     void queryThrowsWhenSeasonYearMissing() {
+        when(currentUserProvider.getCurrentUserId()).thenReturn(1L);
         assertThatThrownBy(() -> statsQueryService.query(
                 StatsScope.season,
                 null,
@@ -172,7 +179,8 @@ class StatsQueryServiceTest {
 
         when(clock.getZone()).thenReturn(ZoneId.of("UTC"));
         when(clock.instant()).thenReturn(ZonedDateTime.parse("2026-03-20T00:00:00Z").toInstant());
-        when(gameRecordRepository.findAllBySeasonYear(2026)).thenReturn(List.of(game));
+        when(currentUserProvider.getCurrentUserId()).thenReturn(1L);
+        when(gameRecordRepository.findAllByUserIdAndSeasonYear(1L, 2026)).thenReturn(List.of(game));
         when(batterRecordRepository.findAllByGameIdIn(List.of(2L))).thenReturn(List.of(batter));
 
         BatterStatsResponse response = (BatterStatsResponse) statsQueryService.query(
@@ -193,6 +201,7 @@ class StatsQueryServiceTest {
                 .teamName("블루스톰")
                 .opponentName("레전드")
                 .memo(null)
+                .userId(1L)
                 .participationType(ParticipationType.BOTH)
                 .build();
         var idField = GameRecord.class.getDeclaredField("id");

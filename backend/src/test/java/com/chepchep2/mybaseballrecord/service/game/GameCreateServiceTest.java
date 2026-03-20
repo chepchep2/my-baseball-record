@@ -9,6 +9,7 @@ import com.chepchep2.mybaseballrecord.dto.game.request.GameCreateRequest;
 import com.chepchep2.mybaseballrecord.repository.game.BatterRecordRepository;
 import com.chepchep2.mybaseballrecord.repository.game.GameRecordRepository;
 import com.chepchep2.mybaseballrecord.repository.game.PitcherRecordRepository;
+import com.chepchep2.mybaseballrecord.service.auth.CurrentUserProvider;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -35,6 +36,9 @@ class GameCreateServiceTest {
 
     @Mock
     private PitcherRecordRepository pitcherRecordRepository;
+
+    @Mock
+    private CurrentUserProvider currentUserProvider;
 
     @InjectMocks
     private GameCommandService gameCommandService;
@@ -63,6 +67,7 @@ class GameCreateServiceTest {
             return game;
         });
         when(batterRecordRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
+        when(currentUserProvider.getCurrentUserId()).thenReturn(1L);
 
         var response = gameCommandService.create(request);
 
@@ -93,6 +98,7 @@ class GameCreateServiceTest {
             return game;
         });
         when(batterRecordRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
+        when(currentUserProvider.getCurrentUserId()).thenReturn(1L);
 
         var response = gameCommandService.create(request);
 
@@ -123,6 +129,7 @@ class GameCreateServiceTest {
             return game;
         });
         when(batterRecordRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
+        when(currentUserProvider.getCurrentUserId()).thenReturn(1L);
 
         gameCommandService.create(request);
 
@@ -156,6 +163,7 @@ class GameCreateServiceTest {
             return game;
         });
         when(batterRecordRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
+        when(currentUserProvider.getCurrentUserId()).thenReturn(1L);
 
         var response = gameCommandService.create(request);
 
@@ -186,6 +194,7 @@ class GameCreateServiceTest {
             return game;
         });
         when(batterRecordRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
+        when(currentUserProvider.getCurrentUserId()).thenReturn(1L);
 
         var response = gameCommandService.create(request);
 

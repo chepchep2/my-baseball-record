@@ -39,6 +39,7 @@ class GameRepositoryTest {
                         "블루스톰",
                         "레전드",
                         "메모",
+                        null,
                         ParticipationType.BATTER
                 )
         );
@@ -60,6 +61,7 @@ class GameRepositoryTest {
                         GameType.NON_OFFICIAL,
                         "블루스톰",
                         "레전드",
+                        null,
                         null,
                         ParticipationType.PITCHER
                 )
@@ -83,6 +85,7 @@ class GameRepositoryTest {
                         "블루스톰",
                         "레전드",
                         "삭제 테스트",
+                        null,
                         ParticipationType.BOTH
                 )
         );

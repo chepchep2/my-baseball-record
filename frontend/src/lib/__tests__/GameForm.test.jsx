@@ -72,6 +72,16 @@ describe("GameForm", () => {
     expect(pushMock).toHaveBeenCalledWith("/games/301");
   });
 
+  it("생성 모드에서 타자/투수 기록이 모두 없으면 저장하지 않고 안내 문구를 보여준다", async () => {
+    render(<GameForm mode="create" />);
+
+    await userEvent.click(await screen.findByRole("button", { name: "다음" }));
+    await userEvent.click(screen.getByRole("button", { name: "저장" }));
+
+    expect(createGame).not.toHaveBeenCalled();
+    expect(screen.getByText("타자 기록 또는 투수 기록 중 하나는 입력해야 합니다.")).toBeInTheDocument();
+  });
+
   it("수정 모드면 상세 API를 불러와 폼을 채운다", async () => {
     getGameDetail.mockResolvedValue({
       id: 101,

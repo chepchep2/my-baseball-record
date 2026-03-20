@@ -37,8 +37,16 @@ function toCount(value) {
   return Number.isNaN(parsed) ? null : parsed;
 }
 
+function hasAnyRecordInput(record) {
+  return Object.values(record).some((value) => value !== "" && value !== null && value !== undefined);
+}
+
 function validateGameForm(form) {
   const errors = [];
+
+  if (!hasAnyRecordInput(form.batter) && !hasAnyRecordInput(form.pitcher)) {
+    errors.push("타자 기록 또는 투수 기록 중 하나는 입력해야 합니다.");
+  }
 
   const plateAppearances = toCount(form.batter.plateAppearances);
   const atBats = toCount(form.batter.atBats);

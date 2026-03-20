@@ -47,7 +47,7 @@ public class GameCommandService {
                         .playedAt(request.gameInfo().playedAt())
                         .seasonYear(seasonYear)
                         .gameType(request.gameInfo().gameType())
-                        .teamName(request.gameInfo().teamName())
+                        .teamName(normalizeTeamName(request.gameInfo().teamName()))
                         .opponentName(request.gameInfo().opponentName())
                         .memo(request.gameInfo().memo())
                         .participationType(participationType)
@@ -113,7 +113,7 @@ public class GameCommandService {
         validateImmutableFields(game, request.gameInfo());
         ParticipationType participationType = resolveParticipationType(request);
         game.updateMutableFields(
-                request.gameInfo().teamName(),
+                normalizeTeamName(request.gameInfo().teamName()),
                 request.gameInfo().opponentName(),
                 request.gameInfo().memo(),
                 participationType
@@ -314,5 +314,12 @@ public class GameCommandService {
                 record.saves(),
                 record.holds()
         );
+    }
+
+    private String normalizeTeamName(String teamName) {
+        if (teamName == null || teamName.isBlank()) {
+            return "";
+        }
+        return teamName.trim();
     }
 }

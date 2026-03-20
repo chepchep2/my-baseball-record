@@ -131,4 +131,34 @@ class GameCreateServiceTest {
         verify(batterRecordRepository).save(batterCaptor.capture());
         assertThat(batterCaptor.getValue().gameId()).isEqualTo(1L);
     }
+
+    @Test
+    @DisplayName("teamName이 null이면 빈 문자열로 저장한다")
+    void createGameStoresEmptyTeamNameWhenNull() {
+        GameCreateRequest request = new GameCreateRequest(
+                new GameCreateInfoRequest(
+                        LocalDate.parse("2026-03-18"),
+                        2026,
+                        GameType.LEAGUE,
+                        null,
+                        "레전드",
+                        null
+                ),
+                new BatterRecordRequest(4, 3, 1, 1, 0, 1, 1, 0, 0, 3, 2, 0, 0, 0),
+                null
+        );
+
+        when(gameRecordRepository.save(any())).thenAnswer(invocation -> {
+            GameRecord game = invocation.getArgument(0);
+            var field = game.getClass().getDeclaredField("id");
+            field.setAccessible(true);
+            field.set(game, 1L);
+            return game;
+        });
+        when(batterRecordRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
+
+        var response = gameCommandService.create(request);
+
+        assertThat(response.gameInfo().teamName()).isEqualTo("");
+    }
 }

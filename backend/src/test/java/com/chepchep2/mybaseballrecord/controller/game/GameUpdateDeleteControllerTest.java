@@ -91,8 +91,8 @@ class GameUpdateDeleteControllerTest {
     }
 
     @Test
-    @DisplayName("PUT /api/games/{id} - gameInfo.teamName 누락이면 400 VALIDATION_ERROR")
-    void putGameValidationErrorWhenTeamNameMissing() throws Exception {
+    @DisplayName("PUT /api/games/{id} - gameInfo.opponentName 누락이면 400 VALIDATION_ERROR")
+    void putGameValidationErrorWhenOpponentNameMissing() throws Exception {
         mockMvc.perform(put("/api/games/101")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
@@ -101,7 +101,7 @@ class GameUpdateDeleteControllerTest {
                                     "playedAt": "2026-03-18",
                                     "seasonYear": 2026,
                                     "gameType": "LEAGUE",
-                                    "opponentName": "레전드"
+                                    "teamName": "블루스톰"
                                   },
                                   "batter": {
                                     "plateAppearances": 4,

@@ -123,4 +123,56 @@ class GameCreateControllerTest {
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.code").value("VALIDATION_ERROR"));
     }
+
+    @Test
+    @DisplayName("POST /api/games - teamName 누락도 허용한다")
+    void postGamesAllowsMissingTeamName() throws Exception {
+        given(gameCommandService.create(any()))
+                .willReturn(new GameDetailResponse(
+                        102L,
+                        new GameInfoResponse(
+                                LocalDate.parse("2026-03-18"),
+                                2026,
+                                GameType.LEAGUE,
+                                "",
+                                "레전드",
+                                null
+                        ),
+                        ParticipationType.BATTER,
+                        new GameBatterResponse(4, 3, 1, 1, 0, 1, 1, 0, 0, 3, 2, 0, 0, 0),
+                        null
+                ));
+
+        mockMvc.perform(post("/api/games")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "gameInfo": {
+                                    "playedAt": "2026-03-18",
+                                    "seasonYear": 2026,
+                                    "gameType": "LEAGUE",
+                                    "opponentName": "레전드"
+                                  },
+                                  "batter": {
+                                    "plateAppearances": 4,
+                                    "atBats": 3,
+                                    "singles": 1,
+                                    "doubles": 1,
+                                    "triples": 0,
+                                    "homeRuns": 1,
+                                    "walks": 1,
+                                    "strikeOuts": 0,
+                                    "hitByPitch": 0,
+                                    "runsBattedIn": 3,
+                                    "runs": 2,
+                                    "stolenBases": 0,
+                                    "caughtStealing": 0,
+                                    "sacrificeHits": 0
+                                  }
+                                }
+                                """))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.id").value(102))
+                .andExpect(jsonPath("$.gameInfo.teamName").value(""));
+    }
 }

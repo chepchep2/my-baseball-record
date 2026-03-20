@@ -10,7 +10,7 @@ public record GameUpdateInfoRequest(
         LocalDate playedAt,
         Integer seasonYear,
         GameType gameType,
-        @NotBlank @Size(max = 100) String teamName,
+        @Size(max = 100) String teamName,
         @NotBlank @Size(max = 100) String opponentName,
         @Size(max = 1000) String memo
 ) {

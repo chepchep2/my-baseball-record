@@ -118,51 +118,87 @@ public class GameCommandService {
         GameRecord savedGame = gameRecordRepository.save(game);
 
         if (request.batter() != null) {
-            batterRecordRepository.deleteByGameId(gameId);
-            batterRecordRepository.save(
-                    new BatterRecord(
-                            gameId,
-                            request.batter().plateAppearances(),
-                            request.batter().atBats(),
-                            request.batter().singles(),
-                            request.batter().doubles(),
-                            request.batter().triples(),
-                            request.batter().homeRuns(),
-                            request.batter().walks(),
-                            request.batter().strikeOuts(),
-                            request.batter().hitByPitch(),
-                            request.batter().runsBattedIn(),
-                            request.batter().runs(),
-                            request.batter().stolenBases(),
-                            request.batter().caughtStealing(),
-                            request.batter().sacrificeHits()
-                    )
-            );
+            batterRecordRepository.findByGameId(gameId)
+                    .ifPresentOrElse(
+                            existing -> existing.update(
+                                    request.batter().plateAppearances(),
+                                    request.batter().atBats(),
+                                    request.batter().singles(),
+                                    request.batter().doubles(),
+                                    request.batter().triples(),
+                                    request.batter().homeRuns(),
+                                    request.batter().walks(),
+                                    request.batter().strikeOuts(),
+                                    request.batter().hitByPitch(),
+                                    request.batter().runsBattedIn(),
+                                    request.batter().runs(),
+                                    request.batter().stolenBases(),
+                                    request.batter().caughtStealing(),
+                                    request.batter().sacrificeHits()
+                            ),
+                            () -> batterRecordRepository.save(
+                                    new BatterRecord(
+                                            gameId,
+                                            request.batter().plateAppearances(),
+                                            request.batter().atBats(),
+                                            request.batter().singles(),
+                                            request.batter().doubles(),
+                                            request.batter().triples(),
+                                            request.batter().homeRuns(),
+                                            request.batter().walks(),
+                                            request.batter().strikeOuts(),
+                                            request.batter().hitByPitch(),
+                                            request.batter().runsBattedIn(),
+                                            request.batter().runs(),
+                                            request.batter().stolenBases(),
+                                            request.batter().caughtStealing(),
+                                            request.batter().sacrificeHits()
+                                    )
+                            )
+                    );
         } else {
             batterRecordRepository.deleteByGameId(gameId);
         }
 
         if (request.pitcher() != null) {
-            pitcherRecordRepository.deleteByGameId(gameId);
-            pitcherRecordRepository.save(
-                    new PitcherRecord(
-                            gameId,
-                            request.pitcher().innings(),
-                            request.pitcher().additionalOuts(),
-                            request.pitcher().runsAllowed(),
-                            request.pitcher().earnedRuns(),
-                            request.pitcher().hitsAllowed(),
-                            request.pitcher().walks(),
-                            request.pitcher().hitByPitch(),
-                            request.pitcher().homeRunsAllowed(),
-                            request.pitcher().strikeOuts(),
-                            request.pitcher().battersFaced(),
-                            request.pitcher().wins(),
-                            request.pitcher().losses(),
-                            request.pitcher().saves(),
-                            request.pitcher().holds()
-                    )
-            );
+            pitcherRecordRepository.findByGameId(gameId)
+                    .ifPresentOrElse(
+                            existing -> existing.update(
+                                    request.pitcher().innings(),
+                                    request.pitcher().additionalOuts(),
+                                    request.pitcher().runsAllowed(),
+                                    request.pitcher().earnedRuns(),
+                                    request.pitcher().hitsAllowed(),
+                                    request.pitcher().walks(),
+                                    request.pitcher().hitByPitch(),
+                                    request.pitcher().homeRunsAllowed(),
+                                    request.pitcher().strikeOuts(),
+                                    request.pitcher().battersFaced(),
+                                    request.pitcher().wins(),
+                                    request.pitcher().losses(),
+                                    request.pitcher().saves(),
+                                    request.pitcher().holds()
+                            ),
+                            () -> pitcherRecordRepository.save(
+                                    new PitcherRecord(
+                                            gameId,
+                                            request.pitcher().innings(),
+                                            request.pitcher().additionalOuts(),
+                                            request.pitcher().runsAllowed(),
+                                            request.pitcher().earnedRuns(),
+                                            request.pitcher().hitsAllowed(),
+                                            request.pitcher().walks(),
+                                            request.pitcher().hitByPitch(),
+                                            request.pitcher().homeRunsAllowed(),
+                                            request.pitcher().strikeOuts(),
+                                            request.pitcher().battersFaced(),
+                                            request.pitcher().wins(),
+                                            request.pitcher().losses(),
+                                            request.pitcher().saves(),
+                                            request.pitcher().holds()
+                                    )
+                            )
+                    );
         } else {
             pitcherRecordRepository.deleteByGameId(gameId);
         }

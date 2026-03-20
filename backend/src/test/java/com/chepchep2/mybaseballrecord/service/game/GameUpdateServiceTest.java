@@ -3,6 +3,8 @@ package com.chepchep2.mybaseballrecord.service.game;
 import com.chepchep2.mybaseballrecord.domain.game.GameRecord;
 import com.chepchep2.mybaseballrecord.domain.game.GameType;
 import com.chepchep2.mybaseballrecord.domain.game.ParticipationType;
+import com.chepchep2.mybaseballrecord.domain.game.BatterRecord;
+import com.chepchep2.mybaseballrecord.domain.game.PitcherRecord;
 import com.chepchep2.mybaseballrecord.dto.game.request.GameUpdateRequest;
 import com.chepchep2.mybaseballrecord.exception.game.GameImmutableFieldException;
 import com.chepchep2.mybaseballrecord.repository.game.BatterRecordRepository;
@@ -87,10 +89,12 @@ class GameUpdateServiceTest {
         );
         when(gameRecordRepository.findById(101L)).thenReturn(Optional.of(existing));
         when(gameRecordRepository.save(any(GameRecord.class))).thenAnswer(invocation -> invocation.getArgument(0));
-        when(batterRecordRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
-        when(pitcherRecordRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
-        when(batterRecordRepository.findByGameId(101L)).thenReturn(Optional.empty());
-        when(pitcherRecordRepository.findByGameId(101L)).thenReturn(Optional.empty());
+        when(batterRecordRepository.findByGameId(101L)).thenReturn(Optional.of(
+                new BatterRecord(101L, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
+        ));
+        when(pitcherRecordRepository.findByGameId(101L)).thenReturn(Optional.of(
+                new PitcherRecord(101L, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
+        ));
 
         GameUpdateRequest request = new GameUpdateRequest(
                 new GameUpdateRequest.GameInfoRequest(
@@ -110,8 +114,6 @@ class GameUpdateServiceTest {
         assertThat(response.gameInfo().teamName()).isEqualTo("수정팀");
         assertThat(response.gameInfo().opponentName()).isEqualTo("수정상대");
         assertThat(response.participationType()).isEqualTo(ParticipationType.BOTH);
-        verify(batterRecordRepository).deleteByGameId(101L);
-        verify(pitcherRecordRepository).deleteByGameId(101L);
     }
 
     private GameRecord gameWithId(

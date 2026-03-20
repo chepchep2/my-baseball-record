@@ -155,4 +155,36 @@ public class BatterRecord {
     public int sacrificeHits() {
         return sacrificeHits;
     }
+
+    public void update(
+            int plateAppearances,
+            int atBats,
+            int singles,
+            int doubles,
+            int triples,
+            int homeRuns,
+            int walks,
+            int strikeOuts,
+            int hitByPitch,
+            int runsBattedIn,
+            int runs,
+            int stolenBases,
+            int caughtStealing,
+            int sacrificeHits
+    ) {
+        this.plateAppearances = plateAppearances;
+        this.atBats = atBats;
+        this.singles = singles;
+        this.doubles = doubles;
+        this.triples = triples;
+        this.homeRuns = homeRuns;
+        this.walks = walks;
+        this.strikeOuts = strikeOuts;
+        this.hitByPitch = hitByPitch;
+        this.runsBattedIn = runsBattedIn;
+        this.runs = runs;
+        this.stolenBases = stolenBases;
+        this.caughtStealing = caughtStealing;
+        this.sacrificeHits = sacrificeHits;
+    }
 }

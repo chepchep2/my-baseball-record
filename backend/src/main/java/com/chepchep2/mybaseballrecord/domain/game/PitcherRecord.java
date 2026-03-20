@@ -155,4 +155,36 @@ public class PitcherRecord {
     public int holds() {
         return holds;
     }
+
+    public void update(
+            int innings,
+            int additionalOuts,
+            int runsAllowed,
+            int earnedRuns,
+            int hitsAllowed,
+            int walks,
+            int hitByPitch,
+            int homeRunsAllowed,
+            int strikeOuts,
+            int battersFaced,
+            int wins,
+            int losses,
+            int saves,
+            int holds
+    ) {
+        this.innings = innings;
+        this.additionalOuts = additionalOuts;
+        this.runsAllowed = runsAllowed;
+        this.earnedRuns = earnedRuns;
+        this.hitsAllowed = hitsAllowed;
+        this.walks = walks;
+        this.hitByPitch = hitByPitch;
+        this.homeRunsAllowed = homeRunsAllowed;
+        this.strikeOuts = strikeOuts;
+        this.battersFaced = battersFaced;
+        this.wins = wins;
+        this.losses = losses;
+        this.saves = saves;
+        this.holds = holds;
+    }
 }

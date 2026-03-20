@@ -63,10 +63,14 @@
 - Header:
   - Name: `Content-Type`
   - Value: `application/json`
-- 필요 시 Header:
+- Header:
   - Name: `Authorization`
   - Value: `Bearer {{access_token}}`
 - Body: 계약 문서의 create 예시 JSON
+
+주의:
+- 현재 보안 설정이 `permitAll`이면 Authorization 없이도 통과할 수 있다.
+- 그래도 리뷰/수동 검증은 Authorization 헤더를 넣은 요청 기준으로 확인한다.
 
 기대:
 - [ ] `201` 응답

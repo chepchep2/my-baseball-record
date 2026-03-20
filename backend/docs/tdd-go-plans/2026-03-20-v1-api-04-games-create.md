@@ -110,9 +110,13 @@ APIdog 기본 설정:
 - Header:
   - Name: `Content-Type`
   - Value: `application/json`
-- 필요 시 Header:
+- Header:
   - Name: `Authorization`
   - Value: `Bearer {{access_token}}`
+
+주의:
+- 현재 단계에서 Security 설정이 `permitAll`이면 Authorization 없이도 통과 가능하다.
+- 수동 검증 기준은 Authorization 헤더 포함 요청으로 고정한다.
 
 ### Task 5: 통합 검증
 

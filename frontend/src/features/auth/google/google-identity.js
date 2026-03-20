@@ -1,6 +1,8 @@
 const GOOGLE_IDENTITY_SCRIPT_URL = "https://accounts.google.com/gsi/client";
 
 let scriptLoadingPromise = null;
+const GOOGLE_BUTTON_SELECTOR = 'div[role="button"], button';
+const GOOGLE_BUTTON_READY_TIMEOUT_MS = 3000;
 
 function getGoogleClientId() {
   if (typeof process === "undefined" || !process.env) {
@@ -42,6 +44,44 @@ function loadGoogleIdentityScript() {
   });
 
   return scriptLoadingPromise;
+}
+
+function findGoogleButton(element) {
+  if (!element) {
+    return null;
+  }
+
+  return element.querySelector(GOOGLE_BUTTON_SELECTOR);
+}
+
+function waitForGoogleButton(element, timeoutMs = GOOGLE_BUTTON_READY_TIMEOUT_MS) {
+  const existingButton = findGoogleButton(element);
+  if (existingButton) {
+    return Promise.resolve(existingButton);
+  }
+
+  return new Promise((resolve, reject) => {
+    const timeoutId = window.setTimeout(() => {
+      observer.disconnect();
+      reject(new Error("Google 로그인 버튼이 준비되지 않았습니다."));
+    }, timeoutMs);
+
+    const observer = new MutationObserver(() => {
+      const button = findGoogleButton(element);
+      if (!button) {
+        return;
+      }
+
+      window.clearTimeout(timeoutId);
+      observer.disconnect();
+      resolve(button);
+    });
+
+    observer.observe(element, {
+      childList: true,
+      subtree: true,
+    });
+  });
 }
 
 export async function mountGoogleSignInButton({ element, onCredential, onError }) {
@@ -91,7 +131,15 @@ export async function mountGoogleSignInButton({ element, onCredential, onError }
     logo_alignment: "left",
   });
 
-  return { ok: true };
+  try {
+    await waitForGoogleButton(element);
+    return { ok: true };
+  } catch (error) {
+    return {
+      ok: false,
+      message: error?.message || "Google 로그인 버튼이 준비되지 않았습니다.",
+    };
+  }
 }
 
 export function triggerGoogleSignIn(element) {
@@ -99,7 +147,7 @@ export function triggerGoogleSignIn(element) {
     return { ok: false, message: "Google 로그인 버튼이 준비되지 않았습니다." };
   }
 
-  const button = element.querySelector('div[role="button"], button');
+  const button = findGoogleButton(element);
   if (!button) {
     return { ok: false, message: "Google 로그인 버튼이 준비되지 않았습니다." };
   }

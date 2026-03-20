@@ -4,6 +4,7 @@ import com.chepchep2.mybaseballrecord.exception.game.GameNotFoundException;
 import com.chepchep2.mybaseballrecord.repository.game.BatterRecordRepository;
 import com.chepchep2.mybaseballrecord.repository.game.GameRecordRepository;
 import com.chepchep2.mybaseballrecord.repository.game.PitcherRecordRepository;
+import com.chepchep2.mybaseballrecord.service.auth.CurrentUserProvider;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -27,13 +28,17 @@ class GameDeleteServiceTest {
     @Mock
     private PitcherRecordRepository pitcherRecordRepository;
 
+    @Mock
+    private CurrentUserProvider currentUserProvider;
+
     @InjectMocks
     private GameCommandService gameCommandService;
 
     @Test
     @DisplayName("경기가 존재하면 삭제한다")
     void deleteGameWhenExists() {
-        when(gameRecordRepository.existsById(101L)).thenReturn(true);
+        when(currentUserProvider.getCurrentUserId()).thenReturn(1L);
+        when(gameRecordRepository.existsByIdAndUserId(101L, 1L)).thenReturn(true);
 
         gameCommandService.delete(101L);
 
@@ -43,7 +48,8 @@ class GameDeleteServiceTest {
     @Test
     @DisplayName("경기가 존재하지 않으면 GAME_NOT_FOUND 예외를 던진다")
     void deleteFailsWhenGameNotExists() {
-        when(gameRecordRepository.existsById(999L)).thenReturn(false);
+        when(currentUserProvider.getCurrentUserId()).thenReturn(1L);
+        when(gameRecordRepository.existsByIdAndUserId(999L, 1L)).thenReturn(false);
 
         assertThatThrownBy(() -> gameCommandService.delete(999L))
                 .isInstanceOf(GameNotFoundException.class);

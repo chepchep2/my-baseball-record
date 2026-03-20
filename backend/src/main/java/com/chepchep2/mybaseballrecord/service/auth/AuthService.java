@@ -9,6 +9,7 @@ import com.chepchep2.mybaseballrecord.exception.auth.RefreshTokenInvalidExceptio
 import com.chepchep2.mybaseballrecord.exception.auth.RefreshTokenRevokedException;
 import com.chepchep2.mybaseballrecord.repository.auth.RefreshTokenRepository;
 import com.chepchep2.mybaseballrecord.repository.auth.UserRepository;
+import jakarta.transaction.Transactional;
 
 import java.time.Clock;
 import java.time.Instant;
@@ -66,6 +67,7 @@ public class AuthService {
         );
     }
 
+    @Transactional
     public AuthLoginResult refreshSession(String refreshToken) {
         if (refreshToken == null || refreshToken.isBlank()) {
             throw new RefreshTokenInvalidException("refresh token is blank.");
@@ -106,6 +108,7 @@ public class AuthService {
         );
     }
 
+    @Transactional
     public void logout(String refreshToken) {
         if (refreshToken == null || refreshToken.isBlank()) {
             throw new RefreshTokenInvalidException("refresh token is blank.");

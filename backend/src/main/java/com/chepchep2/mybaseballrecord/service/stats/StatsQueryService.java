@@ -17,6 +17,7 @@ import com.chepchep2.mybaseballrecord.exception.stats.InvalidStatsQueryException
 import com.chepchep2.mybaseballrecord.repository.game.BatterRecordRepository;
 import com.chepchep2.mybaseballrecord.repository.game.GameRecordRepository;
 import com.chepchep2.mybaseballrecord.repository.game.PitcherRecordRepository;
+import com.chepchep2.mybaseballrecord.service.auth.CurrentUserProvider;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -31,17 +32,20 @@ public class StatsQueryService {
     private final GameRecordRepository gameRecordRepository;
     private final BatterRecordRepository batterRecordRepository;
     private final PitcherRecordRepository pitcherRecordRepository;
+    private final CurrentUserProvider currentUserProvider;
     private final Clock clock;
 
     public StatsQueryService(
             GameRecordRepository gameRecordRepository,
             BatterRecordRepository batterRecordRepository,
             PitcherRecordRepository pitcherRecordRepository,
+            CurrentUserProvider currentUserProvider,
             Clock clock
     ) {
         this.gameRecordRepository = gameRecordRepository;
         this.batterRecordRepository = batterRecordRepository;
         this.pitcherRecordRepository = pitcherRecordRepository;
+        this.currentUserProvider = currentUserProvider;
         this.clock = clock;
     }
 
@@ -51,8 +55,9 @@ public class StatsQueryService {
             StatsRecordType recordType,
             StatsGameFilter gameFilter
     ) {
+        long userId = currentUserProvider.getCurrentUserId();
         Integer targetSeasonYear = resolveSeasonYear(scope, seasonYear);
-        List<GameRecord> filteredGames = filterGames(loadGamesByScope(targetSeasonYear), gameFilter);
+        List<GameRecord> filteredGames = filterGames(loadGamesByScope(userId, targetSeasonYear), gameFilter);
         List<Long> gameIds = filteredGames.stream().map(GameRecord::id).toList();
 
         if (recordType == StatsRecordType.batter) {
@@ -74,11 +79,11 @@ public class StatsQueryService {
         return seasonYear;
     }
 
-    private List<GameRecord> loadGamesByScope(Integer targetSeasonYear) {
+    private List<GameRecord> loadGamesByScope(long userId, Integer targetSeasonYear) {
         if (targetSeasonYear == null) {
-            return gameRecordRepository.findAll();
+            return gameRecordRepository.findAllByUserId(userId);
         }
-        return gameRecordRepository.findAllBySeasonYear(targetSeasonYear);
+        return gameRecordRepository.findAllByUserIdAndSeasonYear(userId, targetSeasonYear);
     }
 
     private List<GameRecord> filterGames(List<GameRecord> games, StatsGameFilter gameFilter) {

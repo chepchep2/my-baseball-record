@@ -16,6 +16,7 @@ import com.chepchep2.mybaseballrecord.exception.game.GameNotFoundException;
 import com.chepchep2.mybaseballrecord.repository.game.BatterRecordRepository;
 import com.chepchep2.mybaseballrecord.repository.game.GameRecordRepository;
 import com.chepchep2.mybaseballrecord.repository.game.PitcherRecordRepository;
+import com.chepchep2.mybaseballrecord.service.auth.CurrentUserProvider;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
@@ -24,19 +25,23 @@ public class GameCommandService {
     private final GameRecordRepository gameRecordRepository;
     private final BatterRecordRepository batterRecordRepository;
     private final PitcherRecordRepository pitcherRecordRepository;
+    private final CurrentUserProvider currentUserProvider;
 
     public GameCommandService(
             GameRecordRepository gameRecordRepository,
             BatterRecordRepository batterRecordRepository,
-            PitcherRecordRepository pitcherRecordRepository
+            PitcherRecordRepository pitcherRecordRepository,
+            CurrentUserProvider currentUserProvider
     ) {
         this.gameRecordRepository = gameRecordRepository;
         this.batterRecordRepository = batterRecordRepository;
         this.pitcherRecordRepository = pitcherRecordRepository;
+        this.currentUserProvider = currentUserProvider;
     }
 
     @Transactional
     public GameDetailResponse create(GameCreateRequest request) {
+        long userId = currentUserProvider.getCurrentUserId();
         int seasonYear = request.gameInfo().seasonYear() != null
                 ? request.gameInfo().seasonYear()
                 : request.gameInfo().playedAt().getYear();
@@ -50,6 +55,7 @@ public class GameCommandService {
                         .teamName(normalizeOptionalName(request.gameInfo().teamName()))
                         .opponentName(normalizeOptionalName(request.gameInfo().opponentName()))
                         .memo(request.gameInfo().memo())
+                        .userId(userId)
                         .participationType(participationType)
                         .build()
         );
@@ -107,7 +113,8 @@ public class GameCommandService {
 
     @Transactional
     public GameDetailResponse update(long gameId, GameUpdateRequest request) {
-        GameRecord game = gameRecordRepository.findById(gameId)
+        long userId = currentUserProvider.getCurrentUserId();
+        GameRecord game = gameRecordRepository.findByIdAndUserId(gameId, userId)
                 .orElseThrow(() -> new GameNotFoundException(gameId));
 
         validateImmutableFields(game, request.gameInfo());
@@ -219,7 +226,8 @@ public class GameCommandService {
 
     @Transactional
     public void delete(long gameId) {
-        if (!gameRecordRepository.existsById(gameId)) {
+        long userId = currentUserProvider.getCurrentUserId();
+        if (!gameRecordRepository.existsByIdAndUserId(gameId, userId)) {
             throw new GameNotFoundException(gameId);
         }
         gameRecordRepository.deleteById(gameId);

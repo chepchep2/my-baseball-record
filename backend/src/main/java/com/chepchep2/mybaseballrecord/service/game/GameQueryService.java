@@ -11,6 +11,7 @@ import com.chepchep2.mybaseballrecord.exception.game.GameNotFoundException;
 import com.chepchep2.mybaseballrecord.repository.game.BatterRecordRepository;
 import com.chepchep2.mybaseballrecord.repository.game.GameRecordRepository;
 import com.chepchep2.mybaseballrecord.repository.game.PitcherRecordRepository;
+import com.chepchep2.mybaseballrecord.service.auth.CurrentUserProvider;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -19,19 +20,23 @@ public class GameQueryService {
     private final GameRecordRepository gameRecordRepository;
     private final BatterRecordRepository batterRecordRepository;
     private final PitcherRecordRepository pitcherRecordRepository;
+    private final CurrentUserProvider currentUserProvider;
 
     public GameQueryService(
             GameRecordRepository gameRecordRepository,
             BatterRecordRepository batterRecordRepository,
-            PitcherRecordRepository pitcherRecordRepository
+            PitcherRecordRepository pitcherRecordRepository,
+            CurrentUserProvider currentUserProvider
     ) {
         this.gameRecordRepository = gameRecordRepository;
         this.batterRecordRepository = batterRecordRepository;
         this.pitcherRecordRepository = pitcherRecordRepository;
+        this.currentUserProvider = currentUserProvider;
     }
 
     public GameDetailResponse getDetail(long gameId) {
-        GameRecord game = gameRecordRepository.findById(gameId)
+        long userId = currentUserProvider.getCurrentUserId();
+        GameRecord game = gameRecordRepository.findByIdAndUserId(gameId, userId)
                 .orElseThrow(() -> new GameNotFoundException(gameId));
 
         GameBatterResponse batter = batterRecordRepository.findByGameId(gameId)

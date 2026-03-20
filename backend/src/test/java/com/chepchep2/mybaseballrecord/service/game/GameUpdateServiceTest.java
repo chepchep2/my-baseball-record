@@ -13,6 +13,7 @@ import com.chepchep2.mybaseballrecord.exception.game.GameImmutableFieldException
 import com.chepchep2.mybaseballrecord.repository.game.BatterRecordRepository;
 import com.chepchep2.mybaseballrecord.repository.game.GameRecordRepository;
 import com.chepchep2.mybaseballrecord.repository.game.PitcherRecordRepository;
+import com.chepchep2.mybaseballrecord.service.auth.CurrentUserProvider;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -42,6 +43,9 @@ class GameUpdateServiceTest {
     @Mock
     private PitcherRecordRepository pitcherRecordRepository;
 
+    @Mock
+    private CurrentUserProvider currentUserProvider;
+
     @InjectMocks
     private GameCommandService gameCommandService;
 
@@ -58,7 +62,8 @@ class GameUpdateServiceTest {
                 "메모",
                 ParticipationType.BATTER
         );
-        when(gameRecordRepository.findById(101L)).thenReturn(Optional.of(existing));
+        when(currentUserProvider.getCurrentUserId()).thenReturn(1L);
+        when(gameRecordRepository.findByIdAndUserId(101L, 1L)).thenReturn(Optional.of(existing));
 
         GameUpdateRequest request = new GameUpdateRequest(
                 new GameUpdateInfoRequest(
@@ -90,7 +95,8 @@ class GameUpdateServiceTest {
                 "메모",
                 ParticipationType.BATTER
         );
-        when(gameRecordRepository.findById(101L)).thenReturn(Optional.of(existing));
+        when(currentUserProvider.getCurrentUserId()).thenReturn(1L);
+        when(gameRecordRepository.findByIdAndUserId(101L, 1L)).thenReturn(Optional.of(existing));
         when(gameRecordRepository.save(any(GameRecord.class))).thenAnswer(invocation -> invocation.getArgument(0));
         when(batterRecordRepository.findByGameId(101L)).thenReturn(Optional.of(
                 new BatterRecord(101L, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
@@ -132,7 +138,8 @@ class GameUpdateServiceTest {
                 "메모",
                 ParticipationType.BATTER
         );
-        when(gameRecordRepository.findById(101L)).thenReturn(Optional.of(existing));
+        when(currentUserProvider.getCurrentUserId()).thenReturn(1L);
+        when(gameRecordRepository.findByIdAndUserId(101L, 1L)).thenReturn(Optional.of(existing));
         when(gameRecordRepository.save(any(GameRecord.class))).thenAnswer(invocation -> invocation.getArgument(0));
         when(batterRecordRepository.findByGameId(101L)).thenReturn(Optional.of(
                 new BatterRecord(101L, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
@@ -170,7 +177,8 @@ class GameUpdateServiceTest {
                 "메모",
                 ParticipationType.BATTER
         );
-        when(gameRecordRepository.findById(101L)).thenReturn(Optional.of(existing));
+        when(currentUserProvider.getCurrentUserId()).thenReturn(1L);
+        when(gameRecordRepository.findByIdAndUserId(101L, 1L)).thenReturn(Optional.of(existing));
         when(gameRecordRepository.save(any(GameRecord.class))).thenAnswer(invocation -> invocation.getArgument(0));
         when(batterRecordRepository.findByGameId(101L)).thenReturn(Optional.of(
                 new BatterRecord(101L, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
@@ -212,6 +220,7 @@ class GameUpdateServiceTest {
                 teamName,
                 opponentName,
                 memo,
+                1L,
                 participationType
         );
         Field idField = GameRecord.class.getDeclaredField("id");

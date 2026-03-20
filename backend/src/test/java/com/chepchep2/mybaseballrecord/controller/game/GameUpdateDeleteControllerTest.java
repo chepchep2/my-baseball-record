@@ -2,7 +2,9 @@ package com.chepchep2.mybaseballrecord.controller.game;
 
 import com.chepchep2.mybaseballrecord.domain.game.GameType;
 import com.chepchep2.mybaseballrecord.domain.game.ParticipationType;
+import com.chepchep2.mybaseballrecord.dto.game.response.GameBatterResponse;
 import com.chepchep2.mybaseballrecord.dto.game.response.GameDetailResponse;
+import com.chepchep2.mybaseballrecord.dto.game.response.GameInfoResponse;
 import com.chepchep2.mybaseballrecord.service.game.GameCommandService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -39,7 +41,7 @@ class GameUpdateDeleteControllerTest {
         given(gameCommandService.update(any(Long.class), any()))
                 .willReturn(new GameDetailResponse(
                         101L,
-                        new GameDetailResponse.GameInfoResponse(
+                        new GameInfoResponse(
                                 LocalDate.parse("2026-03-18"),
                                 2026,
                                 GameType.LEAGUE,
@@ -48,7 +50,7 @@ class GameUpdateDeleteControllerTest {
                                 "수정 메모"
                         ),
                         ParticipationType.BATTER,
-                        new GameDetailResponse.BatterResponse(4, 3, 1, 1, 0, 1, 1, 0, 0, 3, 2, 0, 0, 0),
+                        new GameBatterResponse(4, 3, 1, 1, 0, 1, 1, 0, 0, 3, 2, 0, 0, 0),
                         null
                 ));
 

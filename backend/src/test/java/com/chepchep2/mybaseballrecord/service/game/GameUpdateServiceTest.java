@@ -5,7 +5,10 @@ import com.chepchep2.mybaseballrecord.domain.game.GameType;
 import com.chepchep2.mybaseballrecord.domain.game.ParticipationType;
 import com.chepchep2.mybaseballrecord.domain.game.BatterRecord;
 import com.chepchep2.mybaseballrecord.domain.game.PitcherRecord;
+import com.chepchep2.mybaseballrecord.dto.game.request.BatterRecordRequest;
+import com.chepchep2.mybaseballrecord.dto.game.request.GameUpdateInfoRequest;
 import com.chepchep2.mybaseballrecord.dto.game.request.GameUpdateRequest;
+import com.chepchep2.mybaseballrecord.dto.game.request.PitcherRecordRequest;
 import com.chepchep2.mybaseballrecord.exception.game.GameImmutableFieldException;
 import com.chepchep2.mybaseballrecord.repository.game.BatterRecordRepository;
 import com.chepchep2.mybaseballrecord.repository.game.GameRecordRepository;
@@ -58,7 +61,7 @@ class GameUpdateServiceTest {
         when(gameRecordRepository.findById(101L)).thenReturn(Optional.of(existing));
 
         GameUpdateRequest request = new GameUpdateRequest(
-                new GameUpdateRequest.GameInfoRequest(
+                new GameUpdateInfoRequest(
                         LocalDate.parse("2026-03-19"),
                         2026,
                         GameType.LEAGUE,
@@ -66,7 +69,7 @@ class GameUpdateServiceTest {
                         "수정상대",
                         "수정메모"
                 ),
-                new GameUpdateRequest.BatterRequest(4, 3, 1, 1, 0, 1, 1, 0, 0, 3, 2, 0, 0, 0),
+                new BatterRecordRequest(4, 3, 1, 1, 0, 1, 1, 0, 0, 3, 2, 0, 0, 0),
                 null
         );
 
@@ -97,7 +100,7 @@ class GameUpdateServiceTest {
         ));
 
         GameUpdateRequest request = new GameUpdateRequest(
-                new GameUpdateRequest.GameInfoRequest(
+                new GameUpdateInfoRequest(
                         LocalDate.parse("2026-03-18"),
                         2026,
                         GameType.LEAGUE,
@@ -105,8 +108,8 @@ class GameUpdateServiceTest {
                         "수정상대",
                         "수정메모"
                 ),
-                new GameUpdateRequest.BatterRequest(4, 3, 1, 1, 0, 1, 1, 0, 0, 3, 2, 0, 0, 0),
-                new GameUpdateRequest.PitcherRequest(1, 0, 0, 0, 1, 0, 0, 0, 2, 4, 0, 0, 0, 0)
+                new BatterRecordRequest(4, 3, 1, 1, 0, 1, 1, 0, 0, 3, 2, 0, 0, 0),
+                new PitcherRecordRequest(1, 0, 0, 0, 1, 0, 0, 0, 2, 4, 0, 0, 0, 0)
         );
 
         var response = gameCommandService.update(101L, request);

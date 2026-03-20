@@ -3,6 +3,8 @@ package com.chepchep2.mybaseballrecord.service.game;
 import com.chepchep2.mybaseballrecord.domain.game.BatterRecord;
 import com.chepchep2.mybaseballrecord.domain.game.GameRecord;
 import com.chepchep2.mybaseballrecord.domain.game.GameType;
+import com.chepchep2.mybaseballrecord.dto.game.request.BatterRecordRequest;
+import com.chepchep2.mybaseballrecord.dto.game.request.GameCreateInfoRequest;
 import com.chepchep2.mybaseballrecord.dto.game.request.GameCreateRequest;
 import com.chepchep2.mybaseballrecord.repository.game.BatterRecordRepository;
 import com.chepchep2.mybaseballrecord.repository.game.GameRecordRepository;
@@ -41,7 +43,7 @@ class GameCreateServiceTest {
     @DisplayName("seasonYear를 생략하면 playedAt 연도로 저장한다")
     void createGameUsesPlayedAtYearWhenSeasonYearMissing() {
         GameCreateRequest request = new GameCreateRequest(
-                new GameCreateRequest.GameInfoRequest(
+                new GameCreateInfoRequest(
                         LocalDate.parse("2026-03-18"),
                         null,
                         GameType.LEAGUE,
@@ -49,7 +51,7 @@ class GameCreateServiceTest {
                         "레전드",
                         "메모"
                 ),
-                new GameCreateRequest.BatterRequest(4, 3, 1, 1, 0, 1, 1, 0, 0, 3, 2, 0, 0, 0),
+                new BatterRecordRequest(4, 3, 1, 1, 0, 1, 1, 0, 0, 3, 2, 0, 0, 0),
                 null
         );
 
@@ -71,7 +73,7 @@ class GameCreateServiceTest {
     @DisplayName("seasonYear를 전달하면 전달값으로 저장한다")
     void createGameUsesGivenSeasonYear() {
         GameCreateRequest request = new GameCreateRequest(
-                new GameCreateRequest.GameInfoRequest(
+                new GameCreateInfoRequest(
                         LocalDate.parse("2026-03-18"),
                         2030,
                         GameType.LEAGUE,
@@ -79,7 +81,7 @@ class GameCreateServiceTest {
                         "레전드",
                         "메모"
                 ),
-                new GameCreateRequest.BatterRequest(4, 3, 1, 1, 0, 1, 1, 0, 0, 3, 2, 0, 0, 0),
+                new BatterRecordRequest(4, 3, 1, 1, 0, 1, 1, 0, 0, 3, 2, 0, 0, 0),
                 null
         );
 
@@ -101,7 +103,7 @@ class GameCreateServiceTest {
     @DisplayName("batter가 있으면 game 저장 후 batter도 함께 저장한다")
     void createGameSavesGameAndBatter() throws Exception {
         GameCreateRequest request = new GameCreateRequest(
-                new GameCreateRequest.GameInfoRequest(
+                new GameCreateInfoRequest(
                         LocalDate.parse("2026-03-18"),
                         2026,
                         GameType.LEAGUE,
@@ -109,7 +111,7 @@ class GameCreateServiceTest {
                         "레전드",
                         "메모"
                 ),
-                new GameCreateRequest.BatterRequest(4, 3, 1, 1, 0, 1, 1, 0, 0, 3, 2, 0, 0, 0),
+                new BatterRecordRequest(4, 3, 1, 1, 0, 1, 1, 0, 0, 3, 2, 0, 0, 0),
                 null
         );
 

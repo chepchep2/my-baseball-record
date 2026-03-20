@@ -5,8 +5,12 @@ import com.chepchep2.mybaseballrecord.domain.game.GameRecord;
 import com.chepchep2.mybaseballrecord.domain.game.ParticipationType;
 import com.chepchep2.mybaseballrecord.domain.game.PitcherRecord;
 import com.chepchep2.mybaseballrecord.dto.game.request.GameCreateRequest;
+import com.chepchep2.mybaseballrecord.dto.game.request.GameUpdateInfoRequest;
 import com.chepchep2.mybaseballrecord.dto.game.request.GameUpdateRequest;
+import com.chepchep2.mybaseballrecord.dto.game.response.GameBatterResponse;
 import com.chepchep2.mybaseballrecord.dto.game.response.GameDetailResponse;
+import com.chepchep2.mybaseballrecord.dto.game.response.GameInfoResponse;
+import com.chepchep2.mybaseballrecord.dto.game.response.GamePitcherResponse;
 import com.chepchep2.mybaseballrecord.exception.game.GameImmutableFieldException;
 import com.chepchep2.mybaseballrecord.exception.game.GameNotFoundException;
 import com.chepchep2.mybaseballrecord.repository.game.BatterRecordRepository;
@@ -50,7 +54,7 @@ public class GameCommandService {
                 )
         );
 
-        GameDetailResponse.BatterResponse batterResponse = null;
+        GameBatterResponse batterResponse = null;
         if (request.batter() != null) {
             BatterRecord savedBatter = batterRecordRepository.save(
                     new BatterRecord(
@@ -74,7 +78,7 @@ public class GameCommandService {
             batterResponse = toBatterResponse(savedBatter);
         }
 
-        GameDetailResponse.PitcherResponse pitcherResponse = null;
+        GamePitcherResponse pitcherResponse = null;
         if (request.pitcher() != null) {
             PitcherRecord savedPitcher = pitcherRecordRepository.save(
                     new PitcherRecord(
@@ -203,10 +207,10 @@ public class GameCommandService {
             pitcherRecordRepository.deleteByGameId(gameId);
         }
 
-        GameDetailResponse.BatterResponse batterResponse = batterRecordRepository.findByGameId(gameId)
+        GameBatterResponse batterResponse = batterRecordRepository.findByGameId(gameId)
                 .map(this::toBatterResponse)
                 .orElse(null);
-        GameDetailResponse.PitcherResponse pitcherResponse = pitcherRecordRepository.findByGameId(gameId)
+        GamePitcherResponse pitcherResponse = pitcherRecordRepository.findByGameId(gameId)
                 .map(this::toPitcherResponse)
                 .orElse(null);
 
@@ -241,7 +245,7 @@ public class GameCommandService {
         return ParticipationType.PITCHER;
     }
 
-    private void validateImmutableFields(GameRecord game, GameUpdateRequest.GameInfoRequest gameInfo) {
+    private void validateImmutableFields(GameRecord game, GameUpdateInfoRequest gameInfo) {
         if (gameInfo.playedAt() != null && !game.playedAt().equals(gameInfo.playedAt())) {
             throw new GameImmutableFieldException("playedAt");
         }
@@ -255,12 +259,12 @@ public class GameCommandService {
 
     private GameDetailResponse toDetailResponse(
             GameRecord game,
-            GameDetailResponse.BatterResponse batterResponse,
-            GameDetailResponse.PitcherResponse pitcherResponse
+            GameBatterResponse batterResponse,
+            GamePitcherResponse pitcherResponse
     ) {
         return new GameDetailResponse(
                 game.id(),
-                new GameDetailResponse.GameInfoResponse(
+                new GameInfoResponse(
                         game.playedAt(),
                         game.seasonYear(),
                         game.gameType(),
@@ -274,8 +278,8 @@ public class GameCommandService {
         );
     }
 
-    private GameDetailResponse.BatterResponse toBatterResponse(BatterRecord record) {
-        return new GameDetailResponse.BatterResponse(
+    private GameBatterResponse toBatterResponse(BatterRecord record) {
+        return new GameBatterResponse(
                 record.plateAppearances(),
                 record.atBats(),
                 record.singles(),
@@ -293,8 +297,8 @@ public class GameCommandService {
         );
     }
 
-    private GameDetailResponse.PitcherResponse toPitcherResponse(PitcherRecord record) {
-        return new GameDetailResponse.PitcherResponse(
+    private GamePitcherResponse toPitcherResponse(PitcherRecord record) {
+        return new GamePitcherResponse(
                 record.innings(),
                 record.additionalOuts(),
                 record.runsAllowed(),

@@ -118,7 +118,7 @@ function validateGameForm(form) {
 
 export default function GameForm({ mode = "create", gameId = null }) {
   const router = useRouter();
-  const { apiClient, user } = useAuthSession();
+  const { apiClient, isBootstrapping, user } = useAuthSession();
   const isEditMode = mode === "edit";
   const todayValue = getTodayValue();
   const draftUserId = user?.id ?? user?.email ?? "anonymous";
@@ -126,14 +126,27 @@ export default function GameForm({ mode = "create", gameId = null }) {
   const [form, setForm] = useState(() => buildEmptyGameForm());
   const [showRecoveryModal, setShowRecoveryModal] = useState(false);
   const [validationErrors, setValidationErrors] = useState([]);
-  const [ready, setReady] = useState(mode !== "edit");
+  const [ready, setReady] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     let active = true;
 
+    if (isBootstrapping) {
+      return () => {
+        active = false;
+      };
+    }
+
+    if (!isEditMode) {
+      setReady(true);
+      return () => {
+        active = false;
+      };
+    }
+
     async function loadEditGame() {
-      if (!isEditMode || !gameId) {
+      if (!gameId) {
         return;
       }
 
@@ -162,7 +175,7 @@ export default function GameForm({ mode = "create", gameId = null }) {
     return () => {
       active = false;
     };
-  }, [apiClient, gameId, isEditMode]);
+  }, [apiClient, gameId, isBootstrapping, isEditMode]);
 
   useEffect(() => {
     if (!ready) {

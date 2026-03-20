@@ -5,9 +5,13 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import GameForm from "../GameForm";
 import { createGame, getGameDetail, updateGame } from "@/features/games/api/games-api";
 
-const { pushMock, writeDraftMock } = vi.hoisted(() => ({
+const { pushMock, writeDraftMock, authSessionState } = vi.hoisted(() => ({
   pushMock: vi.fn(),
   writeDraftMock: vi.fn(),
+  authSessionState: {
+    isBootstrapping: false,
+    user: { id: 7, email: "user@gmail.com" },
+  },
 }));
 
 vi.mock("next/link", () => ({
@@ -38,7 +42,7 @@ vi.mock("@/components/layout/PageHeader", () => ({
 
 vi.mock("@/features/auth/session/useAuthSession", () => ({
   useAuthSession: () => ({
-    user: { id: 7, email: "user@gmail.com" },
+    ...authSessionState,
     apiClient: { get: vi.fn(), post: vi.fn(), put: vi.fn(), delete: vi.fn() },
   }),
 }));
@@ -60,6 +64,8 @@ vi.mock("@/lib/game-draft", () => ({
 describe("GameForm", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    authSessionState.isBootstrapping = false;
+    authSessionState.user = { id: 7, email: "user@gmail.com" };
   });
 
   it("초안 저장 키에 현재 로그인 사용자 id를 사용한다", async () => {
@@ -67,6 +73,16 @@ describe("GameForm", () => {
 
     await waitFor(() => expect(writeDraftMock).toHaveBeenCalled());
     expect(writeDraftMock.mock.calls[0][0]).toBe("draft:create:7");
+  });
+
+  it("세션 부트스트랩 중에는 익명 초안을 읽거나 쓰지 않는다", async () => {
+    authSessionState.isBootstrapping = true;
+    authSessionState.user = null;
+
+    render(<GameForm mode="create" />);
+
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    expect(writeDraftMock).not.toHaveBeenCalled();
   });
 
   it("생성 저장 성공 시 POST 호출 후 상세 화면으로 이동한다", async () => {

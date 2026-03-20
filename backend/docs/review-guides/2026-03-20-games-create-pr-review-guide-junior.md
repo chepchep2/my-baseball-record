@@ -66,7 +66,39 @@
 - Header:
   - Name: `Authorization`
   - Value: `Bearer {{access_token}}`
-- Body: 계약 문서의 create 예시 JSON
+- 헤더 설명:
+  - `Content-Type`는 본문을 JSON으로 파싱하기 위해 필요
+  - `Authorization`는 인증 사용자 요청임을 전달하기 위해 필요
+- Body 예시:
+
+```json
+{
+  "gameInfo": {
+    "playedAt": "2026-03-20",
+    "seasonYear": 2026,
+    "gameType": "LEAGUE",
+    "teamName": "마이베이스볼",
+    "opponentName": "상대팀",
+    "memo": "APIdog 수동 테스트"
+  },
+  "batter": {
+    "plateAppearances": 4,
+    "atBats": 3,
+    "singles": 1,
+    "doubles": 0,
+    "triples": 0,
+    "homeRuns": 0,
+    "walks": 1,
+    "strikeOuts": 1,
+    "hitByPitch": 0,
+    "runsBattedIn": 1,
+    "runs": 1,
+    "stolenBases": 0,
+    "caughtStealing": 0,
+    "sacrificeHits": 0
+  }
+}
+```
 
 주의:
 - 현재 보안 설정이 `permitAll`이면 Authorization 없이도 통과할 수 있다.

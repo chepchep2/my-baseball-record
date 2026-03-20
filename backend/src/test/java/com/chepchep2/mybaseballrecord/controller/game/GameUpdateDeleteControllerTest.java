@@ -91,8 +91,8 @@ class GameUpdateDeleteControllerTest {
     }
 
     @Test
-    @DisplayName("PUT /api/games/{id} - gameInfo.opponentName 누락이면 400 VALIDATION_ERROR")
-    void putGameValidationErrorWhenOpponentNameMissing() throws Exception {
+    @DisplayName("PUT /api/games/{id} - 타수>타석이면 400 VALIDATION_ERROR")
+    void putGameValidationErrorWhenAtBatsGreaterThanPlateAppearances() throws Exception {
         mockMvc.perform(put("/api/games/101")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
@@ -101,7 +101,60 @@ class GameUpdateDeleteControllerTest {
                                     "playedAt": "2026-03-18",
                                     "seasonYear": 2026,
                                     "gameType": "LEAGUE",
-                                    "teamName": "블루스톰"
+                                    "teamName": "블루스톰",
+                                    "opponentName": "레전드"
+                                  },
+                                  "batter": {
+                                    "plateAppearances": 4,
+                                    "atBats": 5,
+                                    "singles": 1,
+                                    "doubles": 1,
+                                    "triples": 0,
+                                    "homeRuns": 1,
+                                    "walks": 1,
+                                    "strikeOuts": 0,
+                                    "hitByPitch": 0,
+                                    "runsBattedIn": 3,
+                                    "runs": 2,
+                                    "stolenBases": 0,
+                                    "caughtStealing": 0,
+                                    "sacrificeHits": 0
+                                  }
+                                }
+                                """))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("VALIDATION_ERROR"));
+    }
+
+    @Test
+    @DisplayName("PUT /api/games/{id} - opponentName 누락도 허용한다")
+    void putGameAllowsMissingOpponentName() throws Exception {
+        given(gameCommandService.update(any(Long.class), any()))
+                .willReturn(new GameDetailResponse(
+                        104L,
+                        new GameInfoResponse(
+                                LocalDate.parse("2026-03-18"),
+                                2026,
+                                GameType.LEAGUE,
+                                "수정된 팀명",
+                                "",
+                                "수정 메모"
+                        ),
+                        ParticipationType.BATTER,
+                        new GameBatterResponse(4, 3, 1, 1, 0, 1, 1, 0, 0, 3, 2, 0, 0, 0),
+                        null
+                ));
+
+        mockMvc.perform(put("/api/games/104")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "gameInfo": {
+                                    "playedAt": "2026-03-18",
+                                    "seasonYear": 2026,
+                                    "gameType": "LEAGUE",
+                                    "teamName": "수정된 팀명",
+                                    "memo": "수정 메모"
                                   },
                                   "batter": {
                                     "plateAppearances": 4,
@@ -121,8 +174,9 @@ class GameUpdateDeleteControllerTest {
                                   }
                                 }
                                 """))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.code").value("VALIDATION_ERROR"));
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(104))
+                .andExpect(jsonPath("$.gameInfo.opponentName").value(""));
     }
 
     @Test

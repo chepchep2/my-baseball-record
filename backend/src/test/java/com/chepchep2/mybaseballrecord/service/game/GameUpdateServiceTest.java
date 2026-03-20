@@ -157,6 +157,44 @@ class GameUpdateServiceTest {
         assertThat(response.gameInfo().teamName()).isEqualTo("");
     }
 
+    @Test
+    @DisplayName("opponentName이 null이면 빈 문자열로 저장한다")
+    void updateStoresEmptyOpponentNameWhenNull() throws Exception {
+        GameRecord existing = gameWithId(
+                101L,
+                LocalDate.parse("2026-03-18"),
+                2026,
+                GameType.LEAGUE,
+                "기존팀",
+                "기존상대",
+                "메모",
+                ParticipationType.BATTER
+        );
+        when(gameRecordRepository.findById(101L)).thenReturn(Optional.of(existing));
+        when(gameRecordRepository.save(any(GameRecord.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(batterRecordRepository.findByGameId(101L)).thenReturn(Optional.of(
+                new BatterRecord(101L, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
+        ));
+        when(pitcherRecordRepository.findByGameId(101L)).thenReturn(Optional.empty());
+
+        GameUpdateRequest request = new GameUpdateRequest(
+                new GameUpdateInfoRequest(
+                        LocalDate.parse("2026-03-18"),
+                        2026,
+                        GameType.LEAGUE,
+                        "수정팀",
+                        null,
+                        "수정메모"
+                ),
+                new BatterRecordRequest(4, 3, 1, 1, 0, 1, 1, 0, 0, 3, 2, 0, 0, 0),
+                null
+        );
+
+        var response = gameCommandService.update(101L, request);
+
+        assertThat(response.gameInfo().opponentName()).isEqualTo("");
+    }
+
     private GameRecord gameWithId(
             long id,
             LocalDate playedAt,

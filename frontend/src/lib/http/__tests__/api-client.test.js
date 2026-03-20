@@ -9,6 +9,26 @@ function jsonResponse(body, status = 200) {
 }
 
 describe("api-client", () => {
+  it("상대 경로 요청이면 NEXT_PUBLIC_API_BASE_URL을 붙여 호출한다", async () => {
+    const originalBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
+    process.env.NEXT_PUBLIC_API_BASE_URL = "https://api.example.com/";
+
+    const fetchMock = vi.fn().mockResolvedValue(jsonResponse({ ok: true }));
+    const client = createApiClient({
+      fetchImpl: fetchMock,
+      getAccessToken: () => null,
+    });
+
+    await client.get("/api/stats");
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      "https://api.example.com/api/stats",
+      expect.objectContaining({ method: "GET" }),
+    );
+
+    process.env.NEXT_PUBLIC_API_BASE_URL = originalBaseUrl;
+  });
+
   it("access token이 있으면 Authorization Bearer 헤더를 추가한다", async () => {
     const fetchMock = vi.fn().mockResolvedValue(jsonResponse({ ok: true }));
     const client = createApiClient({

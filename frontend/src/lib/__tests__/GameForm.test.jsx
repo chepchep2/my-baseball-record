@@ -5,7 +5,10 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import GameForm from "../GameForm";
 import { createGame, getGameDetail, updateGame } from "@/features/games/api/games-api";
 
-const pushMock = vi.fn();
+const { pushMock, writeDraftMock } = vi.hoisted(() => ({
+  pushMock: vi.fn(),
+  writeDraftMock: vi.fn(),
+}));
 
 vi.mock("next/link", () => ({
   default: ({ href, children, ...props }) => (
@@ -35,6 +38,7 @@ vi.mock("@/components/layout/PageHeader", () => ({
 
 vi.mock("@/features/auth/session/useAuthSession", () => ({
   useAuthSession: () => ({
+    user: { id: 7, email: "user@gmail.com" },
     apiClient: { get: vi.fn(), post: vi.fn(), put: vi.fn(), delete: vi.fn() },
   }),
 }));
@@ -50,12 +54,19 @@ vi.mock("@/lib/game-draft", () => ({
   clearDraft: vi.fn(),
   readDraft: vi.fn().mockReturnValue(null),
   shouldAutoRestoreDraft: vi.fn().mockReturnValue(false),
-  writeDraft: vi.fn(),
+  writeDraft: writeDraftMock,
 }));
 
 describe("GameForm", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+  });
+
+  it("초안 저장 키에 현재 로그인 사용자 id를 사용한다", async () => {
+    render(<GameForm mode="create" />);
+
+    await waitFor(() => expect(writeDraftMock).toHaveBeenCalled());
+    expect(writeDraftMock.mock.calls[0][0]).toBe("draft:create:7");
   });
 
   it("생성 저장 성공 시 POST 호출 후 상세 화면으로 이동한다", async () => {

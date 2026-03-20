@@ -14,7 +14,6 @@ import {
   buildDraftKey,
   buildEmptyGameForm,
   buildFormFromGame,
-  DRAFT_USER_ID,
   pitcherGroups,
 } from "@/lib/game-form-data";
 import { clearDraft, readDraft, shouldAutoRestoreDraft, writeDraft } from "@/lib/game-draft";
@@ -119,10 +118,11 @@ function validateGameForm(form) {
 
 export default function GameForm({ mode = "create", gameId = null }) {
   const router = useRouter();
-  const { apiClient } = useAuthSession();
+  const { apiClient, user } = useAuthSession();
   const isEditMode = mode === "edit";
   const todayValue = getTodayValue();
-  const draftKey = useMemo(() => buildDraftKey(mode, DRAFT_USER_ID, gameId), [gameId, mode]);
+  const draftUserId = user?.id ?? user?.email ?? "anonymous";
+  const draftKey = useMemo(() => buildDraftKey(mode, draftUserId, gameId), [draftUserId, gameId, mode]);
   const [form, setForm] = useState(() => buildEmptyGameForm());
   const [showRecoveryModal, setShowRecoveryModal] = useState(false);
   const [validationErrors, setValidationErrors] = useState([]);

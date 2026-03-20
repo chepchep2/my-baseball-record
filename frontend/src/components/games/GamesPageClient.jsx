@@ -1,11 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import GameCalendar from "@/components/calendar/GameCalendar";
 import GameCards from "@/components/games/GameCards";
 import AppPageLayout from "@/components/layout/AppPageLayout";
 import BottomTabBar from "@/components/navigation/BottomTabBar";
 import PageHeader from "@/components/layout/PageHeader";
+import { filterDeletedGames } from "@/lib/game-deletions";
 import {
   buildGameCountMap,
   clampDateValueToMonth,
@@ -26,9 +27,17 @@ export default function GamesPageClient({ games, initialTodayValue }) {
   const [visibleMonthValue, setVisibleMonthValue] = useState(
     getMonthValueFromDateValue(todayValue),
   );
+  const [visibleGames, setVisibleGames] = useState(games);
 
-  const countsByDate = buildGameCountMap(games);
-  const selectedGames = getGamesForDate(games, selectedDate);
+  useEffect(() => {
+    setVisibleGames(filterDeletedGames(games));
+  }, [games]);
+
+  const countsByDate = useMemo(() => buildGameCountMap(visibleGames), [visibleGames]);
+  const selectedGames = useMemo(
+    () => getGamesForDate(visibleGames, selectedDate),
+    [visibleGames, selectedDate],
+  );
 
   const moveMonth = (offset) => {
     setVisibleMonthValue((currentMonthValue) => {

@@ -1,4 +1,4 @@
-package com.chepchep2.mybaseballrecord;
+package com.chepchep2.baseballrecord;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;

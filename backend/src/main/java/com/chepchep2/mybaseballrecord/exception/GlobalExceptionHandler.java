@@ -5,6 +5,8 @@ import com.chepchep2.mybaseballrecord.exception.auth.InvalidGoogleTokenException
 import com.chepchep2.mybaseballrecord.exception.auth.RefreshTokenExpiredException;
 import com.chepchep2.mybaseballrecord.exception.auth.RefreshTokenInvalidException;
 import com.chepchep2.mybaseballrecord.exception.auth.RefreshTokenRevokedException;
+import com.chepchep2.mybaseballrecord.exception.game.GameImmutableFieldException;
+import com.chepchep2.mybaseballrecord.exception.game.GameNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
@@ -88,6 +90,30 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
                 new ApiErrorResponse(
                         "REFRESH_TOKEN_REVOKED",
+                        ex.getMessage(),
+                        List.of(),
+                        false
+                )
+        );
+    }
+
+    @ExceptionHandler(GameNotFoundException.class)
+    public ResponseEntity<ApiErrorResponse> handleGameNotFound(GameNotFoundException ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
+                new ApiErrorResponse(
+                        "GAME_NOT_FOUND",
+                        ex.getMessage(),
+                        List.of(),
+                        false
+                )
+        );
+    }
+
+    @ExceptionHandler(GameImmutableFieldException.class)
+    public ResponseEntity<ApiErrorResponse> handleGameImmutableField(GameImmutableFieldException ex) {
+        return ResponseEntity.badRequest().body(
+                new ApiErrorResponse(
+                        "GAME_IMMUTABLE_FIELD",
                         ex.getMessage(),
                         List.of(),
                         false

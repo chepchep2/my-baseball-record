@@ -7,4 +7,6 @@ import java.util.Optional;
 
 public interface PitcherRecordRepository extends JpaRepository<PitcherRecord, Long> {
     Optional<PitcherRecord> findByGameId(Long gameId);
+
+    void deleteByGameId(Long gameId);
 }

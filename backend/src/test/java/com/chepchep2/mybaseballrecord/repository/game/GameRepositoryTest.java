@@ -71,4 +71,28 @@ class GameRepositoryTest {
         assertThat(found).isPresent();
         assertThat(found.get().strikeOuts()).isEqualTo(2);
     }
+
+    @Test
+    @DisplayName("game 삭제 시 하위 batter/pitcher 기록도 함께 삭제된다")
+    void deleteGameCascadesChildRecords() {
+        GameRecord game = gameRecordRepository.save(
+                new GameRecord(
+                        LocalDate.parse("2026-03-20"),
+                        2026,
+                        GameType.LEAGUE,
+                        "블루스톰",
+                        "레전드",
+                        "삭제 테스트",
+                        ParticipationType.BOTH
+                )
+        );
+        batterRecordRepository.save(new BatterRecord(game.id(), 4, 3, 1, 1, 0, 1, 1, 0, 0, 3, 2, 0, 0, 0));
+        pitcherRecordRepository.save(new PitcherRecord(game.id(), 1, 0, 0, 0, 1, 0, 0, 0, 2, 4, 0, 0, 0, 0));
+
+        gameRecordRepository.deleteById(game.id());
+        gameRecordRepository.flush();
+
+        assertThat(batterRecordRepository.findByGameId(game.id())).isEmpty();
+        assertThat(pitcherRecordRepository.findByGameId(game.id())).isEmpty();
+    }
 }

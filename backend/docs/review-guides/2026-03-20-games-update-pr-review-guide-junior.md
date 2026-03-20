@@ -25,7 +25,11 @@
 - URL: `http://localhost:8080/api/games/{gameId}`
 - Headers:
   - Name: `Content-Type`, Value: `application/json`
-  - 필요 시 Name: `Authorization`, Value: `Bearer {{access_token}}`
+  - Name: `Authorization`, Value: `Bearer {{access_token}}`
+
+주의:
+- 현재 보안 설정이 `permitAll`이면 Authorization 없이도 통과할 수 있다.
+- 그래도 리뷰/수동 검증은 Authorization 헤더를 넣은 요청 기준으로 확인한다.
 
 성공 케이스:
 - [ ] memo/teamName/opponentName 등 변경 후 `200`

@@ -27,6 +27,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/api/auth/refresh").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/auth/logout").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/games").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/games/**").permitAll()
                         .requestMatchers(HttpMethod.PUT, "/api/games/**").permitAll()
                         .requestMatchers(HttpMethod.DELETE, "/api/games/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/stats").permitAll()

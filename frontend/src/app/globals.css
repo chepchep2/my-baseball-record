@@ -647,6 +647,8 @@ textarea {
 
 @media (min-width: 641px) {
     .home-center-frame,
+    .records-center-frame,
+    .detail-center-frame,
     .form-center-frame,
     .account-center-frame,
     .games-center-frame {
@@ -665,6 +667,18 @@ textarea {
     }
 
     .page-shell:has(.home-center-frame) {
+        display: flex;
+        flex-direction: column;
+        min-height: 100dvh;
+    }
+
+    .page-shell:has(.records-center-frame) {
+        display: flex;
+        flex-direction: column;
+        min-height: 100dvh;
+    }
+
+    .page-shell:has(.detail-center-frame) {
         display: flex;
         flex-direction: column;
         min-height: 100dvh;
@@ -689,6 +703,18 @@ textarea {
     }
 
     .home-center-frame {
+        flex: 1 1 auto;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .records-center-frame {
+        flex: 1 1 auto;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .detail-center-frame {
         flex: 1 1 auto;
         display: flex;
         flex-direction: column;
@@ -722,6 +748,14 @@ textarea {
     }
 
     .account-center-frame .detail-screen-panel {
+        flex: 1 1 auto;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-start;
+    }
+
+    .records-center-frame .detail-screen-panel,
+    .detail-center-frame .detail-screen-panel {
         flex: 1 1 auto;
         display: flex;
         flex-direction: column;
@@ -767,6 +801,14 @@ textarea {
     width: 100%;
     min-width: 0;
     box-sizing: border-box;
+}
+
+.field select {
+    font-size: 16px;
+}
+
+.field select option {
+    font-size: 16px;
 }
 
 .field input:disabled,

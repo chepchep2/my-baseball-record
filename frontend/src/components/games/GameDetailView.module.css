@@ -95,13 +95,6 @@
   gap: 10px;
 }
 
-.emptyState {
-  border: 1px dashed var(--color-border);
-  border-radius: 20px;
-  padding: 16px;
-  color: var(--color-muted);
-}
-
 @media (max-width: 640px) {
   .headerRow {
     flex-direction: row;

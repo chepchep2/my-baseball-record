@@ -1,5 +1,19 @@
 import { ApiError } from "@/features/auth/api/auth-api";
 
+function getApiBaseUrl() {
+  return (
+    typeof process !== "undefined" && process.env ? process.env.NEXT_PUBLIC_API_BASE_URL || "" : ""
+  ).replace(/\/$/, "");
+}
+
+function buildUrl(url) {
+  if (!url.startsWith("/")) {
+    return url;
+  }
+
+  return `${getApiBaseUrl()}${url}`;
+}
+
 async function parseResponseBody(response) {
   const text = await response.text();
   if (!text) {
@@ -37,7 +51,7 @@ export function createApiClient({
   async function request(url, init = {}, retried = false) {
     const accessToken = getAccessToken?.() || null;
     const headers = buildHeaders(init.headers, accessToken);
-    const response = await fetchImpl(url, {
+    const response = await fetchImpl(buildUrl(url), {
       ...init,
       headers,
     });

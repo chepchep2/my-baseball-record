@@ -121,7 +121,6 @@ export default function AuthPage() {
           <div
             id="google-signin-button"
             className={`google-signin-overlay-host${isSigningIn || !isGoogleReady ? " is-disabled" : ""}`}
-            aria-hidden="true"
           />
         </div>
       </section>

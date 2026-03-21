@@ -163,6 +163,10 @@ textarea {
     font-size: 1rem;
 }
 
+.google-button-shell {
+    position: relative;
+}
+
 .google-button {
     width: 100%;
     min-height: 58px;
@@ -186,17 +190,32 @@ textarea {
     cursor: default;
 }
 
-.google-signin-hidden-host {
+.google-button-visual {
+    pointer-events: none;
+}
+
+.google-button-shell.is-disabled .google-button-visual {
+    opacity: 0.6;
+}
+
+.google-signin-overlay-host {
     position: absolute;
-    width: 1px;
-    height: 1px;
+    inset: 0;
+    border-radius: 18px;
     overflow: hidden;
-    clip: rect(0, 0, 0, 0);
-    clip-path: inset(50%);
-    white-space: nowrap;
-    border: 0;
-    padding: 0;
-    margin: -1px;
+    opacity: 0.01;
+}
+
+.google-signin-overlay-host.is-disabled {
+    pointer-events: none;
+    opacity: 0;
+}
+
+.google-signin-overlay-host > div,
+.google-signin-overlay-host iframe {
+    width: 100% !important;
+    min-width: 100% !important;
+    height: 100% !important;
 }
 
 .google-mark {

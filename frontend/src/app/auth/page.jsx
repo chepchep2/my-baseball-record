@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { mountGoogleSignInButton, triggerGoogleSignIn } from "@/features/auth/google/google-identity";
+import { mountGoogleSignInButton } from "@/features/auth/google/google-identity";
 import { useAuthSession } from "@/features/auth/session/useAuthSession";
 
 function getNextPath() {
@@ -78,16 +78,6 @@ export default function AuthPage() {
     });
   }, [handleCredential]);
 
-  const handleGoogleLoginClick = useCallback(() => {
-    setLocalError(null);
-    clearAuthError();
-    const buttonHost = document.getElementById("google-signin-button");
-    const result = triggerGoogleSignIn(buttonHost);
-    if (!result.ok) {
-      setLocalError(result.message);
-    }
-  }, [clearAuthError]);
-
   return (
     <main className="page-shell auth-page">
       <section className="panel auth-panel">
@@ -117,19 +107,23 @@ export default function AuthPage() {
           </section>
         ) : null}
 
-        <button
-          type="button"
-          className="google-button"
-          onClick={handleGoogleLoginClick}
-          disabled={isSigningIn || !isGoogleReady}
+        <div
+          className={`google-button-shell${isSigningIn || !isGoogleReady ? " is-disabled" : ""}`}
+          aria-busy={isSigningIn ? "true" : "false"}
         >
-          <span className="google-mark" aria-hidden="true">
-            G
-          </span>
-          <span>{isSigningIn ? "로그인 처리 중..." : "Google로 계속하기"}</span>
-        </button>
+          <div className="google-button google-button-visual" aria-hidden="true">
+            <span className="google-mark" aria-hidden="true">
+              G
+            </span>
+            <span>{isSigningIn ? "로그인 처리 중..." : "Google로 계속하기"}</span>
+          </div>
 
-        <div id="google-signin-button" className="google-signin-hidden-host" aria-hidden="true" />
+          <div
+            id="google-signin-button"
+            className={`google-signin-overlay-host${isSigningIn || !isGoogleReady ? " is-disabled" : ""}`}
+            aria-hidden="true"
+          />
+        </div>
       </section>
     </main>
   );

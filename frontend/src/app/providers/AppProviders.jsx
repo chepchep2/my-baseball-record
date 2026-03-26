@@ -1,8 +1,7 @@
 import React from "react";
-import { BrowserRouter } from "react-router-dom";
 
 function AppProviders({ children }) {
-  return <BrowserRouter>{children}</BrowserRouter>;
+  return <>{children}</>;
 }
 
 export default AppProviders;

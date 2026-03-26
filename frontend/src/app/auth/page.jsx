@@ -1,8 +1,9 @@
 "use client";
 
+import React from "react";
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { mountGoogleSignInButton } from "@/features/auth/google/google-identity";
+import { mountKakaoLoginButton } from "@/features/auth/kakao/kakao-auth";
 import { useAuthSession } from "@/features/auth/session/useAuthSession";
 
 function getNextPath() {
@@ -31,10 +32,10 @@ function getNextPath() {
 
 export default function AuthPage() {
   const router = useRouter();
-  const { isAuthenticated, isBootstrapping, authError, clearAuthError, loginWithGoogleIdToken } = useAuthSession();
+  const { isAuthenticated, isBootstrapping, authError, clearAuthError, loginWithProviderToken } = useAuthSession();
   const [localError, setLocalError] = useState(null);
   const [isSigningIn, setIsSigningIn] = useState(false);
-  const [isGoogleReady, setIsGoogleReady] = useState(false);
+  const [isKakaoReady, setIsKakaoReady] = useState(false);
 
   useEffect(() => {
     if (!isBootstrapping && isAuthenticated) {
@@ -48,34 +49,42 @@ export default function AuthPage() {
     clearAuthError();
 
     try {
-      await loginWithGoogleIdToken(idToken);
+      await loginWithProviderToken(idToken);
       router.replace(getNextPath());
     } catch (error) {
       setLocalError(error?.message || "로그인에 실패했습니다. 잠시 후 다시 시도해 주세요.");
     } finally {
       setIsSigningIn(false);
     }
-  }, [clearAuthError, loginWithGoogleIdToken, router]);
+  }, [clearAuthError, loginWithProviderToken, router]);
 
   useEffect(() => {
-    const buttonHost = document.getElementById("google-signin-button");
+    const buttonHost = document.getElementById("kakao-signin-button");
     if (!buttonHost) {
       return;
     }
 
-    setIsGoogleReady(false);
-    mountGoogleSignInButton({
+    setIsKakaoReady(false);
+    let cleanup = () => {};
+
+    mountKakaoLoginButton({
       element: buttonHost,
       onCredential: handleCredential,
+      onSuccess: handleCredential,
       onError: (message) => setLocalError(message),
     }).then((result) => {
       if (!result.ok) {
         setLocalError(result.message);
-        setIsGoogleReady(false);
+        setIsKakaoReady(false);
         return;
       }
-      setIsGoogleReady(true);
+      cleanup = result.cleanup ?? (() => {});
+      setIsKakaoReady(true);
     });
+
+    return () => {
+      cleanup();
+    };
   }, [handleCredential]);
 
   return (
@@ -89,14 +98,13 @@ export default function AuthPage() {
             <span>MY BASEBALL RECORD</span>
           </p>
           <h1 className="page-title auth-title">
-            내 야구 기록을
+            경기 후 기록,
             <br />
-            한눈에 확인하세요
+            한 번에 남기고 바로 확인하세요
           </h1>
           <p className="section-copy auth-copy">
-            리그 경기, 연습경기, 용병 경기 기록까지
-            {/* <br /> */}
-            한곳에 모아 확인하세요.
+            공식 기록이 없는 경기까지
+            한곳에 쌓아 시즌과 통산 기록으로 확인합니다.
           </p>
         </div>
 
@@ -108,19 +116,16 @@ export default function AuthPage() {
         ) : null}
 
         <div
-          className={`google-button-shell${isSigningIn || !isGoogleReady ? " is-disabled" : ""}`}
+          className={`google-button-shell kakao-button-shell${isSigningIn || !isKakaoReady ? " is-disabled" : ""}`}
           aria-busy={isSigningIn ? "true" : "false"}
         >
-          <div className="google-button google-button-visual" aria-hidden="true">
-            <span className="google-mark" aria-hidden="true">
-              G
-            </span>
-            <span>{isSigningIn ? "로그인 처리 중..." : "Google로 계속하기"}</span>
+          <div className="google-button google-button-visual kakao-button-visual" aria-hidden="true">
+            <span>{isSigningIn ? "로그인 처리 중..." : "카카오로 시작하기"}</span>
           </div>
 
           <div
-            id="google-signin-button"
-            className={`google-signin-overlay-host${isSigningIn || !isGoogleReady ? " is-disabled" : ""}`}
+            id="kakao-signin-button"
+            className={`google-signin-overlay-host${isSigningIn || !isKakaoReady ? " is-disabled" : ""}`}
           />
         </div>
       </section>

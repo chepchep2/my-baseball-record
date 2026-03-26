@@ -3,8 +3,6 @@
 import React from "react";
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { isMockAuthMode } from "@/features/auth/api/auth-api";
-import { mountKakaoLoginButton } from "@/features/auth/kakao/kakao-auth";
 import { useAuthSession } from "@/features/auth/session/useAuthSession";
 
 function getNextPath() {
@@ -36,8 +34,6 @@ export default function AuthPage() {
   const { isAuthenticated, isBootstrapping, authError, clearAuthError, loginWithProviderToken } = useAuthSession();
   const [localError, setLocalError] = useState(null);
   const [isSigningIn, setIsSigningIn] = useState(false);
-  const [isKakaoReady, setIsKakaoReady] = useState(false);
-  const isMockMode = isMockAuthMode();
 
   useEffect(() => {
     if (!isBootstrapping && isAuthenticated) {
@@ -59,40 +55,6 @@ export default function AuthPage() {
       setIsSigningIn(false);
     }
   }, [clearAuthError, loginWithProviderToken, router]);
-
-  useEffect(() => {
-    if (isMockMode) {
-      setIsKakaoReady(true);
-      return;
-    }
-
-    const buttonHost = document.getElementById("kakao-signin-button");
-    if (!buttonHost) {
-      return;
-    }
-
-    setIsKakaoReady(false);
-    let cleanup = () => {};
-
-    mountKakaoLoginButton({
-      element: buttonHost,
-      onCredential: handleCredential,
-      onSuccess: handleCredential,
-      onError: (message) => setLocalError(message),
-    }).then((result) => {
-      if (!result.ok) {
-        setLocalError(result.message);
-        setIsKakaoReady(false);
-        return;
-      }
-      cleanup = result.cleanup ?? (() => {});
-      setIsKakaoReady(true);
-    });
-
-    return () => {
-      cleanup();
-    };
-  }, [handleCredential, isMockMode]);
 
   return (
     <main className="page-shell auth-page">
@@ -122,31 +84,15 @@ export default function AuthPage() {
           </section>
         ) : null}
 
-        <div
-          className={`google-button-shell kakao-button-shell${isSigningIn || !isKakaoReady ? " is-disabled" : ""}`}
-          aria-busy={isSigningIn ? "true" : "false"}
-        >
-          {isMockMode ? (
-            <button
-              type="button"
-              className="google-button kakao-button-visual"
-              onClick={() => handleCredential("mock-kakao-token")}
-              disabled={isSigningIn}
-            >
-              <span>{isSigningIn ? "로그인 처리 중..." : "카카오로 시작하기"}</span>
-            </button>
-          ) : (
-            <div className="google-button google-button-visual kakao-button-visual" aria-hidden="true">
-              <span>{isSigningIn ? "로그인 처리 중..." : "카카오로 시작하기"}</span>
-            </div>
-          )}
-
-          {isMockMode ? null : (
-            <div
-              id="kakao-signin-button"
-              className={`google-signin-overlay-host${isSigningIn || !isKakaoReady ? " is-disabled" : ""}`}
-            />
-          )}
+        <div className={`google-button-shell kakao-button-shell${isSigningIn ? " is-disabled" : ""}`} aria-busy={isSigningIn ? "true" : "false"}>
+          <button
+            type="button"
+            className="google-button kakao-button-visual"
+            onClick={() => handleCredential("mock-kakao-token")}
+            disabled={isSigningIn}
+          >
+            <span>{isSigningIn ? "로그인 처리 중..." : "카카오로 시작하기"}</span>
+          </button>
         </div>
       </section>
     </main>

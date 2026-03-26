@@ -979,6 +979,11 @@ textarea {
     opacity: 0.55;
 }
 
+.entry-exit-modal-actions button {
+    min-height: 58px;
+    padding: 0 18px;
+}
+
 .entry-error-message {
     margin: 0;
     color: #7a2f21;

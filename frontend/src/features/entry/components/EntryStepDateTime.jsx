@@ -1,10 +1,12 @@
 import React from "react";
 import EntryCalendarSheet from "@/features/entry/components/EntryCalendarSheet";
 import EntryProgress from "@/features/entry/components/EntryProgress";
+import useKeyboardInset from "@/features/entry/components/useKeyboardInset";
 import { formatEntryDate, roundUpToNextTenMinutes } from "@/features/entry/model/entry-form";
 
 export default function EntryStepDateTime({ draft, onChangeDate, onChangeTime, onNext }) {
   const now = new Date();
+  const keyboardInset = useKeyboardInset();
   const isToday = draft.date === formatEntryDate(now);
   const roundedNow = roundUpToNextTenMinutes(now);
   const latestHour = String(now.getHours()).padStart(2, "0");
@@ -36,7 +38,7 @@ export default function EntryStepDateTime({ draft, onChangeDate, onChangeTime, o
         <div className="entry-time-grid">
           <label className="entry-select-field">
             <span className="sr-only">시 선택</span>
-            <select value={draft.hour} onChange={(event) => onChangeTime("hour", event.target.value)}>
+            <select value={draft.hour} enterKeyHint="next" onChange={(event) => onChangeTime("hour", event.target.value)}>
               {availableHours.map((hour) => (
                 <option key={hour} value={hour}>{hour}</option>
               ))}
@@ -44,7 +46,7 @@ export default function EntryStepDateTime({ draft, onChangeDate, onChangeTime, o
           </label>
           <label className="entry-select-field">
             <span className="sr-only">분 선택</span>
-            <select value={draft.minute} onChange={(event) => onChangeTime("minute", event.target.value)}>
+            <select value={draft.minute} enterKeyHint="done" onChange={(event) => onChangeTime("minute", event.target.value)}>
               {availableMinutes.map((minute) => (
                 <option key={minute} value={minute}>{minute}</option>
               ))}
@@ -53,7 +55,12 @@ export default function EntryStepDateTime({ draft, onChangeDate, onChangeTime, o
         </div>
       </div>
 
-      <button type="button" className="entry-primary-button" onClick={onNext}>
+      <button
+        type="button"
+        className={`entry-primary-button${keyboardInset > 0 ? " is-keyboard-floating" : ""}`}
+        style={keyboardInset > 0 ? { bottom: `${keyboardInset + 12}px` } : undefined}
+        onClick={onNext}
+      >
         다음
       </button>
     </section>

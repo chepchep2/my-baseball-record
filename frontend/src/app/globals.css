@@ -800,15 +800,17 @@ textarea {
 .entry-progress {
     display: flex;
     align-items: center;
+    width: 100%;
     gap: 12px;
 }
 
 .entry-progress-bars {
-    flex: 1 1 auto;
+    flex: 1 1 0;
+    width: 100%;
+    min-width: 0;
     display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr));
     gap: 10px;
-    max-width: 280px;
 }
 
 .entry-progress-bar {
@@ -961,6 +963,16 @@ textarea {
     border-color: var(--color-accent);
     color: #fff;
     font-weight: 700;
+}
+
+.entry-primary-button.is-keyboard-floating {
+    position: fixed;
+    left: 50%;
+    transform: translateX(-50%);
+    width: min(430px, calc(100% - 36px));
+    margin-top: 0;
+    z-index: 70;
+    box-shadow: 0 16px 30px rgba(72, 64, 43, 0.2);
 }
 
 .entry-primary-button:disabled {

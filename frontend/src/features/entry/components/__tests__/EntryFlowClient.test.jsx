@@ -1,5 +1,5 @@
 import React from "react";
-import { render, screen, waitFor } from "@testing-library/react";
+import { act, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import EntryFlowClient from "../EntryFlowClient";
@@ -183,5 +183,48 @@ describe("EntryFlowClient", () => {
     expect(minuteSelect).toHaveValue("10");
 
     vi.useRealTimers();
+  });
+
+  it("활성 입력칸에는 enterKeyHint를 적용한다", async () => {
+    render(<EntryFlowClient />);
+
+    await userEvent.click(screen.getByRole("button", { name: "다음" }));
+    await userEvent.clear(screen.getByLabelText("타석"));
+    await userEvent.type(screen.getByLabelText("타석"), "4");
+
+    expect(screen.getByLabelText("타석")).toHaveAttribute("enterkeyhint", "next");
+
+    await userEvent.click(screen.getByRole("button", { name: "다음 항목" }));
+    await userEvent.click(screen.getByRole("button", { name: "다음 항목" }));
+    await userEvent.click(screen.getByRole("button", { name: "다음 항목" }));
+    await userEvent.click(screen.getByRole("button", { name: "다음 항목" }));
+    await userEvent.click(screen.getByRole("button", { name: "다음 항목" }));
+
+    expect(screen.getByLabelText("홈런")).toHaveAttribute("enterkeyhint", "done");
+  });
+
+  it("키보드가 열리면 하단 버튼을 키보드 위로 띄운다", async () => {
+    const listeners = {};
+    Object.defineProperty(window, "visualViewport", {
+      configurable: true,
+      value: {
+        height: 900,
+        offsetTop: 0,
+        addEventListener: vi.fn((type, handler) => {
+          listeners[type] = handler;
+        }),
+        removeEventListener: vi.fn(),
+      },
+    });
+
+    render(<EntryFlowClient />);
+    await userEvent.click(screen.getByRole("button", { name: "다음" }));
+
+    window.visualViewport.height = 560;
+    await act(async () => {
+      listeners.resize?.();
+    });
+
+    await waitFor(() => expect(screen.getByRole("button", { name: "다음 항목" })).toHaveClass("is-keyboard-floating"));
   });
 });

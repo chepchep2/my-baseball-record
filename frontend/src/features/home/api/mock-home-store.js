@@ -114,7 +114,7 @@ export function buildHomeDashboardData(selectedScope = "season") {
   return {
     seasonSummary: summarizeGames(seasonGames),
     careerSummary: summarizeGames(games),
-    recentGames: games.slice(0, 2),
+    recentGames: games.slice(0, 3),
     selectedScope,
     isEmpty: false,
   };

@@ -27,7 +27,7 @@ describe("HomePageClient", () => {
     vi.clearAllMocks();
   });
 
-  it("올해 시즌 홈 대시보드를 조회해 핵심 지표와 최근 경기 2개를 보여준다", async () => {
+  it("올해 시즌 홈 대시보드를 조회해 핵심 지표와 최근 경기 3개를 보여준다", async () => {
     getHomeDashboard.mockResolvedValue({
       tabs: [
         { key: "season", label: "올해 시즌", active: true },
@@ -50,6 +50,7 @@ describe("HomePageClient", () => {
       recentGames: [
         { id: 1, playedLabel: "3/22 14:10", summaryLabel: "타석 4 · 안타 1 · 타율 .333" },
         { id: 2, playedLabel: "3/15 09:30", summaryLabel: "타석 5 · 안타 2 · 타율 .500" },
+        { id: 3, playedLabel: "3/10 11:00", summaryLabel: "타석 3 · 안타 0 · 타율 .000" },
       ],
       isEmpty: false,
     });
@@ -67,6 +68,7 @@ describe("HomePageClient", () => {
     expect(screen.getByText("최근 경기 기록 리스트")).toBeInTheDocument();
     expect(screen.getByText("3/22 14:10")).toBeInTheDocument();
     expect(screen.getByText("타석 5 · 안타 2 · 타율 .500")).toBeInTheDocument();
+    expect(screen.getByText("3/10 11:00")).toBeInTheDocument();
   });
 
   it("기록이 0건이면 입력 화면으로 이동한다", async () => {

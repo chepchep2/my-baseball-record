@@ -21,7 +21,7 @@ export function toHomeSummaryItems(summary) {
 }
 
 export function toRecentGameItems(games) {
-  return (games ?? []).slice(0, 2).map((game) => ({
+  return (games ?? []).slice(0, 3).map((game) => ({
     id: game.id,
     playedLabel: game.playedLabel,
     summaryLabel: game.summaryLabel,

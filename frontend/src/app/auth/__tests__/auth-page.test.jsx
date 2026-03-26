@@ -29,6 +29,10 @@ vi.mock("@/features/auth/session/useAuthSession", () => ({
   }),
 }));
 
+vi.mock("@/features/auth/api/auth-api", () => ({
+  isMockAuthMode: () => true,
+}));
+
 vi.mock("@/features/auth/kakao/kakao-auth", () => ({
   mountKakaoLoginButton: vi.fn(async ({ element, onSuccess }) => {
     const button = document.createElement("button");
@@ -53,7 +57,9 @@ describe("AuthPage", () => {
 
     expect(screen.getByText("MY BASEBALL RECORD")).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: /경기 후 기록,/ })).toBeInTheDocument();
-    expect(await screen.findByRole("button", { name: "카카오로 시작하기" })).toBeInTheDocument();
+    const button = await screen.findByRole("button", { name: "카카오로 시작하기" });
+    expect(button).toBeInTheDocument();
+    expect(button).not.toHaveClass("google-button-visual");
   });
 
   it("카카오 로그인 성공 시 홈으로 이동한다", async () => {

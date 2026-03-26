@@ -3,6 +3,7 @@
 import React from "react";
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { isMockAuthMode } from "@/features/auth/api/auth-api";
 import { mountKakaoLoginButton } from "@/features/auth/kakao/kakao-auth";
 import { useAuthSession } from "@/features/auth/session/useAuthSession";
 
@@ -36,6 +37,7 @@ export default function AuthPage() {
   const [localError, setLocalError] = useState(null);
   const [isSigningIn, setIsSigningIn] = useState(false);
   const [isKakaoReady, setIsKakaoReady] = useState(false);
+  const isMockMode = isMockAuthMode();
 
   useEffect(() => {
     if (!isBootstrapping && isAuthenticated) {
@@ -59,6 +61,11 @@ export default function AuthPage() {
   }, [clearAuthError, loginWithProviderToken, router]);
 
   useEffect(() => {
+    if (isMockMode) {
+      setIsKakaoReady(true);
+      return;
+    }
+
     const buttonHost = document.getElementById("kakao-signin-button");
     if (!buttonHost) {
       return;
@@ -85,7 +92,7 @@ export default function AuthPage() {
     return () => {
       cleanup();
     };
-  }, [handleCredential]);
+  }, [handleCredential, isMockMode]);
 
   return (
     <main className="page-shell auth-page">
@@ -119,14 +126,27 @@ export default function AuthPage() {
           className={`google-button-shell kakao-button-shell${isSigningIn || !isKakaoReady ? " is-disabled" : ""}`}
           aria-busy={isSigningIn ? "true" : "false"}
         >
-          <div className="google-button google-button-visual kakao-button-visual" aria-hidden="true">
-            <span>{isSigningIn ? "로그인 처리 중..." : "카카오로 시작하기"}</span>
-          </div>
+          {isMockMode ? (
+            <button
+              type="button"
+              className="google-button kakao-button-visual"
+              onClick={() => handleCredential("mock-kakao-token")}
+              disabled={isSigningIn}
+            >
+              <span>{isSigningIn ? "로그인 처리 중..." : "카카오로 시작하기"}</span>
+            </button>
+          ) : (
+            <div className="google-button google-button-visual kakao-button-visual" aria-hidden="true">
+              <span>{isSigningIn ? "로그인 처리 중..." : "카카오로 시작하기"}</span>
+            </div>
+          )}
 
-          <div
-            id="kakao-signin-button"
-            className={`google-signin-overlay-host${isSigningIn || !isKakaoReady ? " is-disabled" : ""}`}
-          />
+          {isMockMode ? null : (
+            <div
+              id="kakao-signin-button"
+              className={`google-signin-overlay-host${isSigningIn || !isKakaoReady ? " is-disabled" : ""}`}
+            />
+          )}
         </div>
       </section>
     </main>

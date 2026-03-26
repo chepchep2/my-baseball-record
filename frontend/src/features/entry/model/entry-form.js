@@ -5,14 +5,7 @@ function pad(value) {
 export function roundUpToNextTenMinutes(date) {
   const next = new Date(date);
   next.setSeconds(0, 0);
-
-  const minutes = next.getMinutes();
-  const remainder = minutes % 10;
-
-  if (remainder !== 0) {
-    next.setMinutes(minutes + (10 - remainder));
-  }
-
+  next.setMinutes(Math.floor(next.getMinutes() / 10) * 10);
   return next;
 }
 

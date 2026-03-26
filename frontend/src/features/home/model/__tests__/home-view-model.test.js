@@ -20,7 +20,7 @@ describe("home-view-model", () => {
     ]);
   });
 
-  it("최근 경기 리스트는 최대 2개까지만 유지한다", () => {
+  it("최근 경기 리스트는 최대 3개까지만 유지한다", () => {
     const result = toHomeViewModel({
       seasonSummary: {
         battingAverage: "0.280",
@@ -49,7 +49,8 @@ describe("home-view-model", () => {
       { key: "season", label: "올해 시즌", active: false },
       { key: "career", label: "통산", active: true },
     ]);
-    expect(result.recentGames).toHaveLength(2);
+    expect(result.recentGames).toHaveLength(3);
     expect(result.recentGames[0].playedLabel).toBe("3/22 14:10");
+    expect(result.recentGames[2].playedLabel).toBe("3/10 11:00");
   });
 });

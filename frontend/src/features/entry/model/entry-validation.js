@@ -10,6 +10,8 @@ function buildResult(message = null) {
   };
 }
 
+const HITS_OVER_AT_BATS_MESSAGE = "안타의 합은 타수보다 클 수 없습니다.";
+
 export function calculateAtBats(draft) {
   return Math.max(0, toNumber(draft.plateAppearances) - toNumber(draft.walksAndHitByPitch));
 }
@@ -33,7 +35,7 @@ export function validateStep3(draft) {
 
   const hits = toNumber(draft.singles) + toNumber(draft.doubles);
   if (hits > calculateAtBats(draft)) {
-    return buildResult("1루타와 2루타 합은 타수보다 클 수 없습니다.");
+    return buildResult(HITS_OVER_AT_BATS_MESSAGE);
   }
 
   return buildResult();
@@ -45,7 +47,7 @@ export function validateStep4(draft) {
   }
 
   if (calculateHits(draft) > calculateAtBats(draft)) {
-    return buildResult("안타 종류의 합은 타수보다 클 수 없습니다.");
+    return buildResult(HITS_OVER_AT_BATS_MESSAGE);
   }
 
   return buildResult();

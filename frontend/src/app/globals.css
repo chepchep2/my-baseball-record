@@ -62,11 +62,12 @@ textarea {
 
 .page-shell {
     min-height: 100vh;
-    padding: 8px;
+    min-height: 100dvh;
+    padding: clamp(4px, 2vw, 8px);
 }
 
 .page-frame {
-    width: min(430px, 100%);
+    width: min(430px, calc(100vw - 2 * clamp(4px, 2vw, 8px)));
     margin: 0 auto;
 }
 
@@ -791,13 +792,37 @@ textarea {
 .entry-step-panel {
     min-height: calc(100dvh - 16px);
     padding: 22px 18px 18px;
-    display: grid;
-    grid-template-rows: auto auto auto 1fr auto;
+    display: flex;
+    flex-direction: column;
     gap: 18px;
 }
 
-.entry-step-progress {
-    margin: 0;
+.entry-progress {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.entry-progress-bars {
+    flex: 1 1 auto;
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 10px;
+    max-width: 280px;
+}
+
+.entry-progress-bar {
+    height: 8px;
+    border-radius: 999px;
+    background: rgba(110, 105, 86, 0.18);
+}
+
+.entry-progress-bar.is-active {
+    background: var(--color-accent);
+}
+
+.entry-progress-text {
+    flex: 0 0 auto;
     color: var(--color-muted);
     font-size: 0.92rem;
     font-weight: 700;
@@ -813,13 +838,28 @@ textarea {
 .entry-number-field {
     display: grid;
     gap: 8px;
+    align-content: start;
+}
+
+.entry-field-block-compact {
+    gap: 4px;
 }
 
 .entry-field-block > span,
-.entry-number-field > span {
+.entry-number-field > span,
+.entry-number-field > label {
     font-size: 0.95rem;
     font-weight: 700;
     color: var(--color-muted);
+}
+
+.entry-number-field {
+    cursor: pointer;
+}
+
+.entry-number-field > label {
+    display: block;
+    cursor: pointer;
 }
 
 .entry-date-trigger,
@@ -832,18 +872,6 @@ textarea {
     background: #fffdf8;
     color: var(--color-text);
     padding: 14px 16px;
-}
-
-.entry-date-trigger {
-    display: grid;
-    justify-items: start;
-    gap: 4px;
-    text-align: left;
-}
-
-.entry-date-trigger span:last-child {
-    color: var(--color-muted);
-    font-size: 0.9rem;
 }
 
 .entry-time-grid,
@@ -865,6 +893,55 @@ textarea {
     opacity: 0.6;
 }
 
+.entry-number-field:not(.is-active) span {
+    color: rgba(110, 105, 86, 0.6);
+}
+
+.entry-number-field:not(.is-active) input {
+    background: rgba(110, 105, 86, 0.08);
+    border-color: rgba(69, 67, 45, 0.08);
+    color: rgba(110, 105, 86, 0.72);
+    cursor: pointer;
+    pointer-events: none;
+}
+
+.entry-number-field:not(.is-active) label {
+    pointer-events: none;
+}
+
+.entry-number-field.is-active span,
+.entry-number-field.is-active label {
+    color: var(--color-accent);
+}
+
+.entry-number-field.is-active input {
+    border-color: rgba(66, 107, 72, 0.42);
+    box-shadow: 0 0 0 3px rgba(66, 107, 72, 0.08);
+}
+
+.entry-number-field.is-locked {
+    cursor: default;
+}
+
+.entry-number-field.is-locked label {
+    color: rgba(110, 105, 86, 0.45);
+    pointer-events: none;
+}
+
+.entry-number-field.is-locked input {
+    background: rgba(110, 105, 86, 0.05);
+    border-color: rgba(69, 67, 45, 0.06);
+    color: rgba(110, 105, 86, 0.45);
+    pointer-events: none;
+}
+
+.entry-field-hint {
+    margin: -4px 0 0;
+    color: var(--color-muted);
+    font-size: 0.88rem;
+    line-height: 1.4;
+}
+
 .entry-primary-button,
 .entry-exit-modal-actions button,
 .entry-calendar-sheet-header button,
@@ -879,6 +956,7 @@ textarea {
 .entry-primary-button {
     width: 100%;
     min-height: 54px;
+    margin-top: auto;
     background: var(--color-accent);
     border-color: var(--color-accent);
     color: #fff;
@@ -900,7 +978,8 @@ textarea {
 .entry-exit-modal-backdrop {
     position: fixed;
     inset: 0;
-    background: rgba(34, 32, 24, 0.24);
+    background: rgba(24, 22, 17, 0.52);
+    backdrop-filter: blur(8px);
     display: grid;
     z-index: 80;
 }
@@ -915,6 +994,17 @@ textarea {
     display: grid;
     gap: 14px;
     min-height: min(78dvh, 620px);
+    background: var(--color-surface-strong);
+    box-shadow: 0 -12px 30px rgba(34, 32, 24, 0.12);
+}
+
+.entry-calendar-inline {
+    border: 1px solid var(--color-border);
+    border-radius: 22px;
+    background: rgba(255, 255, 255, 0.52);
+    padding: 14px;
+    display: grid;
+    gap: 12px;
 }
 
 .entry-calendar-sheet-header {
@@ -940,6 +1030,14 @@ textarea {
 .calendar-day {
     min-height: 42px;
     padding: 8px 0;
+}
+
+.calendar-day:disabled {
+    background: rgba(110, 105, 86, 0.08);
+    border-color: rgba(69, 67, 45, 0.08);
+    color: rgba(110, 105, 86, 0.42);
+    cursor: not-allowed;
+    box-shadow: none;
 }
 
 .calendar-day.is-selected {

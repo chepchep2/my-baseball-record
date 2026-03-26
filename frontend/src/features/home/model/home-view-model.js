@@ -1,0 +1,42 @@
+function formatAverage(value) {
+  if (!value) {
+    return ".000";
+  }
+
+  return String(value).startsWith("0") ? String(value).slice(1) : String(value);
+}
+
+function formatCount(value) {
+  return String(value ?? 0);
+}
+
+export function toHomeSummaryItems(summary) {
+  return [
+    ["타율", formatAverage(summary.battingAverage)],
+    ["OPS", formatAverage(summary.ops)],
+    ["안타", formatCount(summary.hits)],
+    ["출루율", formatAverage(summary.onBasePercentage)],
+    ["장타율", formatAverage(summary.sluggingPercentage)],
+  ];
+}
+
+export function toRecentGameItems(games) {
+  return (games ?? []).slice(0, 3).map((game) => ({
+    id: game.id,
+    playedLabel: game.playedLabel,
+    summaryLabel: game.summaryLabel,
+  }));
+}
+
+export function toHomeViewModel({ seasonSummary, careerSummary, recentGames, selectedScope = "season", isEmpty = false }) {
+  return {
+    tabs: [
+      { key: "season", label: "올해 시즌", active: selectedScope === "season" },
+      { key: "career", label: "통산", active: selectedScope === "career" },
+    ],
+    seasonSummaryItems: toHomeSummaryItems(seasonSummary),
+    careerSummaryItems: toHomeSummaryItems(careerSummary),
+    recentGames: toRecentGameItems(recentGames),
+    isEmpty,
+  };
+}

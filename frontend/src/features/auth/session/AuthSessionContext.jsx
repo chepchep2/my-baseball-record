@@ -3,7 +3,7 @@
 
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { createApiClient } from "@/lib/http/api-client";
-import { loginWithGoogle, logoutSession, refreshSession as refreshSessionApi } from "@/features/auth/api/auth-api";
+import { isMockAuthMode, loginWithKakao, logoutSession, refreshSession as refreshSessionApi } from "@/features/auth/api/auth-api";
 import {
   clearSessionTokens,
   getAccessToken,
@@ -23,8 +23,8 @@ function getAuthMessage(error, fallbackMessage) {
     return "Google 인증에 실패했습니다. 잠시 후 다시 시도해 주세요.";
   }
 
-  if (error.code === "INVALID_GOOGLE_TOKEN") {
-    return "Google 로그인 정보가 올바르지 않습니다.";
+  if (error.code === "INVALID_KAKAO_TOKEN") {
+    return "카카오 로그인 정보가 올바르지 않습니다.";
   }
 
   if (
@@ -100,6 +100,14 @@ export function AuthSessionProvider({ children }) {
         return;
       }
 
+      if (isMockAuthMode()) {
+        if (active) {
+          setAuthError(null);
+          setIsBootstrapping(false);
+        }
+        return;
+      }
+
       try {
         await refreshIfNeeded();
       } catch {
@@ -120,9 +128,9 @@ export function AuthSessionProvider({ children }) {
     };
   }, [clearSessionState, refreshIfNeeded]);
 
-  const loginWithGoogleIdToken = useCallback(async (idToken) => {
+  const loginWithProviderToken = useCallback(async (providerToken) => {
     try {
-      const session = await loginWithGoogle(idToken);
+      const session = await loginWithKakao(providerToken);
       saveSessionTokens(session);
       setUser(session.user ?? null);
       setAuthError(null);
@@ -169,7 +177,7 @@ export function AuthSessionProvider({ children }) {
       authError,
       apiClient,
       clearAuthError,
-      loginWithGoogleIdToken,
+      loginWithProviderToken,
       refreshIfNeeded,
       logout,
     }),
@@ -179,7 +187,7 @@ export function AuthSessionProvider({ children }) {
       authError,
       apiClient,
       clearAuthError,
-      loginWithGoogleIdToken,
+      loginWithProviderToken,
       refreshIfNeeded,
       logout,
     ],

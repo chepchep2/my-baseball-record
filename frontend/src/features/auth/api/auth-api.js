@@ -2,6 +2,17 @@ const API_BASE_URL = (
   typeof process !== "undefined" && process.env ? process.env.NEXT_PUBLIC_API_BASE_URL || "" : ""
 ).replace(/\/$/, "");
 
+export function isMockAuthMode() {
+  if (typeof window !== "undefined") {
+    const hostname = window.location.hostname;
+    if (hostname === "localhost" || hostname === "127.0.0.1") {
+      return true;
+    }
+  }
+
+  return API_BASE_URL === "";
+}
+
 function buildUrl(path) {
   if (!path.startsWith("/")) {
     throw new Error(`Invalid API path: ${path}`);
@@ -69,9 +80,44 @@ export async function loginWithGoogle(idToken, fetchImpl = fetch) {
   });
 }
 
+function buildMockSession(provider = "KAKAO") {
+  return {
+    accessToken: `mock-access-${provider.toLowerCase()}`,
+    refreshToken: `mock-refresh-${provider.toLowerCase()}`,
+    accessTokenExpiresAt: "2099-12-31T23:59:59Z",
+    refreshTokenExpiresAt: "2099-12-31T23:59:59Z",
+    user: {
+      id: 1,
+      displayName: "카카오 사용자",
+      email: "kakao-user@example.com",
+      provider,
+    },
+  };
+}
+
+export async function loginWithKakao(token, fetchImpl = fetch) {
+  if (!token || !token.trim()) {
+    throw new ApiError("카카오 로그인 정보가 필요합니다.", { code: "INVALID_KAKAO_TOKEN", status: 400 });
+  }
+
+  if (isMockAuthMode()) {
+    return buildMockSession("KAKAO");
+  }
+
+  return requestJson("/api/auth/kakao", {
+    method: "POST",
+    body: { token: token.trim() },
+    fetchImpl,
+  });
+}
+
 export async function refreshSession(refreshToken, fetchImpl = fetch) {
   if (!refreshToken || !refreshToken.trim()) {
     throw new ApiError("refreshToken이 필요합니다.", { code: "REFRESH_TOKEN_INVALID", status: 401 });
+  }
+
+  if (isMockAuthMode()) {
+    return buildMockSession("KAKAO");
   }
 
   return requestJson("/api/auth/refresh", {
@@ -83,6 +129,10 @@ export async function refreshSession(refreshToken, fetchImpl = fetch) {
 
 export async function logoutSession(refreshToken, fetchImpl = fetch) {
   if (!refreshToken || !refreshToken.trim()) {
+    return null;
+  }
+
+  if (isMockAuthMode()) {
     return null;
   }
 

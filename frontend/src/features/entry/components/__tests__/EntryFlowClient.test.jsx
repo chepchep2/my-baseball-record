@@ -227,4 +227,57 @@ describe("EntryFlowClient", () => {
 
     await waitFor(() => expect(screen.getByRole("button", { name: "다음 항목" })).toHaveClass("is-keyboard-floating"));
   });
+
+  it("아래쪽 필드에서 viewport가 밀려도 하단 버튼을 키보드 위로 유지한다", async () => {
+    const listeners = {};
+    Object.defineProperty(window, "visualViewport", {
+      configurable: true,
+      value: {
+        height: 900,
+        offsetTop: 0,
+        addEventListener: vi.fn((type, handler) => {
+          listeners[type] = handler;
+        }),
+        removeEventListener: vi.fn(),
+      },
+    });
+
+    render(<EntryFlowClient />);
+    await userEvent.click(screen.getByRole("button", { name: "다음" }));
+
+    await userEvent.clear(screen.getByLabelText("타석"));
+    await userEvent.type(screen.getByLabelText("타석"), "4");
+    await userEvent.click(screen.getByRole("button", { name: "다음 항목" }));
+    await userEvent.clear(screen.getByLabelText("사사구"));
+    await userEvent.type(screen.getByLabelText("사사구"), "0");
+    await userEvent.click(screen.getByRole("button", { name: "다음 항목" }));
+    await userEvent.click(screen.getByRole("button", { name: "다음 항목" }));
+    await userEvent.click(screen.getByRole("button", { name: "다음 항목" }));
+    await userEvent.click(screen.getByRole("button", { name: "다음 항목" }));
+
+    window.visualViewport.height = 560;
+    window.visualViewport.offsetTop = 180;
+    await act(async () => {
+      listeners.resize?.();
+      listeners.scroll?.();
+    });
+
+    const expectedBottom = `${window.innerHeight - window.visualViewport.height + 12}px`;
+    const button = screen.getByRole("button", { name: "저장" });
+    await waitFor(() => expect(button).toHaveClass("is-keyboard-floating"));
+    expect(button).toHaveStyle({ bottom: expectedBottom });
+  });
+
+  it("1단계에서 뒤로가기를 하면 이탈 확인 모달을 보여준다", async () => {
+    render(<EntryFlowClient />);
+
+    await userEvent.selectOptions(screen.getByLabelText("시 선택"), "10");
+
+    await act(async () => {
+      window.dispatchEvent(new PopStateEvent("popstate"));
+    });
+
+    expect(screen.getByRole("dialog", { name: "기록 입력 중단 확인" })).toBeInTheDocument();
+    expect(screen.getByText("기록 입력을 중단할까요?")).toBeInTheDocument();
+  });
 });

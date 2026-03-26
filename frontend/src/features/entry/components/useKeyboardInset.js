@@ -5,7 +5,7 @@ function getKeyboardInset() {
     return 0;
   }
 
-  const inset = Math.max(0, window.innerHeight - window.visualViewport.height - window.visualViewport.offsetTop);
+  const inset = Math.max(0, window.innerHeight - window.visualViewport.height);
   return inset > 120 ? inset : 0;
 }
 

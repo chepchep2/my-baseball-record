@@ -1,5 +1,10 @@
-import GameForm from "@/lib/GameForm";
+import AppPageLayout from "@/components/layout/AppPageLayout";
+import EntryFlowClient from "@/features/entry/components/EntryFlowClient";
 
 export default function GamesNewPage() {
-  return <GameForm mode="create" />;
+  return (
+    <AppPageLayout showTabs={false} frameClassName="milestone-entry-frame">
+      <EntryFlowClient />
+    </AppPageLayout>
+  );
 }

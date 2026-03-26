@@ -24,7 +24,7 @@ export function buildEntryDraft(now = new Date()) {
   const rounded = roundUpToNextTenMinutes(now);
 
   return {
-    date: formatEntryDate(now),
+    date: formatEntryDate(rounded),
     hour: pad(rounded.getHours()),
     minute: pad(rounded.getMinutes()),
     plateAppearances: "0",

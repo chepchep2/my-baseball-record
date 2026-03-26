@@ -664,6 +664,319 @@ textarea {
     text-align: center;
 }
 
+.milestone-home-frame,
+.milestone-entry-frame {
+    min-height: calc(100dvh - 16px);
+    align-content: stretch;
+}
+
+.milestone-home-panel,
+.entry-flow-shell {
+    min-height: calc(100dvh - 16px);
+}
+
+.milestone-home-panel {
+    position: relative;
+    padding: 18px 18px 88px;
+}
+
+.milestone-home-content {
+    display: grid;
+    gap: 18px;
+    align-content: start;
+}
+
+.milestone-home-scope-tabs {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+}
+
+.milestone-home-scope-tabs .tab-button {
+    justify-content: center;
+    text-align: center;
+}
+
+.milestone-home-summary-card,
+.milestone-home-recent-card,
+.entry-step-panel,
+.entry-exit-modal,
+.entry-calendar-sheet {
+    border: 1px solid var(--color-border);
+    border-radius: 24px;
+    background: rgba(255, 255, 255, 0.56);
+    box-shadow: var(--shadow-card);
+}
+
+.milestone-home-summary-card {
+    padding: 16px;
+    display: grid;
+    gap: 12px;
+}
+
+.milestone-home-stat-row {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 12px;
+    align-items: center;
+}
+
+.milestone-home-stat-label {
+    color: var(--color-muted);
+    font-size: 0.95rem;
+    font-weight: 700;
+}
+
+.milestone-home-stat-value {
+    min-width: 0;
+    text-align: right;
+    font-size: 1.05rem;
+}
+
+.milestone-home-recent-panel {
+    display: grid;
+    gap: 12px;
+}
+
+.milestone-home-section-title {
+    margin: 0;
+    font-size: 1rem;
+}
+
+.milestone-home-recent-list {
+    display: grid;
+    gap: 10px;
+}
+
+.milestone-home-recent-card {
+    padding: 16px;
+    display: grid;
+    gap: 8px;
+}
+
+.milestone-home-recent-date {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 700;
+}
+
+.milestone-home-recent-summary {
+    margin: 0;
+    color: var(--color-muted);
+    line-height: 1.45;
+}
+
+.milestone-home-fab {
+    position: absolute;
+    right: 18px;
+    bottom: 18px;
+    width: 54px;
+    height: 54px;
+    border-radius: 999px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--color-accent);
+    color: #fff;
+    font-size: 1.9rem;
+    line-height: 1;
+    box-shadow: 0 16px 30px rgba(66, 107, 72, 0.24);
+}
+
+.entry-flow-shell {
+    display: grid;
+    align-content: stretch;
+}
+
+.entry-step-panel {
+    min-height: calc(100dvh - 16px);
+    padding: 22px 18px 18px;
+    display: grid;
+    grid-template-rows: auto auto auto 1fr auto;
+    gap: 18px;
+}
+
+.entry-step-progress {
+    margin: 0;
+    color: var(--color-muted);
+    font-size: 0.92rem;
+    font-weight: 700;
+}
+
+.entry-step-title {
+    margin: 0;
+    font-size: 1.8rem;
+    line-height: 1.12;
+}
+
+.entry-field-block,
+.entry-number-field {
+    display: grid;
+    gap: 8px;
+}
+
+.entry-field-block > span,
+.entry-number-field > span {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--color-muted);
+}
+
+.entry-date-trigger,
+.entry-select-field select,
+.entry-number-field input {
+    width: 100%;
+    min-height: 58px;
+    border: 1px solid var(--color-border);
+    border-radius: 18px;
+    background: #fffdf8;
+    color: var(--color-text);
+    padding: 14px 16px;
+}
+
+.entry-date-trigger {
+    display: grid;
+    justify-items: start;
+    gap: 4px;
+    text-align: left;
+}
+
+.entry-date-trigger span:last-child {
+    color: var(--color-muted);
+    font-size: 0.9rem;
+}
+
+.entry-time-grid,
+.entry-number-grid,
+.entry-exit-modal-actions,
+.entry-calendar-month-picker {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+}
+
+.entry-select-field select,
+.entry-number-field input {
+    font-size: 16px;
+}
+
+.entry-number-field input:disabled,
+.entry-select-field select:disabled {
+    opacity: 0.6;
+}
+
+.entry-primary-button,
+.entry-exit-modal-actions button,
+.entry-calendar-sheet-header button,
+.entry-calendar-month-trigger,
+.calendar-day {
+    border: 1px solid var(--color-border);
+    border-radius: 18px;
+    background: #fffdf8;
+    color: var(--color-text);
+}
+
+.entry-primary-button {
+    width: 100%;
+    min-height: 54px;
+    background: var(--color-accent);
+    border-color: var(--color-accent);
+    color: #fff;
+    font-weight: 700;
+}
+
+.entry-primary-button:disabled {
+    opacity: 0.55;
+}
+
+.entry-error-message {
+    margin: 0;
+    color: #7a2f21;
+    font-size: 0.95rem;
+    line-height: 1.45;
+}
+
+.entry-calendar-sheet-backdrop,
+.entry-exit-modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(34, 32, 24, 0.24);
+    display: grid;
+    z-index: 80;
+}
+
+.entry-calendar-sheet-backdrop {
+    align-items: end;
+}
+
+.entry-calendar-sheet {
+    border-radius: 28px 28px 0 0;
+    padding: 18px;
+    display: grid;
+    gap: 14px;
+    min-height: min(78dvh, 620px);
+}
+
+.entry-calendar-sheet-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.entry-calendar-month-trigger {
+    min-height: 48px;
+    padding: 12px 14px;
+    text-align: left;
+    font-weight: 700;
+}
+
+.entry-calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    gap: 8px;
+}
+
+.calendar-day {
+    min-height: 42px;
+    padding: 8px 0;
+}
+
+.calendar-day.is-selected {
+    background: var(--color-accent);
+    border-color: var(--color-accent);
+    color: #fff;
+}
+
+.entry-exit-modal-backdrop {
+    place-items: center;
+    padding: 16px;
+}
+
+.entry-exit-modal {
+    width: min(100%, 360px);
+    padding: 20px 18px;
+    display: grid;
+    gap: 14px;
+    background: var(--color-surface-strong);
+}
+
+.entry-exit-modal strong {
+    font-size: 1.05rem;
+}
+
+.entry-exit-modal p {
+    margin: 0;
+    color: var(--color-muted);
+    line-height: 1.45;
+}
+
+.entry-exit-modal-actions button:last-child {
+    background: var(--color-accent);
+    border-color: var(--color-accent);
+    color: #fff;
+}
+
 @media (min-width: 641px) {
     .home-center-frame,
     .records-center-frame,
@@ -721,6 +1034,13 @@ textarea {
         min-height: 100dvh;
     }
 
+    .page-shell:has(.milestone-home-frame),
+    .page-shell:has(.milestone-entry-frame) {
+        display: flex;
+        flex-direction: column;
+        min-height: 100dvh;
+    }
+
     .home-center-frame {
         flex: 1 1 auto;
         display: flex;
@@ -764,6 +1084,18 @@ textarea {
         flex: 1 1 auto;
         display: flex;
         flex-direction: column;
+    }
+
+    .milestone-home-frame,
+    .milestone-entry-frame {
+        flex: 1 1 auto;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .milestone-home-frame .milestone-home-panel,
+    .milestone-entry-frame .entry-flow-shell {
+        flex: 1 1 auto;
     }
 
     .account-center-frame .detail-screen-panel {

@@ -18,6 +18,14 @@ describe("entry-form", () => {
     expect(result.getMinutes()).toBe(10);
   });
 
+  it("자정 넘김이 발생하면 날짜도 올림된 시각에 맞춘다", () => {
+    const result = buildEntryDraft(new Date("2026-03-26T23:58:00"));
+
+    expect(result.date).toBe("2026-03-27");
+    expect(result.hour).toBe("00");
+    expect(result.minute).toBe("00");
+  });
+
   it("4단계 입력 metadata를 반환한다", () => {
     expect(getEntrySteps()).toEqual([
       { step: 1, title: "날짜 + 시간" },

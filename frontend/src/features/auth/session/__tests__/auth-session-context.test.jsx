@@ -3,23 +3,24 @@ import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { AuthSessionProvider, useAuthSession } from "../AuthSessionContext";
-import { loginWithGoogle, logoutSession } from "../../api/auth-api";
+import { loginWithKakao, logoutSession } from "../../api/auth-api";
 
 vi.mock("../../api/auth-api", () => ({
-  loginWithGoogle: vi.fn(),
+  isMockAuthMode: vi.fn(() => false),
+  loginWithKakao: vi.fn(),
   refreshSession: vi.fn(),
   logoutSession: vi.fn(),
 }));
 
 function Probe() {
-  const { isAuthenticated, user, loginWithGoogleIdToken, logout, isBootstrapping } = useAuthSession();
+  const { isAuthenticated, user, loginWithProviderToken, logout, isBootstrapping } = useAuthSession();
 
   return (
     <div>
       <p data-testid="boot">{isBootstrapping ? "booting" : "ready"}</p>
       <p data-testid="auth">{isAuthenticated ? "yes" : "no"}</p>
       <p data-testid="user">{user?.displayName ?? "none"}</p>
-      <button type="button" onClick={() => loginWithGoogleIdToken("id-token")}>
+      <button type="button" onClick={() => loginWithProviderToken("provider-token")}>
         login
       </button>
       <button type="button" onClick={() => logout()}>
@@ -35,13 +36,13 @@ describe("AuthSessionContext", () => {
     vi.clearAllMocks();
   });
 
-  it("google 로그인 성공 시 인증 상태와 저장소를 갱신한다", async () => {
-    loginWithGoogle.mockResolvedValue({
+  it("카카오 로그인 성공 시 인증 상태와 저장소를 갱신한다", async () => {
+    loginWithKakao.mockResolvedValue({
       accessToken: "access-1",
       refreshToken: "refresh-1",
       accessTokenExpiresAt: "2026-03-20T00:00:00Z",
       refreshTokenExpiresAt: "2026-04-20T00:00:00Z",
-      user: { id: 1, displayName: "조상우", email: "user@gmail.com", provider: "GOOGLE" },
+      user: { id: 1, displayName: "조상우", email: "user@gmail.com", provider: "KAKAO" },
     });
 
     render(
@@ -59,12 +60,12 @@ describe("AuthSessionContext", () => {
   });
 
   it("로그아웃 시 서버 호출 후 로컬 세션을 삭제한다", async () => {
-    loginWithGoogle.mockResolvedValue({
+    loginWithKakao.mockResolvedValue({
       accessToken: "access-1",
       refreshToken: "refresh-1",
       accessTokenExpiresAt: "2026-03-20T00:00:00Z",
       refreshTokenExpiresAt: "2026-04-20T00:00:00Z",
-      user: { id: 1, displayName: "조상우", email: "user@gmail.com", provider: "GOOGLE" },
+      user: { id: 1, displayName: "조상우", email: "user@gmail.com", provider: "KAKAO" },
     });
     logoutSession.mockResolvedValue(null);
 

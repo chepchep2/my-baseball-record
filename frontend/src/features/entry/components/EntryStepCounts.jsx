@@ -1,6 +1,7 @@
 import React, { useEffect, useId, useMemo, useRef, useState } from "react";
 import EntryProgress from "@/features/entry/components/EntryProgress";
 import { calculateAtBats, calculateHits } from "@/features/entry/model/entry-validation";
+import useKeyboardInset from "@/features/entry/components/useKeyboardInset";
 
 function normalizeNumericValue(value) {
   const digitsOnly = value.replace(/[^\d]/g, "");
@@ -11,7 +12,7 @@ function normalizeNumericValue(value) {
   return digitsOnly.replace(/^0+(?=\d)/, "");
 }
 
-function NumericField({ label, value, onChange, isActive, isSelectable, inputRef, onActivate }) {
+function NumericField({ label, value, onChange, isActive, isSelectable, inputRef, onActivate, enterKeyHint }) {
   const inputId = useId();
 
   return (
@@ -46,6 +47,7 @@ function NumericField({ label, value, onChange, isActive, isSelectable, inputRef
         ref={inputRef}
         type="text"
         inputMode="numeric"
+        enterKeyHint={enterKeyHint}
         pattern="[0-9]*"
         value={value}
         disabled={!isActive || !isSelectable}
@@ -65,6 +67,7 @@ export default function EntryStepCounts({
 }) {
   const inputRefs = useRef({});
   const [activeFieldKey, setActiveFieldKey] = useState(fields[0]?.key ?? null);
+  const keyboardInset = useKeyboardInset();
   const atBats = useMemo(() => calculateAtBats(values), [values]);
   const totalHits = useMemo(() => calculateHits(values), [values]);
   const hitFields = useMemo(() => fields.slice(2), [fields]);
@@ -135,6 +138,7 @@ export default function EntryStepCounts({
             value={values[field.key]}
             isActive={field.key === activeFieldKey}
             isSelectable={editableFieldKeys.includes(field.key)}
+            enterKeyHint={field.key === activeFieldKey && isLastField ? "done" : "next"}
             inputRef={(node) => {
               inputRefs.current[field.key] = node;
             }}
@@ -148,7 +152,13 @@ export default function EntryStepCounts({
 
       {error ? <p className="entry-error-message">{error}</p> : null}
 
-      <button type="button" className="entry-primary-button" onClick={goNextFieldOrSubmit} disabled={!canProceed}>
+      <button
+        type="button"
+        className={`entry-primary-button${keyboardInset > 0 ? " is-keyboard-floating" : ""}`}
+        style={keyboardInset > 0 ? { bottom: `${keyboardInset + 12}px` } : undefined}
+        onClick={goNextFieldOrSubmit}
+        disabled={!canProceed}
+      >
         {isLastField ? "저장" : "다음 항목"}
       </button>
     </section>

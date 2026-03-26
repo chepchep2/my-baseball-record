@@ -95,12 +95,16 @@ function buildMockSession(provider = "KAKAO") {
   };
 }
 
+function isMockToken(token) {
+  return typeof token === "string" && token.startsWith("mock-");
+}
+
 export async function loginWithKakao(token, fetchImpl = fetch) {
   if (!token || !token.trim()) {
     throw new ApiError("카카오 로그인 정보가 필요합니다.", { code: "INVALID_KAKAO_TOKEN", status: 400 });
   }
 
-  if (isMockAuthMode()) {
+  if (isMockAuthMode() || isMockToken(token)) {
     return buildMockSession("KAKAO");
   }
 
@@ -116,7 +120,7 @@ export async function refreshSession(refreshToken, fetchImpl = fetch) {
     throw new ApiError("refreshToken이 필요합니다.", { code: "REFRESH_TOKEN_INVALID", status: 401 });
   }
 
-  if (isMockAuthMode()) {
+  if (isMockAuthMode() || isMockToken(refreshToken)) {
     return buildMockSession("KAKAO");
   }
 
@@ -132,7 +136,7 @@ export async function logoutSession(refreshToken, fetchImpl = fetch) {
     return null;
   }
 
-  if (isMockAuthMode()) {
+  if (isMockAuthMode() || isMockToken(refreshToken)) {
     return null;
   }
 

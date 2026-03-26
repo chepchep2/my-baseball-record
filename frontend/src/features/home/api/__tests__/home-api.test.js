@@ -67,4 +67,30 @@ describe("home-api", () => {
     expect(result.recentGames).toEqual([]);
     expect(result.tabs[1].active).toBe(true);
   });
+
+  it("타율은 안타를 타수로 나눈 값으로 계산한다", async () => {
+    window.localStorage.setItem("milestone-1.mock-games", JSON.stringify([
+      {
+        id: "game-1",
+        playedAt: `${new Date().getFullYear()}-03-22`,
+        playedLabel: "3/22 14:10",
+        summaryLabel: "타석 5 · 안타 1 · 타율 1.000",
+        plateAppearances: 5,
+        walksAndHitByPitch: 4,
+        singles: 1,
+        doubles: 0,
+        triples: 0,
+        homeRuns: 0,
+        hits: 1,
+        battingAverage: "1.000",
+        onBasePercentage: "1.000",
+        sluggingPercentage: "1.000",
+        ops: "2.000",
+      },
+    ]));
+
+    const result = await getHomeDashboard({ selectedScope: "season" });
+
+    expect(result.seasonSummaryItems[0]).toEqual(["타율", "1.000"]);
+  });
 });

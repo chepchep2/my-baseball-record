@@ -57,7 +57,7 @@ export default function EntryStepDateTime({ draft, onChangeDate, onChangeTime, o
 
       <button
         type="button"
-        className={`entry-primary-button${keyboardInset > 0 ? " is-keyboard-floating" : ""}`}
+        className={`entry-primary-button entry-step-next-button${keyboardInset > 0 ? " is-keyboard-floating" : ""}`}
         style={keyboardInset > 0 ? { bottom: `${keyboardInset + 12}px` } : undefined}
         onClick={onNext}
       >

@@ -186,10 +186,64 @@ describe("EntryFlowClient", () => {
     fireEvent.change(screen.getByLabelText("타석"), { target: { value: "4" } });
 
     expect(screen.getByLabelText("타석")).toHaveAttribute("enterkeyhint", "next");
+    expect(screen.getByLabelText("타석")).toHaveAttribute("inputmode", "numeric");
+    expect(screen.getByLabelText("타석")).toHaveAttribute("pattern", "\\\\d*");
+    expect(screen.getByLabelText("타석")).toHaveAttribute("autocomplete", "off");
+    expect(screen.getByLabelText("타석")).toHaveAttribute("spellcheck", "false");
 
     await activateField("홈런");
 
     expect(screen.getByLabelText("홈런")).toHaveAttribute("enterkeyhint", "done");
+  });
+
+  it("2단계는 form submit으로도 다음 필드로 이동한다", async () => {
+    render(<EntryFlowClient />);
+
+    await userEvent.click(screen.getByRole("button", { name: "다음" }));
+    await setNumericValue("타석", "4");
+
+    const entryForm = screen.getByLabelText("타석").closest("form");
+    expect(entryForm).not.toBeNull();
+
+    fireEvent.submit(entryForm);
+
+    await waitFor(() => expect(screen.getByLabelText("사사구")).toHaveFocus());
+  });
+
+  it("2단계는 form keydown enter로도 다음 필드로 이동한다", async () => {
+    render(<EntryFlowClient />);
+
+    await userEvent.click(screen.getByRole("button", { name: "다음" }));
+    await setNumericValue("타석", "4");
+
+    fireEvent.keyDown(screen.getByLabelText("타석"), { key: "Enter", keyCode: 13 });
+
+    await waitFor(() => expect(screen.getByLabelText("사사구")).toHaveFocus());
+  });
+
+  it("마지막 필드에서는 form submit으로 저장된다", async () => {
+    render(<EntryFlowClient />);
+
+    await userEvent.click(screen.getByRole("button", { name: "다음" }));
+    await setNumericValue("타석", "4");
+    await activateField("사사구");
+    await setNumericValue("사사구", "0");
+    await activateField("1루타");
+    await setNumericValue("1루타", "1");
+    await userEvent.click(screen.getByRole("button", { name: "다음" }));
+    await waitFor(() => expect(screen.getByLabelText("2루타")).toHaveFocus());
+    await userEvent.click(screen.getByRole("button", { name: "다음" }));
+    await waitFor(() => expect(screen.getByLabelText("3루타")).toHaveFocus());
+    await userEvent.click(screen.getByRole("button", { name: "다음" }));
+    await waitFor(() => expect(screen.getByLabelText("홈런")).toHaveFocus());
+    fireEvent.change(screen.getByLabelText("홈런"), { target: { value: "1" } });
+
+    const entryForm = screen.getByLabelText("홈런").closest("form");
+    expect(entryForm).not.toBeNull();
+
+    fireEvent.submit(entryForm);
+
+    await waitFor(() => expect(pushMock).toHaveBeenCalledWith("/home"));
   });
 
   it("2단계에서는 다음 버튼을 노출하고 마지막 필드에서는 저장 버튼으로 바뀐다", async () => {
@@ -227,7 +281,13 @@ describe("EntryFlowClient", () => {
   it("1단계에서 뒤로가기를 하면 이탈 확인 모달을 보여준다", async () => {
     render(<EntryFlowClient />);
 
-    await userEvent.selectOptions(screen.getByLabelText("시 선택"), "10");
+    const hourSelect = screen.getByLabelText("시 선택");
+    const nextHourValue = Array.from(hourSelect.options)
+      .map((option) => option.value)
+      .find((value) => value !== hourSelect.value);
+
+    expect(nextHourValue).toBeTruthy();
+    await userEvent.selectOptions(hourSelect, nextHourValue);
 
     await act(async () => {
       window.dispatchEvent(new PopStateEvent("popstate"));

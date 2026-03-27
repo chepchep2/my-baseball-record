@@ -68,6 +68,9 @@ export default function HomePageClient({ selectedScope = "season" }) {
 
   return (
     <AppPageLayout showTabs={false} frameClassName="milestone-home-frame">
+      <Link href="/games/new" className="milestone-home-fab" aria-label="새 경기 기록 추가">
+        +
+      </Link>
       <section className="panel milestone-home-panel">
         <div className="milestone-home-content">
           <div className="milestone-home-scope-tabs" role="tablist" aria-label="기록 범위 전환">
@@ -109,10 +112,6 @@ export default function HomePageClient({ selectedScope = "season" }) {
             </>
           )}
         </div>
-
-        <Link href="/games/new" className="milestone-home-fab" aria-label="새 경기 기록 추가">
-          +
-        </Link>
       </section>
     </AppPageLayout>
   );

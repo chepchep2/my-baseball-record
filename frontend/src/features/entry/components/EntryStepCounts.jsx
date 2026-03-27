@@ -9,11 +9,26 @@ function normalizeNumericValue(value) {
     return "0";
   }
 
-  return digitsOnly.replace(/^0+(?=\d)/, "");
+  const normalizedValue = digitsOnly.replace(/^0+(?=\d)/, "");
+  return String(Math.min(10, Number.parseInt(normalizedValue, 10)));
 }
 
-function NumericField({ label, value, onChange, isActive, isSelectable, inputRef, onActivate, enterKeyHint }) {
+function NumericField({
+  label,
+  value,
+  onChange,
+  isActive,
+  isSelectable,
+  inputRef,
+  onActivate,
+  enterKeyHint,
+  onSubmitKey,
+}) {
   const inputId = useId();
+  function handleSubmitIntent(event) {
+    event.preventDefault();
+    onSubmitKey();
+  }
 
   return (
     <div
@@ -30,7 +45,7 @@ function NumericField({ label, value, onChange, isActive, isSelectable, inputRef
         }
       }}
       role="button"
-      tabIndex={0}
+      tabIndex={-1}
       aria-disabled={!isSelectable}
       onKeyDown={(event) => {
         if (event.key === "Enter" || event.key === " ") {
@@ -49,9 +64,25 @@ function NumericField({ label, value, onChange, isActive, isSelectable, inputRef
         inputMode="numeric"
         enterKeyHint={enterKeyHint}
         pattern="[0-9]*"
+        maxLength={2}
         value={value}
-        disabled={!isActive || !isSelectable}
+        disabled={!isSelectable}
+        onFocus={() => {
+          if (isSelectable && !isActive) {
+            onActivate();
+          }
+        }}
         onChange={(event) => onChange(normalizeNumericValue(event.target.value))}
+        onBeforeInput={(event) => {
+          if (event.nativeEvent?.inputType === "insertLineBreak") {
+            handleSubmitIntent(event);
+          }
+        }}
+        onKeyDown={(event) => {
+          if (event.key === "Enter") {
+            handleSubmitIntent(event);
+          }
+        }}
       />
     </div>
   );
@@ -66,31 +97,12 @@ export default function EntryStepCounts({
   onSubmit,
 }) {
   const inputRefs = useRef({});
-  const [activeFieldKey, setActiveFieldKey] = useState(fields[0]?.key ?? null);
   const keyboardInset = useKeyboardInset();
-  const atBats = useMemo(() => calculateAtBats(values), [values]);
-  const totalHits = useMemo(() => calculateHits(values), [values]);
+  const [activeFieldKey, setActiveFieldKey] = useState(fields[0]?.key ?? null);
   const hitFields = useMemo(() => fields.slice(2), [fields]);
   const editableFieldKeys = useMemo(
-    () => {
-      const baseFields = fields.slice(0, 2).map((field) => field.key);
-
-      if (atBats === 0) {
-        return baseFields;
-      }
-
-      if (totalHits < atBats) {
-        return fields.map((field) => field.key);
-      }
-
-      let lastFilledHitIndex = hitFields.findLastIndex((field) => Number.parseInt(values[field.key] ?? "0", 10) > 0);
-      if (lastFilledHitIndex < 0) {
-        lastFilledHitIndex = 0;
-      }
-
-      return [...baseFields, ...hitFields.slice(0, lastFilledHitIndex + 1).map((field) => field.key)];
-    },
-    [atBats, fields, hitFields, totalHits, values],
+    () => getEditableFieldKeys(fields, hitFields, values),
+    [fields, hitFields, values],
   );
   const editableFields = useMemo(
     () => fields.filter((field) => editableFieldKeys.includes(field.key)),
@@ -117,6 +129,10 @@ export default function EntryStepCounts({
   }, [activeFieldKey, editableFieldKeys, fields]);
 
   function goNextFieldOrSubmit() {
+    if (!canProceed) {
+      return;
+    }
+
     if (isLastField) {
       onSubmit();
       return;
@@ -144,11 +160,12 @@ export default function EntryStepCounts({
             }}
             onActivate={() => setActiveFieldKey(field.key)}
             onChange={(nextValue) => onChange(field.key, nextValue)}
+            onSubmitKey={goNextFieldOrSubmit}
           />
         ))}
       </div>
 
-      <p className="entry-field-hint">수정할 항목을 누르면 그 입력칸으로 다시 이동합니다.</p>
+      <p className="entry-field-hint">수정할 항목은 칸을 눌러 다시 입력하고, 다음 버튼으로 이동합니다.</p>
 
       {error ? <p className="entry-error-message">{error}</p> : null}
 
@@ -159,8 +176,29 @@ export default function EntryStepCounts({
         onClick={goNextFieldOrSubmit}
         disabled={!canProceed}
       >
-        {isLastField ? "저장" : "다음 항목"}
+        {isLastField ? "저장" : "다음"}
       </button>
     </section>
   );
+}
+
+function getEditableFieldKeys(fields, hitFields, values) {
+  const atBats = calculateAtBats(values);
+  const totalHits = calculateHits(values);
+  const baseFields = fields.slice(0, 2).map((field) => field.key);
+
+  if (atBats === 0) {
+    return baseFields;
+  }
+
+  if (totalHits < atBats) {
+    return fields.map((field) => field.key);
+  }
+
+  let lastFilledHitIndex = hitFields.findLastIndex((field) => Number.parseInt(values[field.key] ?? "0", 10) > 0);
+  if (lastFilledHitIndex < 0) {
+    lastFilledHitIndex = 0;
+  }
+
+  return [...baseFields, ...hitFields.slice(0, lastFilledHitIndex + 1).map((field) => field.key)];
 }

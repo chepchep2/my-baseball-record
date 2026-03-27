@@ -30,6 +30,16 @@ function toNumber(value) {
   return Number.isNaN(parsed) ? 0 : parsed;
 }
 
+function toPlayedAtSortKey(game) {
+  const playedDate = String(game.playedAt ?? "");
+  const playedTime = String(game.playedTime ?? "00:00");
+  return `${playedDate}T${playedTime}`;
+}
+
+function sortGamesByPlayedAtDesc(games) {
+  return [...games].sort((left, right) => toPlayedAtSortKey(right).localeCompare(toPlayedAtSortKey(left)));
+}
+
 function formatAverage(value) {
   if (!Number.isFinite(value) || value <= 0) {
     return "0.000";
@@ -85,7 +95,7 @@ export function saveMockGame(record) {
 }
 
 export function buildHomeDashboardData(selectedScope = "season") {
-  const games = readRawGames();
+  const games = sortGamesByPlayedAtDesc(readRawGames());
   if (games.length === 0) {
     return {
       seasonSummary: {

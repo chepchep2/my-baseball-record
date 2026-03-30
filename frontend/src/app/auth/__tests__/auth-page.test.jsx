@@ -4,9 +4,9 @@ import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import AuthPage from "../page";
 
-const { replaceMock, loginWithProviderTokenMock, clearAuthErrorMock, authState } = vi.hoisted(() => ({
+const { replaceMock, beginKakaoLoginMock, clearAuthErrorMock, authState } = vi.hoisted(() => ({
   replaceMock: vi.fn(),
-  loginWithProviderTokenMock: vi.fn().mockResolvedValue({}),
+  beginKakaoLoginMock: vi.fn(),
   clearAuthErrorMock: vi.fn(),
   authState: {
     isAuthenticated: false,
@@ -25,23 +25,11 @@ vi.mock("@/features/auth/session/useAuthSession", () => ({
   useAuthSession: () => ({
     ...authState,
     clearAuthError: clearAuthErrorMock,
-    loginWithProviderToken: loginWithProviderTokenMock,
   }),
 }));
 
 vi.mock("@/features/auth/api/auth-api", () => ({
-  isMockAuthMode: () => true,
-}));
-
-vi.mock("@/features/auth/kakao/kakao-auth", () => ({
-  mountKakaoLoginButton: vi.fn(async ({ element, onSuccess }) => {
-    const button = document.createElement("button");
-    button.type = "button";
-    button.textContent = "카카오로 시작하기";
-    button.addEventListener("click", () => onSuccess("mock-kakao-token"));
-    element.appendChild(button);
-    return { ok: true, cleanup: () => {} };
-  }),
+  beginKakaoLogin: beginKakaoLoginMock,
 }));
 
 describe("AuthPage", () => {
@@ -57,17 +45,17 @@ describe("AuthPage", () => {
 
     expect(screen.getByText("MY BASEBALL RECORD")).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: /경기 후 기록,/ })).toBeInTheDocument();
-    const button = await screen.findByRole("button", { name: "카카오로 시작하기" });
+    const button = screen.getByRole("button", { name: "카카오로 시작하기" });
     expect(button).toBeInTheDocument();
-    expect(button).not.toHaveClass("google-button-visual");
+    expect(button).toHaveClass("kakao-button-visual");
   });
 
-  it("카카오 로그인 성공 시 홈으로 이동한다", async () => {
+  it("카카오 로그인 버튼을 누르면 백엔드 로그인 시작 URL로 이동한다", async () => {
     render(<AuthPage />);
 
-    await userEvent.click(await screen.findByRole("button", { name: "카카오로 시작하기" }));
+    await userEvent.click(screen.getByRole("button", { name: "카카오로 시작하기" }));
 
-    await waitFor(() => expect(loginWithProviderTokenMock).toHaveBeenCalledWith("mock-kakao-token"));
-    expect(replaceMock).toHaveBeenCalledWith("/home");
+    await waitFor(() => expect(beginKakaoLoginMock).toHaveBeenCalledTimes(1));
+    expect(replaceMock).not.toHaveBeenCalled();
   });
 });

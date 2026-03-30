@@ -43,7 +43,6 @@ function buildHeaders(initialHeaders, accessToken) {
 export function createApiClient({
   fetchImpl = fetch,
   getAccessToken,
-  getRefreshToken,
   refreshSession,
   onRefreshSuccess,
   onRefreshFailed,
@@ -54,19 +53,17 @@ export function createApiClient({
     const response = await fetchImpl(buildUrl(url), {
       ...init,
       headers,
+      credentials: "include",
     });
 
-    if (response.status === 401 && !retried && refreshSession && getRefreshToken) {
-      const refreshToken = getRefreshToken();
-      if (refreshToken) {
-        try {
-          const refreshedSession = await refreshSession(refreshToken);
-          onRefreshSuccess?.(refreshedSession);
-          return request(url, init, true);
-        } catch (error) {
-          onRefreshFailed?.(error);
-          throw error;
-        }
+    if (response.status === 401 && !retried && refreshSession) {
+      try {
+        const refreshedSession = await refreshSession();
+        onRefreshSuccess?.(refreshedSession);
+        return request(url, init, true);
+      } catch (error) {
+        onRefreshFailed?.(error);
+        throw error;
       }
     }
 

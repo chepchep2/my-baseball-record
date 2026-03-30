@@ -77,7 +77,8 @@ public class SecurityConfig {
                 "http://localhost:3000",
                 "http://127.0.0.1:3000",
                 "https://my-baseball-record.vercel.app",
-                "https://app.plannr.cloud"
+                "https://app.plannr.cloud",
+                "https://app.mybaseball.cloud"
         ));
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("*"));

@@ -54,7 +54,7 @@ class AuthRefreshServiceTest {
     @DisplayName("유효한 refresh token이면 access/refresh를 재발급하고 기존 refresh를 회전한다")
     void refreshSessionRotatesRefreshToken() {
         RefreshToken stored = new RefreshToken(1L, "aaa.bbb.ccc", Instant.parse("2999-01-01T00:00:00Z"));
-        User user = User.existing(1L, "google-sub-1", "user@gmail.com", "조상우");
+        User user = User.existing(1L, "kakao-sub-1", null, "조상우", "KAKAO", "https://k.kakaocdn.net/profile.png");
 
         when(refreshTokenValidator.validateAndGetUserId("aaa.bbb.ccc")).thenReturn(1L);
         when(refreshTokenRepository.findByToken("aaa.bbb.ccc")).thenReturn(Optional.of(stored));
@@ -70,6 +70,7 @@ class AuthRefreshServiceTest {
         assertThat(result.accessToken()).isEqualTo("new-access");
         assertThat(result.refreshToken()).isEqualTo("new.refresh.token");
         assertThat(result.user().id()).isEqualTo(1L);
+        assertThat(result.user().profileImageUrl()).isEqualTo("https://k.kakaocdn.net/profile.png");
         verify(refreshTokenRepository).delete(stored);
 
         ArgumentCaptor<RefreshToken> captor = ArgumentCaptor.forClass(RefreshToken.class);

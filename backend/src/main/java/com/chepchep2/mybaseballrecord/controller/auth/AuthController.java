@@ -85,7 +85,7 @@ public class AuthController {
                 new AuthSessionResponse.AuthSessionUserResponse(
                         result.user().id(),
                         result.user().displayName(),
-                        null
+                        result.user().profileImageUrl()
                 )
         );
     }

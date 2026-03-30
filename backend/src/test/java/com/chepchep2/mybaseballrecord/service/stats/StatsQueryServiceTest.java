@@ -4,13 +4,7 @@ import com.chepchep2.mybaseballrecord.domain.game.BatterRecord;
 import com.chepchep2.mybaseballrecord.domain.game.GameRecord;
 import com.chepchep2.mybaseballrecord.domain.game.GameType;
 import com.chepchep2.mybaseballrecord.domain.game.ParticipationType;
-import com.chepchep2.mybaseballrecord.domain.game.PitcherRecord;
-import com.chepchep2.mybaseballrecord.domain.stats.StatsGameFilter;
-import com.chepchep2.mybaseballrecord.domain.stats.StatsRecordType;
-import com.chepchep2.mybaseballrecord.domain.stats.StatsScope;
-import com.chepchep2.mybaseballrecord.dto.stats.response.BatterStatsResponse;
-import com.chepchep2.mybaseballrecord.dto.stats.response.PitcherStatsResponse;
-import com.chepchep2.mybaseballrecord.exception.stats.InvalidStatsQueryException;
+import com.chepchep2.mybaseballrecord.dto.stats.response.BatterStatsSummaryResponse;
 import com.chepchep2.mybaseballrecord.repository.game.BatterRecordRepository;
 import com.chepchep2.mybaseballrecord.repository.game.GameRecordRepository;
 import com.chepchep2.mybaseballrecord.repository.game.PitcherRecordRepository;
@@ -22,6 +16,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.time.Clock;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -29,7 +24,6 @@ import java.time.ZonedDateTime;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -48,15 +42,15 @@ class StatsQueryServiceTest {
     private CurrentUserProvider currentUserProvider;
 
     @Mock
-    private java.time.Clock clock;
+    private Clock clock;
 
     @InjectMocks
     private StatsQueryService statsQueryService;
 
     @Test
-    @DisplayName("batter current_season all 집계를 계산한다")
-    void queryBatterStatsCurrentSeasonAll() throws Exception {
-        GameRecord game = createGame(1L, 2026, GameType.LEAGUE);
+    @DisplayName("scope=season이면 현재 연도 기준 타자 홈 요약을 반환한다")
+    void querySeasonSummary() throws Exception {
+        GameRecord game = createGame(1L, 2026, LocalDateTime.parse("2026-03-18T19:00:00"));
         BatterRecord batter = BatterRecord.builder()
                 .gameId(1L)
                 .plateAppearances(4)
@@ -81,89 +75,26 @@ class StatsQueryServiceTest {
         when(gameRecordRepository.findAllByUserIdAndSeasonYear(1L, 2026)).thenReturn(List.of(game));
         when(batterRecordRepository.findAllByGameIdIn(List.of(1L))).thenReturn(List.of(batter));
 
-        BatterStatsResponse response = (BatterStatsResponse) statsQueryService.query(
-                StatsScope.current_season,
-                null,
-                StatsRecordType.batter,
-                StatsGameFilter.all
-        );
+        BatterStatsSummaryResponse response = statsQueryService.query("season");
 
-        assertThat(response.seasonYear()).isEqualTo(2026);
-        assertThat(response.summary().games()).isEqualTo(1);
-        assertThat(response.summary().atBats()).isEqualTo(3);
-        assertThat(response.summary().hits()).isEqualTo(2);
-        assertThat(response.summary().battingAverage()).isEqualTo("0.667");
-        assertThat(response.summary().ops()).isEqualTo("1.750");
-        assertThat(response.isEmpty()).isFalse();
+        assertThat(response.scope()).isEqualTo("season");
+        assertThat(response.battingAverage()).isEqualTo("0.667");
+        assertThat(response.ops()).isEqualTo("1.750");
+        assertThat(response.hits()).isEqualTo(2);
+        assertThat(response.onBasePercentage()).isEqualTo("0.750");
+        assertThat(response.sluggingPercentage()).isEqualTo("1.000");
     }
 
     @Test
-    @DisplayName("pitcher career league 집계를 계산한다")
-    void queryPitcherStatsCareerLeague() throws Exception {
-        GameRecord leagueGame = createGame(10L, 2025, GameType.LEAGUE);
-        GameRecord nonOfficialGame = createGame(11L, 2025, GameType.NON_OFFICIAL);
+    @DisplayName("scope=career이면 통산 타자 홈 요약을 반환한다")
+    void queryCareerSummary() throws Exception {
+        GameRecord game2025 = createGame(10L, 2025, LocalDateTime.parse("2025-03-18T19:00:00"));
+        GameRecord game2026 = createGame(11L, 2026, LocalDateTime.parse("2026-03-19T14:10:00"));
 
-        PitcherRecord pitcherLeague = PitcherRecord.builder()
+        BatterRecord batter2025 = BatterRecord.builder()
                 .gameId(10L)
-                .innings(3)
-                .additionalOuts(2)
-                .runsAllowed(1)
-                .earnedRuns(1)
-                .hitsAllowed(3)
-                .walks(1)
-                .hitByPitch(0)
-                .homeRunsAllowed(0)
-                .strikeOuts(4)
-                .battersFaced(15)
-                .wins(1)
-                .losses(0)
-                .saves(0)
-                .holds(0)
-                .build();
-
-        when(currentUserProvider.getCurrentUserId()).thenReturn(1L);
-        when(gameRecordRepository.findAllByUserId(1L)).thenReturn(List.of(leagueGame, nonOfficialGame));
-        when(pitcherRecordRepository.findAllByGameIdIn(List.of(10L))).thenReturn(List.of(pitcherLeague));
-
-        PitcherStatsResponse response = (PitcherStatsResponse) statsQueryService.query(
-                StatsScope.career,
-                null,
-                StatsRecordType.pitcher,
-                StatsGameFilter.league
-        );
-
-        assertThat(response.seasonYear()).isNull();
-        assertThat(response.summary().games()).isEqualTo(1);
-        assertThat(response.summary().inningsPitchedDisplay()).isEqualTo("3.2");
-        assertThat(response.summary().era()).isEqualTo("2.45");
-        assertThat(response.summary().whip()).isEqualTo("1.09");
-        assertThat(response.summary().strikeOuts()).isEqualTo(4);
-        assertThat(response.summary().wins()).isEqualTo(1);
-        assertThat(response.details().opponentBattingAverage()).isEqualTo("0.214");
-    }
-
-    @Test
-    @DisplayName("scope=season에서 seasonYear 누락이면 예외를 던진다")
-    void queryThrowsWhenSeasonYearMissing() {
-        when(currentUserProvider.getCurrentUserId()).thenReturn(1L);
-        assertThatThrownBy(() -> statsQueryService.query(
-                StatsScope.season,
-                null,
-                StatsRecordType.batter,
-                StatsGameFilter.all
-        ))
-                .isInstanceOf(InvalidStatsQueryException.class)
-                .hasMessageContaining("seasonYear");
-    }
-
-    @Test
-    @DisplayName("OBP는 sacrificeHits를 분모에 포함하지 않는다")
-    void queryBatterObpDoesNotUseSacrificeHits() throws Exception {
-        GameRecord game = createGame(2L, 2026, GameType.LEAGUE);
-        BatterRecord batter = BatterRecord.builder()
-                .gameId(2L)
-                .plateAppearances(5)
-                .atBats(2)
+                .plateAppearances(4)
+                .atBats(3)
                 .singles(1)
                 .doubles(0)
                 .triples(0)
@@ -175,35 +106,51 @@ class StatsQueryServiceTest {
                 .runs(0)
                 .stolenBases(0)
                 .caughtStealing(0)
-                .sacrificeHits(2)
+                .sacrificeHits(0)
                 .build();
 
-        when(clock.getZone()).thenReturn(ZoneId.of("UTC"));
-        when(clock.instant()).thenReturn(ZonedDateTime.parse("2026-03-20T00:00:00Z").toInstant());
+        BatterRecord batter2026 = BatterRecord.builder()
+                .gameId(11L)
+                .plateAppearances(5)
+                .atBats(4)
+                .singles(1)
+                .doubles(1)
+                .triples(0)
+                .homeRuns(1)
+                .walks(1)
+                .strikeOuts(1)
+                .hitByPitch(0)
+                .runsBattedIn(3)
+                .runs(2)
+                .stolenBases(0)
+                .caughtStealing(0)
+                .sacrificeHits(0)
+                .build();
+
         when(currentUserProvider.getCurrentUserId()).thenReturn(1L);
-        when(gameRecordRepository.findAllByUserIdAndSeasonYear(1L, 2026)).thenReturn(List.of(game));
-        when(batterRecordRepository.findAllByGameIdIn(List.of(2L))).thenReturn(List.of(batter));
+        when(gameRecordRepository.findAllByUserId(1L)).thenReturn(List.of(game2025, game2026));
+        when(batterRecordRepository.findAllByGameIdIn(List.of(10L, 11L))).thenReturn(List.of(batter2025, batter2026));
 
-        BatterStatsResponse response = (BatterStatsResponse) statsQueryService.query(
-                StatsScope.current_season,
-                null,
-                StatsRecordType.batter,
-                StatsGameFilter.all
-        );
+        BatterStatsSummaryResponse response = statsQueryService.query("career");
 
-        assertThat(response.details().onBasePercentage()).isEqualTo("0.667");
+        assertThat(response.scope()).isEqualTo("career");
+        assertThat(response.hits()).isEqualTo(4);
+        assertThat(response.battingAverage()).isEqualTo("0.571");
+        assertThat(response.onBasePercentage()).isEqualTo("0.667");
+        assertThat(response.sluggingPercentage()).isEqualTo("1.143");
+        assertThat(response.ops()).isEqualTo("1.810");
     }
 
-    private GameRecord createGame(long id, int seasonYear, GameType gameType) throws Exception {
+    private GameRecord createGame(long id, int seasonYear, LocalDateTime playedAt) throws Exception {
         GameRecord game = GameRecord.builder()
-                .playedAt(LocalDateTime.parse(seasonYear + "-03-18T00:00:00"))
+                .playedAt(playedAt)
                 .seasonYear(seasonYear)
-                .gameType(gameType)
+                .gameType(GameType.LEAGUE)
                 .teamName("블루스톰")
                 .opponentName("레전드")
                 .memo(null)
                 .userId(1L)
-                .participationType(ParticipationType.BOTH)
+                .participationType(ParticipationType.BATTER)
                 .build();
         var idField = GameRecord.class.getDeclaredField("id");
         idField.setAccessible(true);

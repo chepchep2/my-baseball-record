@@ -1,9 +1,22 @@
 import { ApiError } from "@/features/auth/api/auth-api";
 
 function getApiBaseUrl() {
-  return (
+  const configuredApiBaseUrl = (
     typeof process !== "undefined" && process.env ? process.env.NEXT_PUBLIC_API_BASE_URL || "" : ""
   ).replace(/\/$/, "");
+
+  if (configuredApiBaseUrl) {
+    return configuredApiBaseUrl;
+  }
+
+  if (typeof window !== "undefined") {
+    const { protocol, hostname } = window.location;
+    if (hostname === "localhost" || hostname === "127.0.0.1") {
+      return `${protocol}//${hostname}:8080`;
+    }
+  }
+
+  return "";
 }
 
 function buildUrl(url) {

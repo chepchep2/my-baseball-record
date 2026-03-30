@@ -1,8 +1,5 @@
 package com.chepchep2.mybaseballrecord.controller.stats;
 
-import com.chepchep2.mybaseballrecord.domain.stats.StatsGameFilter;
-import com.chepchep2.mybaseballrecord.domain.stats.StatsRecordType;
-import com.chepchep2.mybaseballrecord.domain.stats.StatsScope;
 import com.chepchep2.mybaseballrecord.service.stats.StatsQueryService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -21,14 +18,7 @@ public class StatsQueryController {
     }
 
     @GetMapping
-    public ResponseEntity<?> getStats(
-            @RequestParam StatsScope scope,
-            @RequestParam(required = false) Integer seasonYear,
-            @RequestParam StatsRecordType recordType,
-            @RequestParam StatsGameFilter gameFilter
-    ) {
-        return ResponseEntity.ok(
-                statsQueryService.query(scope, seasonYear, recordType, gameFilter)
-        );
+    public ResponseEntity<?> getStats(@RequestParam String scope) {
+        return ResponseEntity.ok(statsQueryService.query(scope));
     }
 }

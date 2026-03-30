@@ -4,7 +4,7 @@
 
 **Goal:** 카카오 로그인 기반 JWT 인증과 1차 마일스톤용 기록 생성/요약/최근 경기 조회 API를 현재 백엔드 구조 위에 맞게 구현한다.
 
-**Architecture:** 기존 Spring Boot 계층형 구조를 유지한다. 인증은 `GET /api/auth/kakao/login -> GET /api/auth/kakao/callback -> GET /api/auth/session -> POST /api/auth/refresh -> POST /api/auth/logout` 흐름으로 정리하고, `refresh token`은 HttpOnly cookie로 관리한다. 기록/통계는 기존 game/stats 서비스를 재사용하되 1차 마일스톤 입력 모델과 응답 계약에 맞게 DTO, 계산, 검증 규칙을 재정의한다.
+**Architecture:** 기존 Spring Boot 계층형 구조를 유지한다. 인증은 `GET /api/auth/kakao/login -> GET /api/auth/kakao/callback -> GET /api/auth/session -> POST /api/auth/refresh -> POST /api/auth/logout` 흐름으로 정리하고, `refresh token`은 HttpOnly cookie로 관리한다. 기록/통계는 기존 game/stats 서비스를 재사용하되 1차 마일스톤 입력 모델과 응답 계약에 맞게 DTO, 계산, 검증 규칙을 재정의한다. 경기 시각의 canonical 저장 필드는 `played_at`으로 두고, 모든 game row는 현재 인증 사용자의 `user_id`에 귀속시킨다.
 
 **Tech Stack:** Java 21, Spring Boot, Spring Security, JPA, Flyway, PostgreSQL, JUnit 5, MockMvc
 
@@ -189,6 +189,7 @@ Implementation notes:
 - `AuthService` should no longer depend on `GoogleTokenVerifier`
 - add a dedicated callback login method that accepts `authorizationCode`
 - map Kakao user info to existing `User` domain
+- callback 이후 프론트 bootstrap 흐름을 위해 redirect target과 cookie set 시점을 함께 정리한다
 
 - [ ] **Step 4: Run the auth service tests again**
 
@@ -238,6 +239,8 @@ Implementation notes:
 - remove refresh/logout request bodies from controller contract
 - use `RefreshTokenCookieManager` for set/clear logic
 - keep DB-backed refresh token validation and rotation
+- frontend auth/session requests must work with `credentials: include`
+- backend CORS and cookie policy must allow credential-based refresh/session bootstrap
 
 - [ ] **Step 4: Run the same auth refresh/logout tests again**
 
@@ -283,6 +286,8 @@ Expected:
 Implementation notes:
 - remove pitcher/team/memo/etc from create request
 - enforce integer and range validation at DTO level where practical
+- request의 `playedDate`, `playedHour`, `playedMinute`는 저장 시 `played_at`으로 합친다
+- `userId`는 요청에서 받지 않고 JWT subject 기준으로 결정한다
 
 - [ ] **Step 4: Run the controller test again**
 
@@ -330,6 +335,7 @@ Expected:
 Implementation notes:
 - keep server-side validation even if frontend already validates
 - centralize stat math close to batter domain/service logic
+- 최근 경기 정렬과 시즌 집계가 흔들리지 않도록 `played_at`을 기준 필드로 사용한다
 
 - [ ] **Step 4: Run the service test again**
 
@@ -463,6 +469,8 @@ Implementation notes:
 - keep detail endpoint if it already exists
 - add `recent` as a sibling read endpoint
 - return a wrapper object with `items`
+- ordering must be `played_at DESC`, not `created_at DESC`
+- all recent items are filtered by the authenticated user's `user_id`
 
 - [ ] **Step 4: Run the recent games tests again**
 
@@ -503,6 +511,7 @@ Run the auth controller test command from Task 1.
 Implementation notes:
 - add placeholders for client id/secret/redirect uri
 - document local/prod env names clearly
+- document cookie `Domain`, `SameSite`, `Secure`, and credential-based CORS assumptions clearly
 
 - [ ] **Step 4: Run auth controller tests again**
 
@@ -561,7 +570,10 @@ git commit -m "test: 백엔드 1차 인증과 기록 조회 검증을 마무리�
 - 기존 Google 로그인 관련 코드가 많으므로, 새 Kakao 흐름을 붙일 때는 “공존”보다 “계약을 새 설계에 맞게 교체”하는 쪽으로 간다.
 - refresh token은 더 이상 JSON body로 주고받지 않는다.
 - `GET /api/auth/session`은 프론트가 callback 리다이렉트 이후 초기 access token과 user 정보를 받는 용도다.
+- 프론트 인증 관련 요청은 `credentials: include`를 사용한다.
+- backend CORS는 credential 요청을 허용해야 한다.
 - `GET /api/stats?scope=season|career`는 현재 사용자 기준으로만 동작한다.
 - `GET /api/games/recent?limit=3`는 목록 API이고, 상세 조회 API와 응답 책임이 다르다.
+- 최근 경기 목록의 recent는 최근 생성 순이 아니라 실제 경기 시각 `played_at DESC`를 의미한다.
 
 Plan complete and saved to `docs/milestone-1/2026-03-27-backend-implementation-plan.md`. Ready to execute?

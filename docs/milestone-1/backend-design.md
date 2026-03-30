@@ -95,6 +95,13 @@
 - `Path=/api/auth`
 - `Max-Age=30일`
 
+브라우저/배포 조건 원칙:
+
+- 프론트의 인증 관련 요청(`GET /api/auth/session`, `POST /api/auth/refresh`, `POST /api/auth/logout`)은 `credentials: include`를 사용한다.
+- 백엔드는 인증 관련 CORS 설정에서 credential 요청을 허용한다.
+- `refresh token` cookie의 `Domain`과 `SameSite` 값은 실제 프론트/백엔드 배포 도메인 구조에 맞춰 확정한다.
+- 배포 환경에서는 `Secure` cookie를 전제로 한다.
+
 ### 4.3 로그인 성공 응답
 
 카카오 callback 처리 자체는 JSON 응답을 반환하지 않고, 프론트 앱으로 리다이렉트한다.
@@ -183,6 +190,24 @@
   - 최근 경기 목록
 
 즉 홈 화면이 하나라는 이유만으로 `GET /api/home` 같은 화면 종속 API로 묶지 않고, 도메인 책임 기준으로 나눈다.
+
+## 5.1 데이터 저장 기준
+
+이번 1차에서 경기 시각의 canonical 저장 필드는 `played_at`으로 본다.
+
+- 프론트 입력은 `playedDate`, `playedHour`, `playedMinute`로 받는다.
+- 백엔드는 이 입력값을 합쳐 `played_at` datetime 필드로 저장한다.
+- 최근 경기 정렬, 시즌 필터링, 통계 집계의 기준은 모두 `played_at`으로 맞춘다.
+- 응답에서는 프론트 사용성을 위해 다시 `playedDate`, `playedHour`, `playedMinute`, `playedAtLabel`로 풀어준다.
+
+## 5.2 사용자 소유권 기준
+
+모든 경기 기록은 인증된 현재 사용자에게 귀속된다.
+
+- `games` 저장 시 `user_id`를 반드시 함께 저장한다.
+- `POST /api/games` 요청 바디에는 `userId`를 받지 않는다.
+- 백엔드는 JWT access token의 subject에서 현재 사용자 id를 읽어 `user_id`를 결정한다.
+- `GET /api/stats?scope=...`, `GET /api/games/recent?limit=...`는 모두 현재 인증 사용자 기준으로만 조회한다.
 
 ## 6. API 목록
 
@@ -317,6 +342,8 @@
 - 타자 경기 기록 1건을 생성한다.
 - 입력값 검증과 계산을 모두 서버에서 수행한다.
 - 생성된 경기 상세 전체를 응답으로 반환한다.
+- 백엔드는 현재 인증 사용자의 `user_id`를 함께 저장한다.
+- 저장 기준 시각은 `played_at` canonical field를 사용한다.
 
 요청 필드:
 
@@ -471,6 +498,7 @@
 
 - 최근 경기 목록을 조회한다.
 - 개수는 `limit` 파라미터로 받는다.
+- 정렬 기준은 최근 생성 순서가 아니라 실제 경기 시각(`played_at`) 기준 내림차순이다.
 
 이 API는 `최근 경기 3개 전용 API`가 아니라, 최근 경기 목록 조회 API로 설계한다.
 현재 홈 화면에서는 `limit=3`을 사용하지만, 이후 화면 정책이 바뀌어도 API를 다시 만들지 않도록 한다.

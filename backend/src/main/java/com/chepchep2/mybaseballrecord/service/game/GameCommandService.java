@@ -12,13 +12,20 @@ import com.chepchep2.mybaseballrecord.dto.game.response.GameDetailResponse;
 import com.chepchep2.mybaseballrecord.dto.game.response.GameInfoResponse;
 import com.chepchep2.mybaseballrecord.dto.game.response.GamePitcherResponse;
 import com.chepchep2.mybaseballrecord.exception.game.GameImmutableFieldException;
+import com.chepchep2.mybaseballrecord.exception.game.InvalidGameCreateException;
 import com.chepchep2.mybaseballrecord.exception.game.GameNotFoundException;
 import com.chepchep2.mybaseballrecord.repository.game.BatterRecordRepository;
 import com.chepchep2.mybaseballrecord.repository.game.GameRecordRepository;
 import com.chepchep2.mybaseballrecord.repository.game.PitcherRecordRepository;
 import com.chepchep2.mybaseballrecord.service.auth.CurrentUserProvider;
 import jakarta.transaction.Transactional;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.time.Clock;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 
 @Service
 public class GameCommandService {
@@ -26,89 +33,87 @@ public class GameCommandService {
     private final BatterRecordRepository batterRecordRepository;
     private final PitcherRecordRepository pitcherRecordRepository;
     private final CurrentUserProvider currentUserProvider;
+    private final Clock clock;
 
+    @Autowired
     public GameCommandService(
             GameRecordRepository gameRecordRepository,
             BatterRecordRepository batterRecordRepository,
             PitcherRecordRepository pitcherRecordRepository,
             CurrentUserProvider currentUserProvider
     ) {
+        this(
+                gameRecordRepository,
+                batterRecordRepository,
+                pitcherRecordRepository,
+                currentUserProvider,
+                Clock.system(ZoneId.of("Asia/Seoul"))
+        );
+    }
+
+    public GameCommandService(
+            GameRecordRepository gameRecordRepository,
+            BatterRecordRepository batterRecordRepository,
+            PitcherRecordRepository pitcherRecordRepository,
+            CurrentUserProvider currentUserProvider,
+            Clock clock
+    ) {
         this.gameRecordRepository = gameRecordRepository;
         this.batterRecordRepository = batterRecordRepository;
         this.pitcherRecordRepository = pitcherRecordRepository;
         this.currentUserProvider = currentUserProvider;
+        this.clock = clock == null ? Clock.system(ZoneId.of("Asia/Seoul")) : clock;
     }
 
     @Transactional
     public GameDetailResponse create(GameCreateRequest request) {
         long userId = currentUserProvider.getCurrentUserId();
-        int seasonYear = request.gameInfo().seasonYear() != null
-                ? request.gameInfo().seasonYear()
-                : request.gameInfo().playedAt().getYear();
+        validateCreateRequest(request);
+        LocalDateTime playedAt = LocalDateTime.of(
+                request.playedDate(),
+                java.time.LocalTime.of(request.playedHour(), request.playedMinute())
+        );
+        int seasonYear = request.playedDate().getYear();
 
-        ParticipationType participationType = resolveParticipationType(request);
         GameRecord savedGame = gameRecordRepository.save(
                 GameRecord.builder()
-                        .playedAt(request.gameInfo().playedAt())
+                        .playedAt(playedAt)
                         .seasonYear(seasonYear)
-                        .gameType(request.gameInfo().gameType())
-                        .teamName(normalizeOptionalName(request.gameInfo().teamName()))
-                        .opponentName(normalizeOptionalName(request.gameInfo().opponentName()))
-                        .memo(request.gameInfo().memo())
+                        .gameType(com.chepchep2.mybaseballrecord.domain.game.GameType.LEAGUE)
+                        .teamName("")
+                        .opponentName("")
+                        .memo(null)
                         .userId(userId)
-                        .participationType(participationType)
+                        .participationType(ParticipationType.BATTER)
                         .build()
         );
 
-        GameBatterResponse batterResponse = null;
-        if (request.batter() != null) {
-            BatterRecord savedBatter = batterRecordRepository.save(
-                    BatterRecord.builder()
-                            .gameId(savedGame.id())
-                            .plateAppearances(request.batter().plateAppearances())
-                            .atBats(request.batter().atBats())
-                            .singles(request.batter().singles())
-                            .doubles(request.batter().doubles())
-                            .triples(request.batter().triples())
-                            .homeRuns(request.batter().homeRuns())
-                            .walks(request.batter().walks())
-                            .strikeOuts(request.batter().strikeOuts())
-                            .hitByPitch(request.batter().hitByPitch())
-                            .runsBattedIn(request.batter().runsBattedIn())
-                            .runs(request.batter().runs())
-                            .stolenBases(request.batter().stolenBases())
-                            .caughtStealing(request.batter().caughtStealing())
-                            .sacrificeHits(request.batter().sacrificeHits())
-                            .build()
-            );
-            batterResponse = toBatterResponse(savedBatter);
-        }
+        int walks = request.walksAndHitByPitch();
+        int hitByPitch = 0;
+        int atBats = request.plateAppearances() - request.walksAndHitByPitch();
+        int hits = request.singles() + request.doubles() + request.triples() + request.homeRuns();
 
-        GamePitcherResponse pitcherResponse = null;
-        if (request.pitcher() != null) {
-            PitcherRecord savedPitcher = pitcherRecordRepository.save(
-                    PitcherRecord.builder()
-                            .gameId(savedGame.id())
-                            .innings(request.pitcher().innings())
-                            .additionalOuts(request.pitcher().additionalOuts())
-                            .runsAllowed(request.pitcher().runsAllowed())
-                            .earnedRuns(request.pitcher().earnedRuns())
-                            .hitsAllowed(request.pitcher().hitsAllowed())
-                            .walks(request.pitcher().walks())
-                            .hitByPitch(request.pitcher().hitByPitch())
-                            .homeRunsAllowed(request.pitcher().homeRunsAllowed())
-                            .strikeOuts(request.pitcher().strikeOuts())
-                            .battersFaced(request.pitcher().battersFaced())
-                            .wins(request.pitcher().wins())
-                            .losses(request.pitcher().losses())
-                            .saves(request.pitcher().saves())
-                            .holds(request.pitcher().holds())
-                            .build()
-            );
-            pitcherResponse = toPitcherResponse(savedPitcher);
-        }
+        BatterRecord savedBatter = batterRecordRepository.save(
+                BatterRecord.builder()
+                        .gameId(savedGame.id())
+                        .plateAppearances(request.plateAppearances())
+                        .atBats(atBats)
+                        .singles(request.singles())
+                        .doubles(request.doubles())
+                        .triples(request.triples())
+                        .homeRuns(request.homeRuns())
+                        .walks(walks)
+                        .strikeOuts(0)
+                        .hitByPitch(hitByPitch)
+                        .runsBattedIn(0)
+                        .runs(0)
+                        .stolenBases(0)
+                        .caughtStealing(0)
+                        .sacrificeHits(0)
+                        .build()
+        );
 
-        return toDetailResponse(savedGame, batterResponse, pitcherResponse);
+        return toMilestoneCreateDetail(savedGame, savedBatter);
     }
 
     @Transactional
@@ -234,13 +239,7 @@ public class GameCommandService {
     }
 
     private ParticipationType resolveParticipationType(GameCreateRequest request) {
-        if (request.batter() != null && request.pitcher() != null) {
-            return ParticipationType.BOTH;
-        }
-        if (request.batter() != null) {
-            return ParticipationType.BATTER;
-        }
-        return ParticipationType.PITCHER;
+        return ParticipationType.BATTER;
     }
 
     private ParticipationType resolveParticipationType(GameUpdateRequest request) {
@@ -254,7 +253,7 @@ public class GameCommandService {
     }
 
     private void validateImmutableFields(GameRecord game, GameUpdateInfoRequest gameInfo) {
-        if (gameInfo.playedAt() != null && !game.playedAt().equals(gameInfo.playedAt())) {
+        if (gameInfo.playedAt() != null && !game.playedAt().toLocalDate().equals(gameInfo.playedAt())) {
             throw new GameImmutableFieldException("playedAt");
         }
         if (gameInfo.gameType() != null && !game.gameType().equals(gameInfo.gameType())) {
@@ -273,7 +272,7 @@ public class GameCommandService {
         return new GameDetailResponse(
                 game.id(),
                 new GameInfoResponse(
-                        game.playedAt(),
+                        game.playedAt().toLocalDate(),
                         game.seasonYear(),
                         game.gameType(),
                         game.teamName(),
@@ -329,5 +328,64 @@ public class GameCommandService {
             return "";
         }
         return value.trim();
+    }
+
+    private void validateCreateRequest(GameCreateRequest request) {
+        LocalDateTime playedAt = LocalDateTime.of(
+                request.playedDate(),
+                java.time.LocalTime.of(request.playedHour(), request.playedMinute())
+        );
+        LocalDateTime now = LocalDateTime.now(clock);
+        if (playedAt.isAfter(now)) {
+            throw new InvalidGameCreateException("playedAt", "future playedAt is not allowed.");
+        }
+        if (request.walksAndHitByPitch() > request.plateAppearances()) {
+            throw new InvalidGameCreateException("walksAndHitByPitch", "walksAndHitByPitch must not exceed plateAppearances.");
+        }
+        int atBats = request.plateAppearances() - request.walksAndHitByPitch();
+        int hits = request.singles() + request.doubles() + request.triples() + request.homeRuns();
+        if (hits > atBats) {
+            throw new InvalidGameCreateException("hits", "hits must not exceed atBats.");
+        }
+    }
+
+    private GameDetailResponse toMilestoneCreateDetail(GameRecord game, BatterRecord batter) {
+        int hits = batter.singles() + batter.doubles() + batter.triples() + batter.homeRuns();
+        int totalBases = batter.singles() + (batter.doubles() * 2) + (batter.triples() * 3) + (batter.homeRuns() * 4);
+        double battingAverage = divideOrZero(hits, batter.atBats());
+        double onBasePercentage = divideOrZero(hits + batter.walks() + batter.hitByPitch(), batter.plateAppearances());
+        double sluggingPercentage = divideOrZero(totalBases, batter.atBats());
+        double ops = onBasePercentage + sluggingPercentage;
+
+        return new GameDetailResponse(
+                game.id(),
+                game.playedAt().toLocalDate(),
+                game.playedAt().getHour(),
+                game.playedAt().getMinute(),
+                DateTimeFormatter.ofPattern("M/d HH:mm").format(game.playedAt()),
+                batter.plateAppearances(),
+                batter.walks() + batter.hitByPitch(),
+                batter.singles(),
+                batter.doubles(),
+                batter.triples(),
+                batter.homeRuns(),
+                batter.atBats(),
+                hits,
+                round3(battingAverage),
+                round3(onBasePercentage),
+                round3(sluggingPercentage),
+                round3(ops)
+        );
+    }
+
+    private double divideOrZero(int numerator, int denominator) {
+        if (denominator == 0) {
+            return 0.0;
+        }
+        return (double) numerator / denominator;
+    }
+
+    private double round3(double value) {
+        return Math.round(value * 1000) / 1000.0;
     }
 }

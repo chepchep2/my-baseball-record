@@ -23,6 +23,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.List;
@@ -195,7 +196,7 @@ class StatsQueryServiceTest {
 
     private GameRecord createGame(long id, int seasonYear, GameType gameType) throws Exception {
         GameRecord game = GameRecord.builder()
-                .playedAt(LocalDate.parse(seasonYear + "-03-18"))
+                .playedAt(LocalDateTime.parse(seasonYear + "-03-18T00:00:00"))
                 .seasonYear(seasonYear)
                 .gameType(gameType)
                 .teamName("블루스톰")

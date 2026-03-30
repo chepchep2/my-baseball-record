@@ -11,7 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.context.ActiveProfiles;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -33,7 +33,7 @@ class GameRepositoryTest {
     void saveGameAndBatter() {
         GameRecord game = gameRecordRepository.save(
                 new GameRecord(
-                        LocalDate.parse("2026-03-18"),
+                        LocalDateTime.parse("2026-03-18T00:00:00"),
                         2026,
                         GameType.LEAGUE,
                         "블루스톰",
@@ -56,7 +56,7 @@ class GameRepositoryTest {
     void saveGameAndPitcher() {
         GameRecord game = gameRecordRepository.save(
                 new GameRecord(
-                        LocalDate.parse("2026-03-19"),
+                        LocalDateTime.parse("2026-03-19T00:00:00"),
                         2026,
                         GameType.NON_OFFICIAL,
                         "블루스톰",
@@ -79,7 +79,7 @@ class GameRepositoryTest {
     void deleteGameCascadesChildRecords() {
         GameRecord game = gameRecordRepository.save(
                 new GameRecord(
-                        LocalDate.parse("2026-03-20"),
+                        LocalDateTime.parse("2026-03-20T00:00:00"),
                         2026,
                         GameType.LEAGUE,
                         "블루스톰",

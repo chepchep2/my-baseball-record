@@ -49,7 +49,7 @@ public class GameQueryService {
         return new GameDetailResponse(
                 game.id(),
                 new GameInfoResponse(
-                        game.playedAt(),
+                        game.playedAt().toLocalDate(),
                         game.seasonYear(),
                         game.gameType(),
                         game.teamName(),

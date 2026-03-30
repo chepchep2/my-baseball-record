@@ -70,7 +70,7 @@ public class AuthService {
 
     public AuthLoginResult loginWithGoogle(String idToken) {
         GoogleTokenVerifier.GoogleUserInfo googleUserInfo = googleTokenVerifier.verify(idToken);
-        User user = userRepository.findByEmail(googleUserInfo.email())
+        User user = userRepository.findByProviderAndProviderSubject("GOOGLE", googleUserInfo.subject())
                 .orElseGet(() -> userRepository.save(
                         User.createNew(
                                 googleUserInfo.subject(),
@@ -92,7 +92,8 @@ public class AuthService {
                         user.id(),
                         user.displayName(),
                         user.email(),
-                        user.provider()
+                        user.provider(),
+                        user.profileImageUrl()
                 )
         );
     }
@@ -121,14 +122,22 @@ public class AuthService {
             throw new KakaoAuthFailedException("kakao user info is invalid.");
         }
 
-        String email = resolveKakaoEmail(kakaoUserInfo);
-        User user = userRepository.findByEmail(email)
+        User user = userRepository.findByProviderAndProviderSubject("KAKAO", kakaoUserInfo.subject())
+                .map(existingUser -> {
+                    existingUser.updateProfile(
+                            kakaoUserInfo.email(),
+                            kakaoUserInfo.nickname(),
+                            kakaoUserInfo.profileImageUrl()
+                    );
+                    return userRepository.save(existingUser);
+                })
                 .orElseGet(() -> userRepository.save(
                         User.createNew(
                                 kakaoUserInfo.subject(),
-                                email,
+                                kakaoUserInfo.email(),
                                 kakaoUserInfo.nickname(),
-                                "KAKAO"
+                                "KAKAO",
+                                kakaoUserInfo.profileImageUrl()
                         )
                 ));
 
@@ -145,7 +154,8 @@ public class AuthService {
                         user.id(),
                         user.displayName(),
                         user.email(),
-                        user.provider()
+                        user.provider(),
+                        user.profileImageUrl()
                 )
         );
     }
@@ -170,7 +180,8 @@ public class AuthService {
                         session.user().id(),
                         session.user().displayName(),
                         session.user().email(),
-                        session.user().provider()
+                        session.user().provider(),
+                        session.user().profileImageUrl()
                 )
         );
     }
@@ -196,7 +207,8 @@ public class AuthService {
                         session.user().id(),
                         session.user().displayName(),
                         session.user().email(),
-                        session.user().provider()
+                        session.user().provider(),
+                        session.user().profileImageUrl()
                 )
         );
     }
@@ -207,13 +219,6 @@ public class AuthService {
             throw new RefreshTokenInvalidException("refresh token is blank.");
         }
         refreshTokenRepository.deleteByToken(refreshToken);
-    }
-
-    private String resolveKakaoEmail(KakaoUserInfo kakaoUserInfo) {
-        if (kakaoUserInfo.email() != null && !kakaoUserInfo.email().isBlank()) {
-            return kakaoUserInfo.email();
-        }
-        return "kakao-" + kakaoUserInfo.subject() + "@no-email.local";
     }
 
     private ValidRefreshSession loadValidRefreshSession(String refreshToken) {

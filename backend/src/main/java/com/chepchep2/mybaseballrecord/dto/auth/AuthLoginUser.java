@@ -4,6 +4,7 @@ public record AuthLoginUser(
         long id,
         String displayName,
         String email,
-        String provider
+        String provider,
+        String profileImageUrl
 ) {
 }

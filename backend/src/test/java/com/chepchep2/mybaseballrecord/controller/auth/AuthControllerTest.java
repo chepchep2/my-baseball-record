@@ -63,7 +63,8 @@ class AuthControllerTest {
                                 7L,
                                 "초상우",
                                 null,
-                                "KAKAO"
+                                "KAKAO",
+                                "https://k.kakaocdn.net/profile.png"
                         )
                 ));
         given(refreshTokenCookieManager.createRefreshTokenCookie("refresh-token", Instant.parse("2026-04-29T12:00:00Z")))
@@ -95,7 +96,8 @@ class AuthControllerTest {
                                 7L,
                                 "초상우",
                                 null,
-                                "KAKAO"
+                                "KAKAO",
+                                "https://k.kakaocdn.net/profile.png"
                         )
                 ));
 
@@ -105,7 +107,8 @@ class AuthControllerTest {
                 .andExpect(jsonPath("$.accessToken").value("new-access-token"))
                 .andExpect(jsonPath("$.expiresIn").isNumber())
                 .andExpect(jsonPath("$.user.id").value(7))
-                .andExpect(jsonPath("$.user.nickname").value("초상우"));
+                .andExpect(jsonPath("$.user.nickname").value("초상우"))
+                .andExpect(jsonPath("$.user.profileImageUrl").value("https://k.kakaocdn.net/profile.png"));
 
         verify(authService).getSession("refresh-token");
     }

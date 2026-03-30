@@ -259,6 +259,32 @@ cd /Users/chosangwoo/dev/projects/my-baseball-record/backend
 
 ---
 
+## 6. DB 확인 포인트
+
+이번 브랜치 기준 사용자 테이블 이름은 `users`가 아니라 `auth_user`이다.
+refresh token 테이블은 `auth_refresh_token`이다.
+
+체크:
+
+- [ ] `auth_user` 테이블이 존재하는지 확인한다.
+- [ ] `auth_user.provider_subject` 컬럼이 존재하는지 확인한다.
+- [ ] `auth_user.email`이 nullable인지 확인한다.
+- [ ] `auth_user.profile_image_url` 컬럼이 존재하는지 확인한다.
+- [ ] 카카오 로그인 후 `provider='KAKAO'` 사용자 row가 생성되거나 재사용되는지 확인한다.
+- [ ] 기존 카카오 가짜 이메일(`kakao-...@no-email.local`)이 migration 후 `NULL`로 정리되는지 확인한다.
+
+확인 예시:
+
+```sql
+select id, provider, provider_subject, email, display_name, profile_image_url
+from auth_user
+order by id desc;
+
+select id, user_id, token, expires_at
+from auth_refresh_token
+order by id desc;
+```
+
 ## 6. 리뷰 메모
 
 이 문서는 현재 auth 구현과 실제 수동 검증 결과를 반영한 상태다.

@@ -50,8 +50,9 @@ class AuthRefreshControllerTest {
                         new AuthLoginUser(
                                 1L,
                                 "조상우",
-                                "user@gmail.com",
-                                "GOOGLE"
+                                null,
+                                "KAKAO",
+                                "https://k.kakaocdn.net/profile.png"
                         )
                 ));
         given(refreshTokenCookieManager.createRefreshTokenCookie("new-refresh-token", Instant.parse("2026-04-17T11:00:00Z")))

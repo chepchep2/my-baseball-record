@@ -88,7 +88,7 @@ class AuthServiceTest {
         );
 
         when(kakaoOauthClient.getUserInfo("valid-code")).thenReturn(kakaoUser);
-        when(userRepository.findByEmail("kakao-kakao-sub-1@no-email.local")).thenReturn(Optional.empty());
+        when(userRepository.findByProviderAndProviderSubject("KAKAO", "kakao-sub-1")).thenReturn(Optional.empty());
         when(userRepository.save(any(User.class))).thenAnswer(invocation -> {
             User user = invocation.getArgument(0);
             user.assignId(7L);
@@ -104,6 +104,7 @@ class AuthServiceTest {
         assertThat(result.user().id()).isEqualTo(7L);
         assertThat(result.user().displayName()).isEqualTo("초상우");
         assertThat(result.user().provider()).isEqualTo("KAKAO");
+        assertThat(result.user().profileImageUrl()).isEqualTo("https://k.kakaocdn.net/profile.png");
 
         ArgumentCaptor<RefreshToken> captor = ArgumentCaptor.forClass(RefreshToken.class);
         verify(refreshTokenRepository).save(captor.capture());
@@ -114,16 +115,17 @@ class AuthServiceTest {
     @Test
     @DisplayName("기존 카카오 사용자면 user를 재사용하고 refresh token을 갱신 저장한다")
     void loginWithKakaoCodeReusesExistingUser() {
-        User existing = User.existing(9L, "kakao-sub-9", "kakao-kakao-sub-9@no-email.local", "기존유저", "KAKAO");
+        User existing = User.existing(9L, "kakao-sub-9", null, "기존유저", "KAKAO", null);
         var kakaoUser = new KakaoUserInfo(
                 "kakao-sub-9",
                 "기존유저",
-                null,
+                "https://k.kakaocdn.net/new.png",
                 null
         );
 
         when(kakaoOauthClient.getUserInfo("existing-code")).thenReturn(kakaoUser);
-        when(userRepository.findByEmail("kakao-kakao-sub-9@no-email.local")).thenReturn(Optional.of(existing));
+        when(userRepository.findByProviderAndProviderSubject("KAKAO", "kakao-sub-9")).thenReturn(Optional.of(existing));
+        when(userRepository.save(existing)).thenReturn(existing);
         when(jwtTokenIssuer.issueAccessToken(9L)).thenReturn(new JwtTokenIssuer.IssuedToken("access-9", Instant.parse("2026-03-30T12:00:00Z")));
         when(jwtTokenIssuer.issueRefreshToken(9L)).thenReturn(new JwtTokenIssuer.IssuedToken("refresh-9", Instant.parse("2026-04-29T12:00:00Z")));
 
@@ -131,6 +133,9 @@ class AuthServiceTest {
 
         assertThat(result.user().id()).isEqualTo(9L);
         assertThat(result.user().provider()).isEqualTo("KAKAO");
+        assertThat(result.user().profileImageUrl()).isEqualTo("https://k.kakaocdn.net/new.png");
+        assertThat(result.user().email()).isNull();
+        verify(userRepository).save(existing);
         verify(refreshTokenRepository).save(any(RefreshToken.class));
     }
 

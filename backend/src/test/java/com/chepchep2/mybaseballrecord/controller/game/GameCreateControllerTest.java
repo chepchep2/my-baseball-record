@@ -1,10 +1,6 @@
 package com.chepchep2.mybaseballrecord.controller.game;
 
-import com.chepchep2.mybaseballrecord.domain.game.GameType;
-import com.chepchep2.mybaseballrecord.domain.game.ParticipationType;
-import com.chepchep2.mybaseballrecord.dto.game.response.GameBatterResponse;
 import com.chepchep2.mybaseballrecord.dto.game.response.GameDetailResponse;
-import com.chepchep2.mybaseballrecord.dto.game.response.GameInfoResponse;
 import com.chepchep2.mybaseballrecord.service.game.GameCommandService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -34,90 +30,71 @@ class GameCreateControllerTest {
     private GameCommandService gameCommandService;
 
     @Test
-    @DisplayName("POST /api/games - 유효한 요청이면 201과 개별 경기 상세를 반환한다")
-    void postGamesReturnsCreatedGameDetail() throws Exception {
+    @DisplayName("POST /api/games - 새 타자 전용 요청이면 201과 flat 경기 상세를 반환한다")
+    void postGamesReturnsFlatCreatedDetail() throws Exception {
         given(gameCommandService.create(any()))
                 .willReturn(new GameDetailResponse(
                         101L,
-                        new GameInfoResponse(
-                                LocalDate.parse("2026-03-18"),
-                                2026,
-                                GameType.LEAGUE,
-                                "블루스톰",
-                                "레전드",
-                                "비 오는 날 경기"
-                        ),
-                        ParticipationType.BATTER,
-                        new GameBatterResponse(4, 3, 1, 1, 0, 1, 1, 0, 0, 3, 2, 0, 0, 0),
-                        null
+                        LocalDate.parse("2026-03-27"),
+                        19,
+                        0,
+                        "3/27 19:00",
+                        5,
+                        1,
+                        2,
+                        0,
+                        0,
+                        1,
+                        4,
+                        3,
+                        0.750,
+                        0.800,
+                        1.500,
+                        2.300
                 ));
 
         mockMvc.perform(post("/api/games")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 {
-                                  "gameInfo": {
-                                    "playedAt": "2026-03-18",
-                                    "seasonYear": 2026,
-                                    "gameType": "LEAGUE",
-                                    "teamName": "블루스톰",
-                                    "opponentName": "레전드",
-                                    "memo": "비 오는 날 경기"
-                                  },
-                                  "batter": {
-                                    "plateAppearances": 4,
-                                    "atBats": 3,
-                                    "singles": 1,
-                                    "doubles": 1,
-                                    "triples": 0,
-                                    "homeRuns": 1,
-                                    "walks": 1,
-                                    "strikeOuts": 0,
-                                    "hitByPitch": 0,
-                                    "runsBattedIn": 3,
-                                    "runs": 2,
-                                    "stolenBases": 0,
-                                    "caughtStealing": 0,
-                                    "sacrificeHits": 0
-                                  },
-                                  "pitcher": null
+                                  "playedDate": "2026-03-27",
+                                  "playedHour": 19,
+                                  "playedMinute": 0,
+                                  "plateAppearances": 5,
+                                  "walksAndHitByPitch": 1,
+                                  "singles": 2,
+                                  "doubles": 0,
+                                  "triples": 0,
+                                  "homeRuns": 1
                                 }
                                 """))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.id").value(101))
-                .andExpect(jsonPath("$.gameInfo.gameType").value("LEAGUE"))
-                .andExpect(jsonPath("$.participationType").value("BATTER"));
+                .andExpect(jsonPath("$.gameId").value(101))
+                .andExpect(jsonPath("$.playedDate").value("2026-03-27"))
+                .andExpect(jsonPath("$.playedHour").value(19))
+                .andExpect(jsonPath("$.playedAtLabel").value("3/27 19:00"))
+                .andExpect(jsonPath("$.plateAppearances").value(5))
+                .andExpect(jsonPath("$.walksAndHitByPitch").value(1))
+                .andExpect(jsonPath("$.atBats").value(4))
+                .andExpect(jsonPath("$.hits").value(3))
+                .andExpect(jsonPath("$.ops").value(2.300));
     }
 
     @Test
-    @DisplayName("POST /api/games - gameInfo.playedAt 누락이면 400 VALIDATION_ERROR")
-    void postGamesValidationErrorWhenPlayedAtMissing() throws Exception {
+    @DisplayName("POST /api/games - playedDate 누락이면 400 VALIDATION_ERROR")
+    void postGamesValidationErrorWhenPlayedDateMissing() throws Exception {
         mockMvc.perform(post("/api/games")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 {
-                                  "gameInfo": {
-                                    "seasonYear": 2026,
-                                    "gameType": "LEAGUE",
-                                    "teamName": "블루스톰",
-                                    "opponentName": "레전드"
-                                  },
-                                  "batter": {
-                                    "plateAppearances": 4,
-                                    "atBats": 3,
-                                    "singles": 1,
-                                    "doubles": 1,
-                                    "triples": 0,
-                                    "homeRuns": 1,
-                                    "walks": 1,
-                                    "strikeOuts": 0,
-                                    "hitByPitch": 0,
-                                    "runsBattedIn": 3,
-                                    "runs": 2,
-                                    "stolenBases": 0,
-                                    "caughtStealing": 0,
-                                    "sacrificeHits": 0
-                                  }
+                                  "playedHour": 19,
+                                  "playedMinute": 0,
+                                  "plateAppearances": 5,
+                                  "walksAndHitByPitch": 1,
+                                  "singles": 2,
+                                  "doubles": 0,
+                                  "triples": 0,
+                                  "homeRuns": 1
                                 }
                                 """))
                 .andExpect(status().isBadRequest())
@@ -125,106 +102,30 @@ class GameCreateControllerTest {
     }
 
     @Test
-    @DisplayName("POST /api/games - teamName 누락도 허용한다")
-    void postGamesAllowsMissingTeamName() throws Exception {
-        given(gameCommandService.create(any()))
-                .willReturn(new GameDetailResponse(
-                        102L,
-                        new GameInfoResponse(
-                                LocalDate.parse("2026-03-18"),
-                                2026,
-                                GameType.LEAGUE,
-                                "",
-                                "레전드",
-                                null
-                        ),
-                        ParticipationType.BATTER,
-                        new GameBatterResponse(4, 3, 1, 1, 0, 1, 1, 0, 0, 3, 2, 0, 0, 0),
-                        null
-                ));
-
+    @DisplayName("POST /api/games - 기존 nested 요청 shape면 400 VALIDATION_ERROR")
+    void postGamesRejectsOldNestedRequestShape() throws Exception {
         mockMvc.perform(post("/api/games")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 {
                                   "gameInfo": {
-                                    "playedAt": "2026-03-18",
+                                    "playedAt": "2026-03-27",
                                     "seasonYear": 2026,
-                                    "gameType": "LEAGUE",
-                                    "opponentName": "레전드"
+                                    "gameType": "LEAGUE"
                                   },
                                   "batter": {
-                                    "plateAppearances": 4,
-                                    "atBats": 3,
-                                    "singles": 1,
-                                    "doubles": 1,
+                                    "plateAppearances": 5,
+                                    "atBats": 4,
+                                    "singles": 2,
+                                    "doubles": 0,
                                     "triples": 0,
                                     "homeRuns": 1,
                                     "walks": 1,
-                                    "strikeOuts": 0,
-                                    "hitByPitch": 0,
-                                    "runsBattedIn": 3,
-                                    "runs": 2,
-                                    "stolenBases": 0,
-                                    "caughtStealing": 0,
-                                    "sacrificeHits": 0
+                                    "hitByPitch": 0
                                   }
                                 }
                                 """))
-                .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.id").value(102))
-                .andExpect(jsonPath("$.gameInfo.teamName").value(""));
-    }
-
-    @Test
-    @DisplayName("POST /api/games - opponentName 누락도 허용한다")
-    void postGamesAllowsMissingOpponentName() throws Exception {
-        given(gameCommandService.create(any()))
-                .willReturn(new GameDetailResponse(
-                        103L,
-                        new GameInfoResponse(
-                                LocalDate.parse("2026-03-18"),
-                                2026,
-                                GameType.LEAGUE,
-                                "블루스톰",
-                                "",
-                                null
-                        ),
-                        ParticipationType.BATTER,
-                        new GameBatterResponse(4, 3, 1, 1, 0, 1, 1, 0, 0, 3, 2, 0, 0, 0),
-                        null
-                ));
-
-        mockMvc.perform(post("/api/games")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("""
-                                {
-                                  "gameInfo": {
-                                    "playedAt": "2026-03-18",
-                                    "seasonYear": 2026,
-                                    "gameType": "LEAGUE",
-                                    "teamName": "블루스톰"
-                                  },
-                                  "batter": {
-                                    "plateAppearances": 4,
-                                    "atBats": 3,
-                                    "singles": 1,
-                                    "doubles": 1,
-                                    "triples": 0,
-                                    "homeRuns": 1,
-                                    "walks": 1,
-                                    "strikeOuts": 0,
-                                    "hitByPitch": 0,
-                                    "runsBattedIn": 3,
-                                    "runs": 2,
-                                    "stolenBases": 0,
-                                    "caughtStealing": 0,
-                                    "sacrificeHits": 0
-                                  }
-                                }
-                                """))
-                .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.id").value(103))
-                .andExpect(jsonPath("$.gameInfo.opponentName").value(""));
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("VALIDATION_ERROR"));
     }
 }

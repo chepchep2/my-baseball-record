@@ -13,7 +13,7 @@ import jakarta.persistence.Table;
 import lombok.Builder;
 
 import java.time.Instant;
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "game_record")
@@ -23,7 +23,7 @@ public class GameRecord {
     private Long id;
 
     @Column(name = "played_at", nullable = false)
-    private LocalDate playedAt;
+    private LocalDateTime playedAt;
 
     @Column(name = "season_year", nullable = false)
     private Integer seasonYear;
@@ -56,7 +56,7 @@ public class GameRecord {
 
     @Builder
     public GameRecord(
-            LocalDate playedAt,
+            LocalDateTime playedAt,
             Integer seasonYear,
             GameType gameType,
             String teamName,
@@ -94,7 +94,7 @@ public class GameRecord {
         return id;
     }
 
-    public LocalDate playedAt() {
+    public LocalDateTime playedAt() {
         return playedAt;
     }
 

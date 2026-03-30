@@ -7,12 +7,20 @@ import com.chepchep2.mybaseballrecord.dto.game.response.GameBatterResponse;
 import com.chepchep2.mybaseballrecord.dto.game.response.GameDetailResponse;
 import com.chepchep2.mybaseballrecord.dto.game.response.GameInfoResponse;
 import com.chepchep2.mybaseballrecord.dto.game.response.GamePitcherResponse;
+import com.chepchep2.mybaseballrecord.dto.game.response.RecentGameItemResponse;
+import com.chepchep2.mybaseballrecord.dto.game.response.RecentGamesResponse;
 import com.chepchep2.mybaseballrecord.exception.game.GameNotFoundException;
 import com.chepchep2.mybaseballrecord.repository.game.BatterRecordRepository;
 import com.chepchep2.mybaseballrecord.repository.game.GameRecordRepository;
 import com.chepchep2.mybaseballrecord.repository.game.PitcherRecordRepository;
 import com.chepchep2.mybaseballrecord.service.auth.CurrentUserProvider;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
+
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.time.format.DateTimeFormatter;
+import java.util.List;
 
 @Service
 public class GameQueryService {
@@ -49,7 +57,7 @@ public class GameQueryService {
         return new GameDetailResponse(
                 game.id(),
                 new GameInfoResponse(
-                        game.playedAt(),
+                        game.playedAt().toLocalDate(),
                         game.seasonYear(),
                         game.gameType(),
                         game.teamName(),
@@ -60,6 +68,17 @@ public class GameQueryService {
                 batter,
                 pitcher
         );
+    }
+
+    public RecentGamesResponse getRecent(int limit) {
+        long userId = currentUserProvider.getCurrentUserId();
+        int boundedLimit = Math.max(1, Math.min(limit, 20));
+        List<GameRecord> games = gameRecordRepository.findByUserIdOrderByPlayedAtDesc(
+                userId,
+                PageRequest.of(0, boundedLimit)
+        );
+
+        return new RecentGamesResponse(games.stream().map(this::toRecentItem).toList());
     }
 
     private GameBatterResponse toBatterResponse(BatterRecord batter) {
@@ -98,5 +117,55 @@ public class GameQueryService {
                 pitcher.saves(),
                 pitcher.holds()
         );
+    }
+
+    private RecentGameItemResponse toRecentItem(GameRecord game) {
+        BatterRecord batter = batterRecordRepository.findByGameId(game.id()).orElse(null);
+        int plateAppearances = batter == null ? 0 : batter.plateAppearances();
+        int walksAndHitByPitch = batter == null ? 0 : batter.walks() + batter.hitByPitch();
+        int singles = batter == null ? 0 : batter.singles();
+        int doubles = batter == null ? 0 : batter.doubles();
+        int triples = batter == null ? 0 : batter.triples();
+        int homeRuns = batter == null ? 0 : batter.homeRuns();
+        int atBats = batter == null ? 0 : batter.atBats();
+        int hits = singles + doubles + triples + homeRuns;
+        int totalBases = singles + (doubles * 2) + (triples * 3) + (homeRuns * 4);
+        String battingAverage = formatDecimal(ratio(hits, atBats), 3);
+        String onBasePercentage = formatDecimal(ratio(hits + walksAndHitByPitch, atBats + walksAndHitByPitch), 3);
+        String sluggingPercentage = formatDecimal(ratio(totalBases, atBats), 3);
+        String ops = formatDecimal(Double.parseDouble(onBasePercentage) + Double.parseDouble(sluggingPercentage), 3);
+
+        return new RecentGameItemResponse(
+                game.id(),
+                game.playedAt().toLocalDate().toString(),
+                game.playedAt().getHour(),
+                game.playedAt().getMinute(),
+                game.playedAt().format(DateTimeFormatter.ofPattern("M/d HH:mm")),
+                plateAppearances,
+                walksAndHitByPitch,
+                singles,
+                doubles,
+                triples,
+                homeRuns,
+                atBats,
+                hits,
+                battingAverage,
+                onBasePercentage,
+                sluggingPercentage,
+                ops
+        );
+    }
+
+    private double ratio(int numerator, int denominator) {
+        if (denominator == 0) {
+            return 0.0;
+        }
+        return (double) numerator / denominator;
+    }
+
+    private String formatDecimal(double value, int scale) {
+        return BigDecimal.valueOf(value)
+                .setScale(scale, RoundingMode.HALF_UP)
+                .toPlainString();
     }
 }

@@ -19,7 +19,7 @@ function SummaryList({ items }) {
 
 export default function HomePageClient({ selectedScope = "season" }) {
   const router = useRouter();
-  const { apiClient } = useAuthSession();
+  const { apiClient, isAuthenticated, isBootstrapping } = useAuthSession();
   const [dashboard, setDashboard] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState(null);
@@ -28,6 +28,15 @@ export default function HomePageClient({ selectedScope = "season" }) {
     let active = true;
 
     async function loadHomeDashboard() {
+      if (isBootstrapping) {
+        return;
+      }
+
+      if (!isAuthenticated) {
+        router.replace(`/auth?next=${encodeURIComponent(`/home?scope=${selectedScope}`)}`);
+        return;
+      }
+
       setIsLoading(true);
       setErrorMessage(null);
 
@@ -62,7 +71,7 @@ export default function HomePageClient({ selectedScope = "season" }) {
     return () => {
       active = false;
     };
-  }, [apiClient, router, selectedScope]);
+  }, [apiClient, isAuthenticated, isBootstrapping, router, selectedScope]);
 
   const activeSummaryItems = selectedScope === "career"
     ? dashboard?.careerSummaryItems ?? []

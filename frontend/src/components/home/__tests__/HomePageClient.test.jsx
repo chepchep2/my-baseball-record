@@ -8,6 +8,12 @@ const { replaceMock } = vi.hoisted(() => ({
   replaceMock: vi.fn(),
 }));
 
+const authSessionMock = vi.hoisted(() => ({
+  apiClient: { get: vi.fn() },
+  isAuthenticated: true,
+  isBootstrapping: false,
+}));
+
 vi.mock("next/navigation", () => ({
   useRouter: () => ({
     replace: replaceMock,
@@ -19,9 +25,7 @@ vi.mock("@/features/home/api/home-api", () => ({
 }));
 
 vi.mock("@/features/auth/session/useAuthSession", () => ({
-  useAuthSession: () => ({
-    apiClient: { get: vi.fn() },
-  }),
+  useAuthSession: () => authSessionMock,
 }));
 
 vi.mock("@/components/layout/AppPageLayout", () => ({
@@ -31,6 +35,9 @@ vi.mock("@/components/layout/AppPageLayout", () => ({
 describe("HomePageClient", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    authSessionMock.apiClient = { get: vi.fn() };
+    authSessionMock.isAuthenticated = true;
+    authSessionMock.isBootstrapping = false;
   });
 
   it("올해 시즌 홈 대시보드를 조회해 핵심 지표와 최근 경기 3개를 보여준다", async () => {
@@ -89,5 +96,23 @@ describe("HomePageClient", () => {
     render(<HomePageClient selectedScope="career" />);
 
     await waitFor(() => expect(replaceMock).toHaveBeenCalledWith("/games/new"));
+  });
+
+  it("세션 bootstrap 중에는 홈 조회를 시작하지 않는다", () => {
+    authSessionMock.isBootstrapping = true;
+
+    render(<HomePageClient selectedScope="season" />);
+
+    expect(getHomeDashboard).not.toHaveBeenCalled();
+    expect(replaceMock).not.toHaveBeenCalled();
+  });
+
+  it("인증되지 않은 상태면 auth 화면으로 이동한다", async () => {
+    authSessionMock.isAuthenticated = false;
+
+    render(<HomePageClient selectedScope="career" />);
+
+    await waitFor(() => expect(replaceMock).toHaveBeenCalledWith("/auth?next=%2Fhome%3Fscope%3Dcareer"));
+    expect(getHomeDashboard).not.toHaveBeenCalled();
   });
 });

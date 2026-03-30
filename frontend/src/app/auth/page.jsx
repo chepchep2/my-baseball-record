@@ -3,6 +3,7 @@
 import React from "react";
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { beginKakaoLogin } from "@/features/auth/api/auth-api";
 import { useAuthSession } from "@/features/auth/session/useAuthSession";
 
 function getNextPath() {
@@ -31,7 +32,7 @@ function getNextPath() {
 
 export default function AuthPage() {
   const router = useRouter();
-  const { isAuthenticated, isBootstrapping, authError, clearAuthError, loginWithProviderToken } = useAuthSession();
+  const { isAuthenticated, isBootstrapping, authError, clearAuthError } = useAuthSession();
   const [localError, setLocalError] = useState(null);
   const [isSigningIn, setIsSigningIn] = useState(false);
 
@@ -41,20 +42,18 @@ export default function AuthPage() {
     }
   }, [isAuthenticated, isBootstrapping, router]);
 
-  const handleCredential = useCallback(async (idToken) => {
+  const handleKakaoLogin = useCallback(async () => {
     setIsSigningIn(true);
     setLocalError(null);
     clearAuthError();
 
     try {
-      await loginWithProviderToken(idToken);
-      router.replace(getNextPath());
+      beginKakaoLogin();
     } catch (error) {
       setLocalError(error?.message || "로그인에 실패했습니다. 잠시 후 다시 시도해 주세요.");
-    } finally {
       setIsSigningIn(false);
     }
-  }, [clearAuthError, loginWithProviderToken, router]);
+  }, [clearAuthError]);
 
   return (
     <main className="page-shell auth-page">
@@ -88,7 +87,7 @@ export default function AuthPage() {
           <button
             type="button"
             className="google-button kakao-button-visual"
-            onClick={() => handleCredential("mock-kakao-token")}
+            onClick={handleKakaoLogin}
             disabled={isSigningIn}
           >
             <span>{isSigningIn ? "로그인 처리 중..." : "카카오로 시작하기"}</span>

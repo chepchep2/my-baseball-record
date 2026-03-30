@@ -51,13 +51,11 @@ describe("api-client", () => {
 
     const refreshMock = vi.fn().mockResolvedValue({
       accessToken: "access-new",
-      refreshToken: "refresh-new",
     });
 
     const client = createApiClient({
       fetchImpl: fetchMock,
       getAccessToken: () => accessToken,
-      getRefreshToken: () => "refresh-old",
       refreshSession: refreshMock,
       onRefreshSuccess: (session) => {
         accessToken = session.accessToken;
@@ -83,12 +81,24 @@ describe("api-client", () => {
     const client = createApiClient({
       fetchImpl: fetchMock,
       getAccessToken: () => "access-1",
-      getRefreshToken: () => "refresh-1",
       refreshSession: refreshMock,
       onRefreshFailed,
     });
 
     await expect(client.get("/api/stats")).rejects.toThrow("refresh failed");
     expect(onRefreshFailed).toHaveBeenCalledWith(refreshError);
+  });
+
+  it("모든 요청에 credentials include를 넣는다", async () => {
+    const fetchMock = vi.fn().mockResolvedValue(jsonResponse({ ok: true }));
+    const client = createApiClient({
+      fetchImpl: fetchMock,
+      getAccessToken: () => null,
+    });
+
+    await client.get("/api/stats");
+
+    const [, init] = fetchMock.mock.calls[0];
+    expect(init.credentials).toBe("include");
   });
 });

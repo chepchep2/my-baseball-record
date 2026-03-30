@@ -1,16 +1,24 @@
-const API_BASE_URL = (
+const CONFIGURED_API_BASE_URL = (
   typeof process !== "undefined" && process.env ? process.env.NEXT_PUBLIC_API_BASE_URL || "" : ""
 ).replace(/\/$/, "");
 
-export function isMockAuthMode() {
+function getApiBaseUrl() {
+  if (CONFIGURED_API_BASE_URL) {
+    return CONFIGURED_API_BASE_URL;
+  }
+
   if (typeof window !== "undefined") {
-    const hostname = window.location.hostname;
+    const { protocol, hostname } = window.location;
     if (hostname === "localhost" || hostname === "127.0.0.1") {
-      return true;
+      return `${protocol}//${hostname}:8080`;
     }
   }
 
-  return API_BASE_URL === "";
+  return "";
+}
+
+export function isMockAuthMode() {
+  return getApiBaseUrl() === "";
 }
 
 function buildUrl(path) {
@@ -18,7 +26,12 @@ function buildUrl(path) {
     throw new Error(`Invalid API path: ${path}`);
   }
 
-  return `${API_BASE_URL}${path}`;
+  const apiBaseUrl = getApiBaseUrl();
+  if (!apiBaseUrl) {
+    throw new Error("API base URL이 설정되지 않았습니다.");
+  }
+
+  return `${apiBaseUrl}${path}`;
 }
 
 async function parseBody(response) {
@@ -51,6 +64,7 @@ async function requestJson(path, { method, body, fetchImpl = fetch }) {
     headers: {
       "Content-Type": "application/json",
     },
+    credentials: "include",
     body: body ? JSON.stringify(body) : undefined,
   });
 
@@ -83,66 +97,97 @@ export async function loginWithGoogle(idToken, fetchImpl = fetch) {
 function buildMockSession(provider = "KAKAO") {
   return {
     accessToken: `mock-access-${provider.toLowerCase()}`,
-    refreshToken: `mock-refresh-${provider.toLowerCase()}`,
+    expiresIn: 900,
     accessTokenExpiresAt: "2099-12-31T23:59:59Z",
-    refreshTokenExpiresAt: "2099-12-31T23:59:59Z",
     user: {
       id: 1,
+      nickname: "카카오 사용자",
       displayName: "카카오 사용자",
-      email: "kakao-user@example.com",
       provider,
+      profileImageUrl: null,
     },
   };
 }
 
-function isMockToken(token) {
-  return typeof token === "string" && token.startsWith("mock-");
-}
-
-export async function loginWithKakao(token, fetchImpl = fetch) {
-  if (!token || !token.trim()) {
-    throw new ApiError("카카오 로그인 정보가 필요합니다.", { code: "INVALID_KAKAO_TOKEN", status: 400 });
-  }
-
-  if (isMockAuthMode() || isMockToken(token)) {
-    return buildMockSession("KAKAO");
-  }
-
-  return requestJson("/api/auth/kakao", {
-    method: "POST",
-    body: { token: token.trim() },
-    fetchImpl,
-  });
-}
-
-export async function refreshSession(refreshToken, fetchImpl = fetch) {
-  if (!refreshToken || !refreshToken.trim()) {
-    throw new ApiError("refreshToken이 필요합니다.", { code: "REFRESH_TOKEN_INVALID", status: 401 });
-  }
-
-  if (isMockAuthMode() || isMockToken(refreshToken)) {
-    return buildMockSession("KAKAO");
-  }
-
-  return requestJson("/api/auth/refresh", {
-    method: "POST",
-    body: { refreshToken: refreshToken.trim() },
-    fetchImpl,
-  });
-}
-
-export async function logoutSession(refreshToken, fetchImpl = fetch) {
-  if (!refreshToken || !refreshToken.trim()) {
+function toExpiresAt(expiresIn) {
+  if (!Number.isFinite(expiresIn) || expiresIn <= 0) {
     return null;
   }
 
-  if (isMockAuthMode() || isMockToken(refreshToken)) {
+  return new Date(Date.now() + expiresIn * 1000).toISOString();
+}
+
+function normalizeUser(user) {
+  if (!user) {
+    return null;
+  }
+
+  if (user.displayName) {
+    return user;
+  }
+
+  return {
+    id: user.id,
+    nickname: user.nickname ?? null,
+    displayName: user.nickname ?? null,
+    email: null,
+    provider: "KAKAO",
+    profileImageUrl: user.profileImageUrl ?? null,
+  };
+}
+
+function normalizeSession(session) {
+  return {
+    accessToken: session?.accessToken ?? null,
+    expiresIn: session?.expiresIn ?? null,
+    accessTokenExpiresAt: session?.accessTokenExpiresAt ?? toExpiresAt(session?.expiresIn),
+    user: normalizeUser(session?.user),
+  };
+}
+
+export function beginKakaoLogin(locationImpl = typeof window !== "undefined" ? window.location : null) {
+  const loginUrl = buildUrl("/api/auth/kakao/login");
+
+  if (locationImpl?.assign) {
+    locationImpl.assign(loginUrl);
+  }
+
+  return loginUrl;
+}
+
+export async function getAuthSession(fetchImpl = fetch) {
+  if (isMockAuthMode()) {
+    return buildMockSession("KAKAO");
+  }
+
+  const payload = await requestJson("/api/auth/session", {
+    method: "GET",
+    fetchImpl,
+  });
+
+  return normalizeSession(payload);
+}
+
+export async function refreshSession(fetchImpl = fetch) {
+  if (isMockAuthMode()) {
+    return buildMockSession("KAKAO");
+  }
+
+  const payload = await requestJson("/api/auth/refresh", {
+    method: "POST",
+    fetchImpl,
+  });
+
+  return normalizeSession(payload);
+}
+
+export async function logoutSession(fetchImpl = fetch) {
+  if (isMockAuthMode()) {
     return null;
   }
 
   return requestJson("/api/auth/logout", {
     method: "POST",
-    body: { refreshToken: refreshToken.trim() },
     fetchImpl,
   }).catch((error) => {
     if (error instanceof ApiError && error.status === 204) {

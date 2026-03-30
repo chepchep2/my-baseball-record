@@ -1,4 +1,3 @@
-const REFRESH_TOKEN_KEY = "auth.refreshToken";
 const SESSION_META_KEY = "auth.sessionMeta";
 
 let accessTokenMemory = null;
@@ -13,17 +12,11 @@ export function saveSessionTokens(session) {
   if (!isBrowser()) {
     return;
   }
-
-  if (session?.refreshToken) {
-    window.localStorage.setItem(REFRESH_TOKEN_KEY, session.refreshToken);
-  } else {
-    window.localStorage.removeItem(REFRESH_TOKEN_KEY);
-  }
+  const previousSessionMeta = readSessionMeta();
 
   const sessionMeta = {
     accessTokenExpiresAt: session?.accessTokenExpiresAt || null,
-    refreshTokenExpiresAt: session?.refreshTokenExpiresAt || null,
-    user: session?.user || null,
+    user: session?.user || previousSessionMeta?.user || null,
   };
 
   window.localStorage.setItem(SESSION_META_KEY, JSON.stringify(sessionMeta));
@@ -47,14 +40,6 @@ export function readSessionMeta() {
   }
 }
 
-export function readStoredRefreshToken() {
-  if (!isBrowser()) {
-    return null;
-  }
-
-  return window.localStorage.getItem(REFRESH_TOKEN_KEY);
-}
-
 export function getAccessToken() {
   return accessTokenMemory;
 }
@@ -70,6 +55,5 @@ export function clearSessionTokens() {
     return;
   }
 
-  window.localStorage.removeItem(REFRESH_TOKEN_KEY);
   window.localStorage.removeItem(SESSION_META_KEY);
 }

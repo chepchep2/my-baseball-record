@@ -32,7 +32,9 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/api/auth/google").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/auth/kakao/login").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/auth/kakao/callback").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/auth/session").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/auth/refresh").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/auth/logout").permitAll()
                         .anyRequest().authenticated()

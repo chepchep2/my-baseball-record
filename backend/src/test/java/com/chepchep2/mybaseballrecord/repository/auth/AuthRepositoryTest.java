@@ -23,15 +23,17 @@ class AuthRepositoryTest {
     private RefreshTokenRepository refreshTokenRepository;
 
     @Test
-    @DisplayName("user를 저장하고 email로 다시 조회할 수 있다")
-    void saveAndFindUserByEmail() {
-        User saved = userRepository.save(User.createNew("google-sub-1", "user@gmail.com", "조상우"));
+    @DisplayName("user를 저장하고 provider/providerSubject로 다시 조회할 수 있다")
+    void saveAndFindUserByProviderAndProviderSubject() {
+        User saved = userRepository.save(User.createNew("kakao-sub-1", null, "조상우", "KAKAO", "https://k.kakaocdn.net/profile.png"));
 
-        var found = userRepository.findByEmail("user@gmail.com");
+        var found = userRepository.findByProviderAndProviderSubject("KAKAO", "kakao-sub-1");
 
         assertThat(saved.id()).isNotNull();
         assertThat(found).isPresent();
-        assertThat(found.get().email()).isEqualTo("user@gmail.com");
+        assertThat(found.get().providerSubject()).isEqualTo("kakao-sub-1");
+        assertThat(found.get().email()).isNull();
+        assertThat(found.get().profileImageUrl()).isEqualTo("https://k.kakaocdn.net/profile.png");
     }
 
     @Test

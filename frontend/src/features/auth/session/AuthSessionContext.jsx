@@ -3,14 +3,14 @@
 
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { createApiClient } from "@/lib/http/api-client";
-import { isMockAuthMode, loginWithKakao, logoutSession, refreshSession as refreshSessionApi } from "@/features/auth/api/auth-api";
 import {
-  clearSessionTokens,
-  getAccessToken,
-  readSessionMeta,
-  readStoredRefreshToken,
-  saveSessionTokens,
-} from "@/features/auth/session/token-storage";
+  beginKakaoLogin as beginKakaoLoginApi,
+  getAuthSession,
+  isMockAuthMode,
+  logoutSession,
+  refreshSession as refreshSessionApi,
+} from "@/features/auth/api/auth-api";
+import { clearSessionTokens, getAccessToken, readSessionMeta, saveSessionTokens } from "@/features/auth/session/token-storage";
 
 const AuthSessionContext = createContext(null);
 
@@ -58,15 +58,10 @@ export function AuthSessionProvider({ children }) {
       return refreshPromiseRef.current;
     }
 
-    const refreshToken = readStoredRefreshToken();
-    if (!refreshToken) {
-      throw new Error("세션이 없습니다.");
-    }
-
-    const refreshPromise = refreshSessionApi(refreshToken)
+    const refreshPromise = refreshSessionApi()
       .then((session) => {
         saveSessionTokens(session);
-        setUser(session.user ?? null);
+        setUser((previousUser) => session.user ?? previousUser ?? null);
         setAuthError(null);
         return session;
       })
@@ -92,14 +87,6 @@ export function AuthSessionProvider({ children }) {
         setUser(sessionMeta.user);
       }
 
-      const refreshToken = readStoredRefreshToken();
-      if (!refreshToken) {
-        if (active) {
-          setIsBootstrapping(false);
-        }
-        return;
-      }
-
       if (isMockAuthMode()) {
         if (active) {
           setAuthError(null);
@@ -109,7 +96,12 @@ export function AuthSessionProvider({ children }) {
       }
 
       try {
-        await refreshIfNeeded();
+        const session = await getAuthSession();
+        saveSessionTokens(session);
+        if (active) {
+          setUser(session.user ?? null);
+          setAuthError(null);
+        }
       } catch {
         if (active) {
           clearSessionState();
@@ -128,26 +120,15 @@ export function AuthSessionProvider({ children }) {
     };
   }, [clearSessionState, refreshIfNeeded]);
 
-  const loginWithProviderToken = useCallback(async (providerToken) => {
-    try {
-      const session = await loginWithKakao(providerToken);
-      saveSessionTokens(session);
-      setUser(session.user ?? null);
-      setAuthError(null);
-      return session;
-    } catch (error) {
-      setAuthError(getAuthMessage(error, "로그인에 실패했습니다."));
-      throw error;
-    }
+  const beginKakaoLogin = useCallback(async () => {
+    setIsBootstrapping(false);
+    setAuthError(null);
+    beginKakaoLoginApi();
   }, []);
 
   const logout = useCallback(async () => {
-    const refreshToken = readStoredRefreshToken();
-
     try {
-      if (refreshToken) {
-        await logoutSession(refreshToken);
-      }
+      await logoutSession();
     } finally {
       clearSessionState();
       setAuthError(null);
@@ -158,7 +139,6 @@ export function AuthSessionProvider({ children }) {
     () =>
       createApiClient({
         getAccessToken,
-        getRefreshToken: readStoredRefreshToken,
         refreshSession: refreshIfNeeded,
         onRefreshSuccess: saveSessionTokens,
         onRefreshFailed: (error) => {
@@ -177,7 +157,7 @@ export function AuthSessionProvider({ children }) {
       authError,
       apiClient,
       clearAuthError,
-      loginWithProviderToken,
+      beginKakaoLogin,
       refreshIfNeeded,
       logout,
     }),
@@ -187,7 +167,7 @@ export function AuthSessionProvider({ children }) {
       authError,
       apiClient,
       clearAuthError,
-      loginWithProviderToken,
+      beginKakaoLogin,
       refreshIfNeeded,
       logout,
     ],

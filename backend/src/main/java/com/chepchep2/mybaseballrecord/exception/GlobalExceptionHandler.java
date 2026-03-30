@@ -3,6 +3,7 @@ package com.chepchep2.mybaseballrecord.exception;
 import com.chepchep2.mybaseballrecord.exception.auth.GoogleAuthFailedException;
 import com.chepchep2.mybaseballrecord.exception.auth.InvalidGoogleTokenException;
 import com.chepchep2.mybaseballrecord.exception.auth.AccessTokenRequiredException;
+import com.chepchep2.mybaseballrecord.exception.auth.KakaoAuthFailedException;
 import com.chepchep2.mybaseballrecord.exception.auth.RefreshTokenExpiredException;
 import com.chepchep2.mybaseballrecord.exception.auth.RefreshTokenInvalidException;
 import com.chepchep2.mybaseballrecord.exception.auth.RefreshTokenRevokedException;
@@ -56,6 +57,18 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
                 new ApiErrorResponse(
                         "GOOGLE_AUTH_FAILED",
+                        ex.getMessage(),
+                        List.of(),
+                        false
+                )
+        );
+    }
+
+    @ExceptionHandler(KakaoAuthFailedException.class)
+    public ResponseEntity<ApiErrorResponse> handleKakaoAuthFailed(KakaoAuthFailedException ex) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
+                new ApiErrorResponse(
+                        "KAKAO_AUTH_FAILED",
                         ex.getMessage(),
                         List.of(),
                         false

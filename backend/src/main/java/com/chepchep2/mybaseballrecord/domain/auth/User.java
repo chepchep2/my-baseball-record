@@ -6,18 +6,24 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 
 @Entity
-@Table(name = "auth_user")
+@Table(
+        name = "auth_user",
+        uniqueConstraints = {
+                @UniqueConstraint(name = "uq_auth_user_provider_subject", columnNames = {"provider", "provider_subject"})
+        }
+)
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "google_subject", nullable = false, unique = true, length = 128)
-    private String googleSubject;
+    @Column(name = "provider_subject", nullable = false, length = 128)
+    private String providerSubject;
 
-    @Column(name = "email", nullable = false, unique = true, length = 320)
+    @Column(name = "email", length = 320)
     private String email;
 
     @Column(name = "display_name", nullable = false, length = 100)
@@ -26,40 +32,67 @@ public class User {
     @Column(name = "provider", nullable = false, length = 20)
     private String provider;
 
-    private User(Long id, String googleSubject, String email, String displayName, String provider) {
+    @Column(name = "profile_image_url", length = 500)
+    private String profileImageUrl;
+
+    private User(Long id, String providerSubject, String email, String displayName, String provider, String profileImageUrl) {
         this.id = id;
-        this.googleSubject = googleSubject;
+        this.providerSubject = providerSubject;
         this.email = email;
         this.displayName = displayName;
         this.provider = provider;
+        this.profileImageUrl = profileImageUrl;
     }
 
     public static User createNew(String googleSubject, String email, String displayName) {
-        return new User(null, googleSubject, email, displayName, "GOOGLE");
+        return new User(null, googleSubject, email, displayName, "GOOGLE", null);
+    }
+
+    public static User createNew(String subject, String email, String displayName, String provider) {
+        return new User(null, subject, email, displayName, provider, null);
+    }
+
+    public static User createNew(String subject, String email, String displayName, String provider, String profileImageUrl) {
+        return new User(null, subject, email, displayName, provider, profileImageUrl);
     }
 
     public static User existing(Long id, String googleSubject, String email, String displayName) {
-        return new User(id, googleSubject, email, displayName, "GOOGLE");
+        return new User(id, googleSubject, email, displayName, "GOOGLE", null);
+    }
+
+    public static User existing(Long id, String subject, String email, String displayName, String provider) {
+        return new User(id, subject, email, displayName, provider, null);
+    }
+
+    public static User existing(Long id, String subject, String email, String displayName, String provider, String profileImageUrl) {
+        return new User(id, subject, email, displayName, provider, profileImageUrl);
     }
 
     protected User() {
         this.id = null;
-        this.googleSubject = null;
+        this.providerSubject = null;
         this.email = null;
         this.displayName = null;
         this.provider = null;
+        this.profileImageUrl = null;
     }
 
     public void assignId(Long id) {
         this.id = id;
     }
 
+    public void updateProfile(String email, String displayName, String profileImageUrl) {
+        this.email = email;
+        this.displayName = displayName;
+        this.profileImageUrl = profileImageUrl;
+    }
+
     public Long id() {
         return id;
     }
 
-    public String googleSubject() {
-        return googleSubject;
+    public String providerSubject() {
+        return providerSubject;
     }
 
     public String email() {
@@ -72,5 +105,9 @@ public class User {
 
     public String provider() {
         return provider;
+    }
+
+    public String profileImageUrl() {
+        return profileImageUrl;
     }
 }

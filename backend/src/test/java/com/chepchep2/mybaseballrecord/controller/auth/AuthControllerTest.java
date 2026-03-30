@@ -2,24 +2,26 @@ package com.chepchep2.mybaseballrecord.controller.auth;
 
 import com.chepchep2.mybaseballrecord.dto.auth.AuthLoginResult;
 import com.chepchep2.mybaseballrecord.dto.auth.AuthLoginUser;
+import com.chepchep2.mybaseballrecord.infrastructure.auth.RefreshTokenCookieManager;
 import com.chepchep2.mybaseballrecord.service.auth.AuthService;
-import com.chepchep2.mybaseballrecord.exception.auth.GoogleAuthFailedException;
-import com.chepchep2.mybaseballrecord.exception.auth.InvalidGoogleTokenException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.http.MediaType;
+import org.springframework.http.ResponseCookie;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.Instant;
 
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.cookie;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(AuthController.class)
@@ -32,89 +34,82 @@ class AuthControllerTest {
     @MockBean
     private AuthService authService;
 
+    @MockBean
+    private RefreshTokenCookieManager refreshTokenCookieManager;
+
     @Test
-    @DisplayName("POST /api/auth/google - idToken이 유효하면 앱 세션 토큰을 반환한다")
-    void postGoogleLoginReturnsTokenResponse() throws Exception {
-        given(authService.loginWithGoogle("google-id-token"))
+    @DisplayName("GET /api/auth/kakao/login - 카카오 로그인 페이지로 리다이렉트한다")
+    void getKakaoLoginRedirectsToKakaoAuthorizeUrl() throws Exception {
+        given(authService.getKakaoLoginUrl())
+                .willReturn("https://kauth.kakao.com/oauth/authorize?client_id=test&redirect_uri=http://localhost:8080/api/auth/kakao/callback");
+
+        mockMvc.perform(get("/api/auth/kakao/login"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("https://kauth.kakao.com/oauth/authorize?client_id=test&redirect_uri=http://localhost:8080/api/auth/kakao/callback"));
+
+        verify(authService).getKakaoLoginUrl();
+    }
+
+    @Test
+    @DisplayName("GET /api/auth/kakao/callback - code가 유효하면 refresh cookie를 설정하고 프론트 앱으로 리다이렉트한다")
+    void getKakaoCallbackSetsRefreshCookieAndRedirectsToFrontend() throws Exception {
+        given(authService.loginWithKakaoCode("valid-code"))
                 .willReturn(new AuthLoginResult(
                         "access-token",
                         "refresh-token",
-                        Instant.parse("2026-03-18T10:00:00Z"),
-                        Instant.parse("2026-04-17T10:00:00Z"),
+                        Instant.parse("2026-03-30T12:00:00Z"),
+                        Instant.parse("2026-04-29T12:00:00Z"),
                         new AuthLoginUser(
-                                1L,
-                                "조상우",
-                                "user@gmail.com",
-                                "GOOGLE"
+                                7L,
+                                "초상우",
+                                null,
+                                "KAKAO",
+                                "https://k.kakaocdn.net/profile.png"
+                        )
+                ));
+        given(refreshTokenCookieManager.createRefreshTokenCookie("refresh-token", Instant.parse("2026-04-29T12:00:00Z")))
+                .willReturn(ResponseCookie.from("refreshToken", "refresh-token").path("/api/auth").httpOnly(true).build());
+        given(authService.getFrontendRedirectUrl())
+                .willReturn("http://localhost:3000/home");
+
+        mockMvc.perform(get("/api/auth/kakao/callback")
+                        .queryParam("code", "valid-code"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(cookie().exists("refreshToken"))
+                .andExpect(header().string("Location", "http://localhost:3000/home"));
+
+        verify(authService).loginWithKakaoCode("valid-code");
+        verify(refreshTokenCookieManager).createRefreshTokenCookie("refresh-token", Instant.parse("2026-04-29T12:00:00Z"));
+        verify(authService).getFrontendRedirectUrl();
+    }
+
+    @Test
+    @DisplayName("GET /api/auth/session - refresh cookie가 유효하면 access token과 최소 사용자 정보를 반환한다")
+    void getAuthSessionReturnsAccessTokenAndUser() throws Exception {
+        given(authService.getSession("refresh-token"))
+                .willReturn(new AuthLoginResult(
+                        "new-access-token",
+                        "refresh-token",
+                        Instant.parse("2026-03-30T12:00:00Z"),
+                        Instant.parse("2026-04-29T12:00:00Z"),
+                        new AuthLoginUser(
+                                7L,
+                                "초상우",
+                                null,
+                                "KAKAO",
+                                "https://k.kakaocdn.net/profile.png"
                         )
                 ));
 
-        mockMvc.perform(post("/api/auth/google")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("""
-                                {
-                                  "idToken": "google-id-token"
-                                }
-                                """))
+        mockMvc.perform(get("/api/auth/session")
+                        .cookie(new jakarta.servlet.http.Cookie("refreshToken", "refresh-token")))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.accessToken").isString())
-                .andExpect(jsonPath("$.refreshToken").isString())
-                .andExpect(jsonPath("$.accessTokenExpiresAt").isString())
-                .andExpect(jsonPath("$.refreshTokenExpiresAt").isString())
-                .andExpect(jsonPath("$.user.id").isNumber())
-                .andExpect(jsonPath("$.user.displayName").isString())
-                .andExpect(jsonPath("$.user.email").isString())
-                .andExpect(jsonPath("$.user.provider").value("GOOGLE"));
+                .andExpect(jsonPath("$.accessToken").value("new-access-token"))
+                .andExpect(jsonPath("$.expiresIn").isNumber())
+                .andExpect(jsonPath("$.user.id").value(7))
+                .andExpect(jsonPath("$.user.nickname").value("초상우"))
+                .andExpect(jsonPath("$.user.profileImageUrl").value("https://k.kakaocdn.net/profile.png"));
 
-        verify(authService).loginWithGoogle("google-id-token");
-    }
-
-    @Test
-    @DisplayName("POST /api/auth/google - idToken이 비어있으면 400 validation error를 반환한다")
-    void postGoogleLoginValidationErrorWhenIdTokenBlank() throws Exception {
-        mockMvc.perform(post("/api/auth/google")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("""
-                                {
-                                  "idToken": "   "
-                                }
-                                """))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.code").value("VALIDATION_ERROR"))
-                .andExpect(jsonPath("$.fieldErrors[0].field").value("idToken"));
-    }
-
-    @Test
-    @DisplayName("POST /api/auth/google - verifier가 invalid token을 반환하면 400 INVALID_GOOGLE_TOKEN을 반환한다")
-    void postGoogleLoginInvalidGoogleToken() throws Exception {
-        given(authService.loginWithGoogle("bad-token"))
-                .willThrow(new InvalidGoogleTokenException("invalid token"));
-
-        mockMvc.perform(post("/api/auth/google")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("""
-                                {
-                                  "idToken": "bad-token"
-                                }
-                                """))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.code").value("INVALID_GOOGLE_TOKEN"));
-    }
-
-    @Test
-    @DisplayName("POST /api/auth/google - verifier가 auth failed를 반환하면 401 GOOGLE_AUTH_FAILED를 반환한다")
-    void postGoogleLoginGoogleAuthFailed() throws Exception {
-        given(authService.loginWithGoogle("auth-failed-token"))
-                .willThrow(new GoogleAuthFailedException("auth failed"));
-
-        mockMvc.perform(post("/api/auth/google")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("""
-                                {
-                                  "idToken": "auth-failed-token"
-                                }
-                                """))
-                .andExpect(status().isUnauthorized())
-                .andExpect(jsonPath("$.code").value("GOOGLE_AUTH_FAILED"));
+        verify(authService).getSession("refresh-token");
     }
 }

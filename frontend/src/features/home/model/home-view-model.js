@@ -10,6 +10,10 @@ function formatCount(value) {
   return String(value ?? 0);
 }
 
+function toRecentSummaryLabel(game) {
+  return `타석 ${game.plateAppearances} · 안타 ${game.hits} · 타율 ${formatAverage(game.battingAverage)}`;
+}
+
 export function toHomeSummaryItems(summary) {
   return [
     ["타율", formatAverage(summary.battingAverage)],
@@ -22,9 +26,9 @@ export function toHomeSummaryItems(summary) {
 
 export function toRecentGameItems(games) {
   return (games ?? []).slice(0, 3).map((game) => ({
-    id: game.id,
-    playedLabel: game.playedLabel,
-    summaryLabel: game.summaryLabel,
+    id: game.gameId ?? game.id,
+    playedLabel: game.playedAtLabel ?? game.playedLabel,
+    summaryLabel: game.summaryLabel ?? toRecentSummaryLabel(game),
   }));
 }
 

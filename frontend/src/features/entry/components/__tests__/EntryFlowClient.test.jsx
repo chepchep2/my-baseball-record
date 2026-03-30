@@ -3,6 +3,7 @@ import { act, fireEvent, render, screen, waitFor } from "@testing-library/react"
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import EntryFlowClient from "../EntryFlowClient";
+import { createGame } from "@/features/games/api/games-api";
 
 const { pushMock } = vi.hoisted(() => ({
   pushMock: vi.fn(),
@@ -14,8 +15,14 @@ vi.mock("next/navigation", () => ({
   }),
 }));
 
-vi.mock("@/features/home/api/mock-home-store", () => ({
-  saveMockGame: vi.fn(),
+vi.mock("@/features/auth/session/useAuthSession", () => ({
+  useAuthSession: () => ({
+    apiClient: { post: vi.fn() },
+  }),
+}));
+
+vi.mock("@/features/games/api/games-api", () => ({
+  createGame: vi.fn().mockResolvedValue({ gameId: 1 }),
 }));
 
 async function setNumericValue(label, value) {
@@ -32,6 +39,7 @@ describe("EntryFlowClient", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     window.history.replaceState({}, "", "/games/new");
+    createGame.mockResolvedValue({ gameId: 1 });
   });
 
   it("1/4부터 4/4까지 진행하고 저장 후 홈으로 이동한다", async () => {
@@ -279,6 +287,9 @@ describe("EntryFlowClient", () => {
   });
 
   it("1단계에서 뒤로가기를 하면 이탈 확인 모달을 보여준다", async () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-03-26T18:12:00"));
+
     render(<EntryFlowClient />);
 
     const hourSelect = screen.getByLabelText("시 선택");
@@ -287,7 +298,7 @@ describe("EntryFlowClient", () => {
       .find((value) => value !== hourSelect.value);
 
     expect(nextHourValue).toBeTruthy();
-    await userEvent.selectOptions(hourSelect, nextHourValue);
+    fireEvent.change(hourSelect, { target: { value: nextHourValue } });
 
     await act(async () => {
       window.dispatchEvent(new PopStateEvent("popstate"));
@@ -295,5 +306,7 @@ describe("EntryFlowClient", () => {
 
     expect(screen.getByRole("dialog", { name: "기록 입력 중단 확인" })).toBeInTheDocument();
     expect(screen.getByText("기록 입력을 중단할까요?")).toBeInTheDocument();
+
+    vi.useRealTimers();
   });
 });

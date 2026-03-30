@@ -4,6 +4,7 @@ import React from "react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useAuthSession } from "@/features/auth/session/useAuthSession";
 import AppPageLayout from "@/components/layout/AppPageLayout";
 import { getHomeDashboard } from "@/features/home/api/home-api";
 
@@ -18,6 +19,7 @@ function SummaryList({ items }) {
 
 export default function HomePageClient({ selectedScope = "season" }) {
   const router = useRouter();
+  const { apiClient } = useAuthSession();
   const [dashboard, setDashboard] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState(null);
@@ -30,7 +32,7 @@ export default function HomePageClient({ selectedScope = "season" }) {
       setErrorMessage(null);
 
       try {
-        const result = await getHomeDashboard({ selectedScope });
+        const result = await getHomeDashboard(apiClient, { selectedScope });
 
         if (!active) {
           return;
@@ -60,7 +62,7 @@ export default function HomePageClient({ selectedScope = "season" }) {
     return () => {
       active = false;
     };
-  }, [router, selectedScope]);
+  }, [apiClient, router, selectedScope]);
 
   const activeSummaryItems = selectedScope === "career"
     ? dashboard?.careerSummaryItems ?? []

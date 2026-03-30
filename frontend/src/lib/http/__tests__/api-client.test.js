@@ -29,6 +29,35 @@ describe("api-client", () => {
     process.env.NEXT_PUBLIC_API_BASE_URL = originalBaseUrl;
   });
 
+  it("로컬 개발에서는 env가 없어도 localhost:8080을 붙여 호출한다", async () => {
+    const originalBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
+    process.env.NEXT_PUBLIC_API_BASE_URL = "";
+    const originalWindow = global.window;
+
+    global.window = {
+      location: {
+        protocol: "http:",
+        hostname: "localhost",
+      },
+    };
+
+    const fetchMock = vi.fn().mockResolvedValue(jsonResponse({ ok: true }));
+    const client = createApiClient({
+      fetchImpl: fetchMock,
+      getAccessToken: () => null,
+    });
+
+    await client.get("/api/stats");
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      "http://localhost:8080/api/stats",
+      expect.objectContaining({ method: "GET" }),
+    );
+
+    process.env.NEXT_PUBLIC_API_BASE_URL = originalBaseUrl;
+    global.window = originalWindow;
+  });
+
   it("access token이 있으면 Authorization Bearer 헤더를 추가한다", async () => {
     const fetchMock = vi.fn().mockResolvedValue(jsonResponse({ ok: true }));
     const client = createApiClient({

@@ -2,7 +2,7 @@ import { describe, expect, it, vi } from "vitest";
 import { createGame, deleteGame, getGameDetail, updateGame } from "../games-api";
 
 describe("games-api", () => {
-  it("GET /api/games/{id} 응답을 현재 상세 화면 shape로 변환한다", async () => {
+  it("GET /api/games/{id} legacy 상세 응답을 현재 상세 화면 shape로 변환한다", async () => {
     const apiClient = {
       get: vi.fn().mockResolvedValue({
         id: 101,
@@ -31,22 +31,7 @@ describe("games-api", () => {
           caughtStealing: 0,
           sacrificeHits: 0,
         },
-        pitcher: {
-          innings: 1,
-          additionalOuts: 0,
-          runsAllowed: 0,
-          earnedRuns: 0,
-          hitsAllowed: 1,
-          walks: 0,
-          strikeOuts: 2,
-          hitByPitch: 0,
-          homeRunsAllowed: 0,
-          battersFaced: 4,
-          wins: 0,
-          losses: 0,
-          saves: 0,
-          holds: 0,
-        },
+        pitcher: null,
       }),
     };
 
@@ -63,48 +48,54 @@ describe("games-api", () => {
       memo: "비 오는 날 경기",
       participationType: "BOTH",
     });
-    expect(game.batter.atBats).toBe(3);
-    expect(game.pitcher.innings).toBe(1);
   });
 
-  it("POST /api/games 응답도 상세 화면 shape로 변환한다", async () => {
+  it("POST /api/games flat 응답을 생성 후 홈 이동에 필요한 shape로 변환한다", async () => {
     const apiClient = {
       post: vi.fn().mockResolvedValue({
-        id: 201,
-        gameInfo: {
-          playedAt: "2026-03-20",
-          seasonYear: 2026,
-          gameType: "LEAGUE",
-          teamName: "블루스톰",
-          opponentName: "스카이워커스",
-          memo: null,
-        },
-        participationType: "BATTER",
-        batter: {
-          plateAppearances: 3,
-          atBats: 3,
-          singles: 1,
-          doubles: 0,
-          triples: 0,
-          homeRuns: 0,
-          walks: 0,
-          strikeOuts: 1,
-          hitByPitch: 0,
-          runsBattedIn: 0,
-          runs: 1,
-          stolenBases: 0,
-          caughtStealing: 0,
-          sacrificeHits: 0,
-        },
-        pitcher: null,
+        gameId: 201,
+        playedDate: "2026-03-20",
+        playedHour: 19,
+        playedMinute: 0,
+        playedAtLabel: "3/20 19:00",
+        plateAppearances: 3,
+        walksAndHitByPitch: 0,
+        singles: 1,
+        doubles: 0,
+        triples: 0,
+        homeRuns: 0,
+        atBats: 3,
+        hits: 1,
+        battingAverage: 0.333,
+        onBasePercentage: 0.333,
+        sluggingPercentage: 0.333,
+        ops: 0.666,
       }),
     };
 
-    const result = await createGame(apiClient, { gameInfo: {}, batter: {}, pitcher: null });
+    const payload = {
+      playedDate: "2026-03-20",
+      playedHour: 19,
+      playedMinute: 0,
+      plateAppearances: 3,
+      walksAndHitByPitch: 0,
+      singles: 1,
+      doubles: 0,
+      triples: 0,
+      homeRuns: 0,
+    };
 
-    expect(apiClient.post).toHaveBeenCalledWith("/api/games", { gameInfo: {}, batter: {}, pitcher: null });
-    expect(result.id).toBe(201);
-    expect(result.playedAt).toBe("2026-03-20");
+    const result = await createGame(apiClient, payload);
+
+    expect(apiClient.post).toHaveBeenCalledWith("/api/games", payload);
+    expect(result).toMatchObject({
+      id: 201,
+      playedDate: "2026-03-20",
+      playedHour: 19,
+      playedMinute: 0,
+      plateAppearances: 3,
+      hits: 1,
+    });
   });
 
   it("PUT /api/games/{id} 응답도 상세 화면 shape로 변환한다", async () => {

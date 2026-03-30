@@ -22,6 +22,7 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -107,5 +108,27 @@ class AuthRefreshServiceTest {
 
         assertThatThrownBy(() -> authService.refreshSession("exp.ired.token"))
                 .isInstanceOf(RefreshTokenExpiredException.class);
+    }
+
+    @Test
+    @DisplayName("session bootstrap은 기존 refresh token을 유지하고 access token만 새로 발급한다")
+    void getSessionKeepsExistingRefreshToken() {
+        RefreshToken stored = new RefreshToken(1L, "aaa.bbb.ccc", Instant.parse("2999-01-01T00:00:00Z"));
+        User user = User.existing(1L, "kakao-sub-1", "user@gmail.com", "조상우", "KAKAO");
+
+        when(refreshTokenValidator.validateAndGetUserId("aaa.bbb.ccc")).thenReturn(1L);
+        when(refreshTokenRepository.findByToken("aaa.bbb.ccc")).thenReturn(Optional.of(stored));
+        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
+        when(clock.instant()).thenReturn(Instant.parse("2026-03-19T07:00:00Z"));
+        when(jwtTokenIssuer.issueAccessToken(1L))
+                .thenReturn(new JwtTokenIssuer.IssuedToken("bootstrap-access", Instant.parse("2026-03-20T00:00:00Z")));
+
+        var result = authService.getSession("aaa.bbb.ccc");
+
+        assertThat(result.accessToken()).isEqualTo("bootstrap-access");
+        assertThat(result.refreshToken()).isEqualTo("aaa.bbb.ccc");
+        verify(jwtTokenIssuer, never()).issueRefreshToken(1L);
+        verify(refreshTokenRepository, never()).delete(stored);
+        verify(refreshTokenRepository, never()).save(any(RefreshToken.class));
     }
 }

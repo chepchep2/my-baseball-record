@@ -38,8 +38,16 @@ public class User {
         return new User(null, googleSubject, email, displayName, "GOOGLE");
     }
 
+    public static User createNew(String subject, String email, String displayName, String provider) {
+        return new User(null, subject, email, displayName, provider);
+    }
+
     public static User existing(Long id, String googleSubject, String email, String displayName) {
         return new User(id, googleSubject, email, displayName, "GOOGLE");
+    }
+
+    public static User existing(Long id, String subject, String email, String displayName, String provider) {
+        return new User(id, subject, email, displayName, provider);
     }
 
     protected User() {

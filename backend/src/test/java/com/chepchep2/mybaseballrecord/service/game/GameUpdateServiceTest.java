@@ -23,6 +23,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.lang.reflect.Field;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -214,7 +215,7 @@ class GameUpdateServiceTest {
             ParticipationType participationType
     ) throws Exception {
         GameRecord game = new GameRecord(
-                playedAt,
+                playedAt.atStartOfDay(),
                 seasonYear,
                 gameType,
                 teamName,

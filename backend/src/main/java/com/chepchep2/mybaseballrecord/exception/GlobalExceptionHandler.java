@@ -8,6 +8,7 @@ import com.chepchep2.mybaseballrecord.exception.auth.RefreshTokenExpiredExceptio
 import com.chepchep2.mybaseballrecord.exception.auth.RefreshTokenInvalidException;
 import com.chepchep2.mybaseballrecord.exception.auth.RefreshTokenRevokedException;
 import com.chepchep2.mybaseballrecord.exception.game.GameImmutableFieldException;
+import com.chepchep2.mybaseballrecord.exception.game.InvalidGameCreateException;
 import com.chepchep2.mybaseballrecord.exception.game.GameNotFoundException;
 import com.chepchep2.mybaseballrecord.exception.stats.InvalidStatsQueryException;
 import org.springframework.http.HttpStatus;
@@ -143,6 +144,18 @@ public class GlobalExceptionHandler {
                         "GAME_IMMUTABLE_FIELD",
                         ex.getMessage(),
                         List.of(),
+                        false
+                )
+        );
+    }
+
+    @ExceptionHandler(InvalidGameCreateException.class)
+    public ResponseEntity<ApiErrorResponse> handleInvalidGameCreate(InvalidGameCreateException ex) {
+        return ResponseEntity.badRequest().body(
+                new ApiErrorResponse(
+                        "VALIDATION_ERROR",
+                        "입력값을 확인해주세요.",
+                        List.of(new ApiErrorResponse.FieldError(ex.field(), ex.getMessage())),
                         false
                 )
         );

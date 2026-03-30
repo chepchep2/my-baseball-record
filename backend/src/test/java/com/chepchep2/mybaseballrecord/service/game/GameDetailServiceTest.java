@@ -18,6 +18,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -122,7 +123,7 @@ class GameDetailServiceTest {
 
     private GameRecord createGame(long id) throws Exception {
         GameRecord game = GameRecord.builder()
-                .playedAt(LocalDate.parse("2026-03-18"))
+                .playedAt(LocalDateTime.parse("2026-03-18T00:00:00"))
                 .seasonYear(2026)
                 .gameType(GameType.LEAGUE)
                 .teamName("블루스톰")

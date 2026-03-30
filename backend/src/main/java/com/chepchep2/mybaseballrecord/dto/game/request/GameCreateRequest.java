@@ -1,16 +1,20 @@
 package com.chepchep2.mybaseballrecord.dto.game.request;
 
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.AssertTrue;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 
+import java.time.LocalDate;
+
 public record GameCreateRequest(
-        @Valid @NotNull GameCreateInfoRequest gameInfo,
-        @Valid BatterRecordRequest batter,
-        @Valid PitcherRecordRequest pitcher
+        @NotNull LocalDate playedDate,
+        @NotNull @Min(0) @Max(23) Integer playedHour,
+        @NotNull @Min(0) @Max(59) Integer playedMinute,
+        @Min(0) int plateAppearances,
+        @Min(0) int walksAndHitByPitch,
+        @Min(0) int singles,
+        @Min(0) int doubles,
+        @Min(0) int triples,
+        @Min(0) int homeRuns
 ) {
-    @AssertTrue(message = "batter 또는 pitcher 중 하나는 입력해야 합니다.")
-    public boolean hasAnyRecord() {
-        return batter != null || pitcher != null;
-    }
 }

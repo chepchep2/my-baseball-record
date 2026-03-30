@@ -2,12 +2,14 @@
 
 import React, { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { saveMockGame } from "@/features/home/api/mock-home-store";
+import { ApiError } from "@/features/auth/api/auth-api";
+import { useAuthSession } from "@/features/auth/session/useAuthSession";
 import EntryExitModal from "@/features/entry/components/EntryExitModal";
 import EntryStepCounts from "@/features/entry/components/EntryStepCounts";
 import EntryStepDateTime from "@/features/entry/components/EntryStepDateTime";
+import { createGame } from "@/features/games/api/games-api";
 import { buildEntryDraft } from "@/features/entry/model/entry-form";
-import { buildMockGameRecord } from "@/features/entry/model/entry-payload";
+import { buildGameCreatePayload } from "@/features/entry/model/entry-payload";
 import { validateEntrySubmission } from "@/features/entry/model/entry-validation";
 
 const ENTRY_FIELDS = [
@@ -21,10 +23,12 @@ const ENTRY_FIELDS = [
 
 export default function EntryFlowClient() {
   const router = useRouter();
+  const { apiClient } = useAuthSession();
   const initialDraft = useMemo(() => buildEntryDraft(new Date()), []);
   const [draft, setDraft] = useState(initialDraft);
   const [currentStep, setCurrentStep] = useState(1);
   const [showExitModal, setShowExitModal] = useState(false);
+  const [submitError, setSubmitError] = useState(null);
 
   const stepError = useMemo(() => {
     if (currentStep === 2) {
@@ -59,6 +63,7 @@ export default function EntryFlowClient() {
   }, [currentStep, isDirty, router]);
 
   function updateField(key, value) {
+    setSubmitError(null);
     setDraft((current) => ({
       ...current,
       [key]: value === "" ? "0" : value,
@@ -69,14 +74,25 @@ export default function EntryFlowClient() {
     setCurrentStep((step) => Math.min(2, step + 1));
   }
 
-  function saveEntry() {
+  async function saveEntry() {
     const result = validateEntrySubmission(draft);
     if (!result.isValid) {
       return;
     }
 
-    saveMockGame(buildMockGameRecord(draft));
-    router.push("/home");
+    const payload = buildGameCreatePayload(draft);
+
+    try {
+      await createGame(apiClient, payload);
+      router.push("/home");
+    } catch (error) {
+      if (error instanceof ApiError) {
+        setSubmitError(error.message || "경기 기록을 저장하지 못했습니다.");
+        return;
+      }
+
+      setSubmitError("경기 기록을 저장하지 못했습니다.");
+    }
   }
 
   return (
@@ -92,7 +108,7 @@ export default function EntryFlowClient() {
         <EntryStepCounts
           fields={ENTRY_FIELDS}
           values={draft}
-          error={stepError}
+          error={submitError ?? stepError}
           canProceed={stepError === null}
           onChange={updateField}
           onSubmit={saveEntry}

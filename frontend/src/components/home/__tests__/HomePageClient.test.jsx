@@ -18,6 +18,12 @@ vi.mock("@/features/home/api/home-api", () => ({
   getHomeDashboard: vi.fn(),
 }));
 
+vi.mock("@/features/auth/session/useAuthSession", () => ({
+  useAuthSession: () => ({
+    apiClient: { get: vi.fn() },
+  }),
+}));
+
 vi.mock("@/components/layout/AppPageLayout", () => ({
   default: ({ children }) => <div>{children}</div>,
 }));
@@ -58,7 +64,7 @@ describe("HomePageClient", () => {
     render(<HomePageClient selectedScope="season" />);
 
     await waitFor(() =>
-      expect(getHomeDashboard).toHaveBeenCalledWith({ selectedScope: "season" }),
+      expect(getHomeDashboard).toHaveBeenCalledWith(expect.any(Object), { selectedScope: "season" }),
     );
 
     expect(screen.getByText("올해 시즌")).toBeInTheDocument();

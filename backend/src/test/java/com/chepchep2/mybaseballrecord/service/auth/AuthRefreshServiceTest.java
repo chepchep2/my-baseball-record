@@ -115,7 +115,7 @@ class AuthRefreshServiceTest {
     @DisplayName("session bootstrap은 기존 refresh token을 유지하고 access token만 새로 발급한다")
     void getSessionKeepsExistingRefreshToken() {
         RefreshToken stored = new RefreshToken(1L, "aaa.bbb.ccc", Instant.parse("2999-01-01T00:00:00Z"));
-        User user = User.existing(1L, "kakao-sub-1", "user@gmail.com", "조상우", "KAKAO");
+        User user = User.existing(1L, "kakao-sub-1", "user@gmail.com", "조상우", "KAKAO", null);
 
         when(refreshTokenValidator.validateAndGetUserId("aaa.bbb.ccc")).thenReturn(1L);
         when(refreshTokenRepository.findByToken("aaa.bbb.ccc")).thenReturn(Optional.of(stored));

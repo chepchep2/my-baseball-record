@@ -5,8 +5,12 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
+
+import java.time.Instant;
 
 @Entity
 @Table(
@@ -35,37 +39,57 @@ public class User {
     @Column(name = "profile_image_url", length = 500)
     private String profileImageUrl;
 
-    private User(Long id, String providerSubject, String email, String displayName, String provider, String profileImageUrl) {
+    @Column(name = "created_at", nullable = false)
+    private Instant createdAt;
+
+    @Column(name = "updated_at", nullable = false)
+    private Instant updatedAt;
+
+    @Column(name = "last_login_at")
+    private Instant lastLoginAt;
+
+    private User(
+            Long id,
+            String providerSubject,
+            String email,
+            String displayName,
+            String provider,
+            String profileImageUrl,
+            Instant createdAt,
+            Instant updatedAt,
+            Instant lastLoginAt
+    ) {
         this.id = id;
         this.providerSubject = providerSubject;
         this.email = email;
         this.displayName = displayName;
         this.provider = provider;
         this.profileImageUrl = profileImageUrl;
-    }
-
-    public static User createNew(String googleSubject, String email, String displayName) {
-        return new User(null, googleSubject, email, displayName, "GOOGLE", null);
-    }
-
-    public static User createNew(String subject, String email, String displayName, String provider) {
-        return new User(null, subject, email, displayName, provider, null);
+        this.createdAt = createdAt;
+        this.updatedAt = updatedAt;
+        this.lastLoginAt = lastLoginAt;
     }
 
     public static User createNew(String subject, String email, String displayName, String provider, String profileImageUrl) {
-        return new User(null, subject, email, displayName, provider, profileImageUrl);
-    }
-
-    public static User existing(Long id, String googleSubject, String email, String displayName) {
-        return new User(id, googleSubject, email, displayName, "GOOGLE", null);
-    }
-
-    public static User existing(Long id, String subject, String email, String displayName, String provider) {
-        return new User(id, subject, email, displayName, provider, null);
+        return new User(null, subject, email, displayName, provider, profileImageUrl, null, null, null);
     }
 
     public static User existing(Long id, String subject, String email, String displayName, String provider, String profileImageUrl) {
-        return new User(id, subject, email, displayName, provider, profileImageUrl);
+        return new User(id, subject, email, displayName, provider, profileImageUrl, null, null, null);
+    }
+
+    public static User existing(
+            Long id,
+            String subject,
+            String email,
+            String displayName,
+            String provider,
+            String profileImageUrl,
+            Instant createdAt,
+            Instant updatedAt,
+            Instant lastLoginAt
+    ) {
+        return new User(id, subject, email, displayName, provider, profileImageUrl, createdAt, updatedAt, lastLoginAt);
     }
 
     protected User() {
@@ -75,6 +99,9 @@ public class User {
         this.displayName = null;
         this.provider = null;
         this.profileImageUrl = null;
+        this.createdAt = null;
+        this.updatedAt = null;
+        this.lastLoginAt = null;
     }
 
     public void assignId(Long id) {
@@ -85,6 +112,26 @@ public class User {
         this.email = email;
         this.displayName = displayName;
         this.profileImageUrl = profileImageUrl;
+    }
+
+    public void markLoggedIn(Instant now) {
+        this.lastLoginAt = now;
+    }
+
+    @PrePersist
+    void onCreate() {
+        Instant now = Instant.now();
+        if (this.createdAt == null) {
+            this.createdAt = now;
+        }
+        if (this.updatedAt == null) {
+            this.updatedAt = this.createdAt;
+        }
+    }
+
+    @PreUpdate
+    void onUpdate() {
+        this.updatedAt = Instant.now();
     }
 
     public Long id() {
@@ -109,5 +156,17 @@ public class User {
 
     public String profileImageUrl() {
         return profileImageUrl;
+    }
+
+    public Instant createdAt() {
+        return createdAt;
+    }
+
+    public Instant updatedAt() {
+        return updatedAt;
+    }
+
+    public Instant lastLoginAt() {
+        return lastLoginAt;
     }
 }

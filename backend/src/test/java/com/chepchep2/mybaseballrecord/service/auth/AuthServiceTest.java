@@ -86,9 +86,11 @@ class AuthServiceTest {
                 "https://k.kakaocdn.net/profile.png",
                 null
         );
+        Instant loginAt = Instant.parse("2026-03-30T11:59:59Z");
 
         when(kakaoOauthClient.getUserInfo("valid-code")).thenReturn(kakaoUser);
         when(userRepository.findByProviderAndProviderSubject("KAKAO", "kakao-sub-1")).thenReturn(Optional.empty());
+        when(clock.instant()).thenReturn(loginAt);
         when(userRepository.save(any(User.class))).thenAnswer(invocation -> {
             User user = invocation.getArgument(0);
             user.assignId(7L);
@@ -106,6 +108,12 @@ class AuthServiceTest {
         assertThat(result.user().provider()).isEqualTo("KAKAO");
         assertThat(result.user().profileImageUrl()).isEqualTo("https://k.kakaocdn.net/profile.png");
 
+        ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
+        verify(userRepository).save(userCaptor.capture());
+        assertThat(userCaptor.getValue().createdAt()).isNull();
+        assertThat(userCaptor.getValue().updatedAt()).isNull();
+        assertThat(userCaptor.getValue().lastLoginAt()).isEqualTo(loginAt);
+
         ArgumentCaptor<RefreshToken> captor = ArgumentCaptor.forClass(RefreshToken.class);
         verify(refreshTokenRepository).save(captor.capture());
         assertThat(captor.getValue().token()).isEqualTo("refresh-token");
@@ -115,7 +123,21 @@ class AuthServiceTest {
     @Test
     @DisplayName("기존 카카오 사용자면 user를 재사용하고 refresh token을 갱신 저장한다")
     void loginWithKakaoCodeReusesExistingUser() {
-        User existing = User.existing(9L, "kakao-sub-9", null, "기존유저", "KAKAO", null);
+        Instant createdAt = Instant.parse("2026-03-01T00:00:00Z");
+        Instant updatedAt = Instant.parse("2026-03-10T00:00:00Z");
+        Instant previousLoginAt = Instant.parse("2026-03-20T00:00:00Z");
+        Instant loginAt = Instant.parse("2026-03-30T11:59:59Z");
+        User existing = User.existing(
+                9L,
+                "kakao-sub-9",
+                null,
+                "기존유저",
+                "KAKAO",
+                null,
+                createdAt,
+                updatedAt,
+                previousLoginAt
+        );
         var kakaoUser = new KakaoUserInfo(
                 "kakao-sub-9",
                 "기존유저",
@@ -125,6 +147,7 @@ class AuthServiceTest {
 
         when(kakaoOauthClient.getUserInfo("existing-code")).thenReturn(kakaoUser);
         when(userRepository.findByProviderAndProviderSubject("KAKAO", "kakao-sub-9")).thenReturn(Optional.of(existing));
+        when(clock.instant()).thenReturn(loginAt);
         when(userRepository.save(existing)).thenReturn(existing);
         when(jwtTokenIssuer.issueAccessToken(9L)).thenReturn(new JwtTokenIssuer.IssuedToken("access-9", Instant.parse("2026-03-30T12:00:00Z")));
         when(jwtTokenIssuer.issueRefreshToken(9L)).thenReturn(new JwtTokenIssuer.IssuedToken("refresh-9", Instant.parse("2026-04-29T12:00:00Z")));
@@ -135,6 +158,9 @@ class AuthServiceTest {
         assertThat(result.user().provider()).isEqualTo("KAKAO");
         assertThat(result.user().profileImageUrl()).isEqualTo("https://k.kakaocdn.net/new.png");
         assertThat(result.user().email()).isNull();
+        assertThat(existing.createdAt()).isEqualTo(createdAt);
+        assertThat(existing.updatedAt()).isEqualTo(updatedAt);
+        assertThat(existing.lastLoginAt()).isEqualTo(loginAt);
         verify(userRepository).save(existing);
         verify(refreshTokenRepository).save(any(RefreshToken.class));
     }

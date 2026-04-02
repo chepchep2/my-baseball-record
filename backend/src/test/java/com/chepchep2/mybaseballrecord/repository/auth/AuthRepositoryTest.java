@@ -34,12 +34,15 @@ class AuthRepositoryTest {
         assertThat(found.get().providerSubject()).isEqualTo("kakao-sub-1");
         assertThat(found.get().email()).isNull();
         assertThat(found.get().profileImageUrl()).isEqualTo("https://k.kakaocdn.net/profile.png");
+        assertThat(found.get().createdAt()).isNotNull();
+        assertThat(found.get().updatedAt()).isNotNull();
+        assertThat(found.get().lastLoginAt()).isNull();
     }
 
     @Test
     @DisplayName("refresh token을 저장하면 userId와 token 값이 유지된다")
     void saveRefreshToken() {
-        User user = userRepository.save(User.createNew("google-sub-2", "token-user@gmail.com", "토큰유저"));
+        User user = userRepository.save(User.createNew("google-sub-2", "token-user@gmail.com", "토큰유저", "GOOGLE", null));
 
         RefreshToken saved = refreshTokenRepository.save(
                 new RefreshToken(user.id(), "refresh-token", Instant.parse("2026-04-17T10:00:00Z"))
@@ -52,7 +55,7 @@ class AuthRepositoryTest {
     @Test
     @DisplayName("refresh token으로 조회할 수 있다")
     void findRefreshTokenByToken() {
-        User user = userRepository.save(User.createNew("google-sub-3", "find-token-user@gmail.com", "조회유저"));
+        User user = userRepository.save(User.createNew("google-sub-3", "find-token-user@gmail.com", "조회유저", "GOOGLE", null));
         refreshTokenRepository.save(
                 new RefreshToken(user.id(), "refresh-token-find", Instant.parse("2026-04-17T10:00:00Z"))
         );
@@ -66,7 +69,7 @@ class AuthRepositoryTest {
     @Test
     @DisplayName("refresh token을 삭제하면 token으로 조회되지 않는다")
     void deleteRefreshTokenByToken() {
-        User user = userRepository.save(User.createNew("google-sub-4", "delete-token-user@gmail.com", "삭제유저"));
+        User user = userRepository.save(User.createNew("google-sub-4", "delete-token-user@gmail.com", "삭제유저", "GOOGLE", null));
         refreshTokenRepository.save(
                 new RefreshToken(user.id(), "refresh-token-delete", Instant.parse("2026-04-17T10:00:00Z"))
         );

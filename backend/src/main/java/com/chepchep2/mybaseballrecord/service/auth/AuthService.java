@@ -70,14 +70,28 @@ public class AuthService {
 
     public AuthLoginResult loginWithGoogle(String idToken) {
         GoogleTokenVerifier.GoogleUserInfo googleUserInfo = googleTokenVerifier.verify(idToken);
+        Instant now = clock.instant();
         User user = userRepository.findByProviderAndProviderSubject("GOOGLE", googleUserInfo.subject())
-                .orElseGet(() -> userRepository.save(
-                        User.createNew(
-                                googleUserInfo.subject(),
-                                googleUserInfo.email(),
-                                googleUserInfo.displayName()
-                        )
-                ));
+                .map(existingUser -> {
+                    existingUser.updateProfile(
+                            googleUserInfo.email(),
+                            googleUserInfo.displayName(),
+                            existingUser.profileImageUrl()
+                    );
+                    existingUser.markLoggedIn(now);
+                    return userRepository.save(existingUser);
+                })
+                .orElseGet(() -> {
+                    User newUser = User.createNew(
+                            googleUserInfo.subject(),
+                            googleUserInfo.email(),
+                            googleUserInfo.displayName(),
+                            "GOOGLE",
+                            null
+                    );
+                    newUser.markLoggedIn(now);
+                    return userRepository.save(newUser);
+                });
 
         JwtTokenIssuer.IssuedToken accessToken = jwtTokenIssuer.issueAccessToken(user.id());
         JwtTokenIssuer.IssuedToken refreshToken = jwtTokenIssuer.issueRefreshToken(user.id());
@@ -122,6 +136,7 @@ public class AuthService {
             throw new KakaoAuthFailedException("kakao user info is invalid.");
         }
 
+        Instant now = clock.instant();
         User user = userRepository.findByProviderAndProviderSubject("KAKAO", kakaoUserInfo.subject())
                 .map(existingUser -> {
                     existingUser.updateProfile(
@@ -129,17 +144,20 @@ public class AuthService {
                             kakaoUserInfo.nickname(),
                             kakaoUserInfo.profileImageUrl()
                     );
+                    existingUser.markLoggedIn(now);
                     return userRepository.save(existingUser);
                 })
-                .orElseGet(() -> userRepository.save(
-                        User.createNew(
-                                kakaoUserInfo.subject(),
-                                kakaoUserInfo.email(),
-                                kakaoUserInfo.nickname(),
-                                "KAKAO",
-                                kakaoUserInfo.profileImageUrl()
-                        )
-                ));
+                .orElseGet(() -> {
+                    User newUser = User.createNew(
+                            kakaoUserInfo.subject(),
+                            kakaoUserInfo.email(),
+                            kakaoUserInfo.nickname(),
+                            "KAKAO",
+                            kakaoUserInfo.profileImageUrl()
+                    );
+                    newUser.markLoggedIn(now);
+                    return userRepository.save(newUser);
+                });
 
         JwtTokenIssuer.IssuedToken accessToken = jwtTokenIssuer.issueAccessToken(user.id());
         JwtTokenIssuer.IssuedToken refreshToken = jwtTokenIssuer.issueRefreshToken(user.id());
@@ -169,6 +187,8 @@ public class AuthService {
 
     public AuthLoginResult getSession(String refreshToken) {
         ValidRefreshSession session = loadValidRefreshSession(refreshToken);
+        session.user().markLoggedIn(clock.instant());
+        userRepository.save(session.user());
         JwtTokenIssuer.IssuedToken newAccessToken = jwtTokenIssuer.issueAccessToken(session.user().id());
 
         return new AuthLoginResult(

@@ -7,18 +7,6 @@ import { deleteGame } from "@/features/games/api/games-api";
 
 const pushMock = vi.fn();
 
-vi.mock("next/link", () => ({
-  default: ({ href, children, ...props }) => (
-    <a href={href} {...props}>
-      {children}
-    </a>
-  ),
-}));
-
-vi.mock("@/components/navigation/BottomTabBar", () => ({
-  default: () => <div>tabs</div>,
-}));
-
 vi.mock("next/navigation", () => ({
   useRouter: () => ({
     push: pushMock,
@@ -40,99 +28,74 @@ describe("GameDetailView", () => {
     vi.clearAllMocks();
   });
 
-  it("API에서 변환된 상세 데이터를 렌더링한다", () => {
+  it("flat 상세 데이터를 읽기 전용 기록 상세 화면으로 렌더링한다", () => {
     render(
       <GameDetailView
         game={{
           id: 101,
-          playedAt: "2026-03-18",
-          seasonYear: 2026,
-          gameType: "LEAGUE",
-          participationType: "BOTH",
-          teamName: "블루스톰",
-          opponentName: "레전드",
-          memo: "비 오는 날 경기",
-          batter: {
-            plateAppearances: 4,
-            atBats: 3,
-            singles: 1,
-            doubles: 1,
-            triples: 0,
-            homeRuns: 1,
-            walks: 1,
-            strikeOuts: 0,
-            hitByPitch: 0,
-            runsBattedIn: 3,
-            runs: 2,
-            stolenBases: 0,
-            caughtStealing: 0,
-            sacrificeHits: 0,
-          },
-          pitcher: {
-            innings: 1,
-            additionalOuts: 0,
-            runsAllowed: 0,
-            earnedRuns: 0,
-            hitsAllowed: 1,
-            walks: 0,
-            strikeOuts: 2,
-            hitByPitch: 0,
-            homeRunsAllowed: 0,
-            battersFaced: 4,
-            wins: 0,
-            losses: 0,
-            saves: 0,
-            holds: 0,
-          },
+          playedDate: "2026-04-05",
+          playedHour: 11,
+          playedMinute: 30,
+          playedAtLabel: "4/5 11:30",
+          plateAppearances: 4,
+          walksAndHitByPitch: 1,
+          singles: 1,
+          doubles: 0,
+          triples: 0,
+          homeRuns: 0,
+          atBats: 3,
+          hits: 1,
+          battingAverage: 0.333,
+          onBasePercentage: 0.5,
+          sluggingPercentage: 0.333,
+          ops: 0.833,
         }}
       />,
     );
 
-    expect(screen.getByText("개별 경기 상세")).toBeInTheDocument();
-    expect(screen.getByText("블루스톰")).toBeInTheDocument();
-    expect(screen.getByText("레전드")).toBeInTheDocument();
-    expect(screen.getByText("비 오는 날 경기")).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "경기 기록" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "수정" })).toBeDisabled();
+    expect(screen.getByText("2026년 4월 5일")).toBeInTheDocument();
+    expect(screen.getByText("11:30")).toBeInTheDocument();
     expect(screen.getByText("타석")).toBeInTheDocument();
+    expect(screen.getByText("사사구")).toBeInTheDocument();
+    expect(screen.getByText("1루타")).toBeInTheDocument();
+    expect(screen.getByText("타율 .333")).toBeInTheDocument();
+    expect(screen.getByText("출루율 .500")).toBeInTheDocument();
+    expect(screen.getByText("장타율 .333")).toBeInTheDocument();
+    expect(screen.getByText("OPS .833")).toBeInTheDocument();
+    expect(screen.getByText("타율 .333").compareDocumentPosition(screen.getByText("타석"))).toBe(
+      Node.DOCUMENT_POSITION_FOLLOWING,
+    );
+    expect(screen.getByRole("button", { name: "삭제" })).toBeInTheDocument();
   });
 
-  it("삭제 확인 후 DELETE 호출하고 경기 목록으로 이동한다", async () => {
+  it("삭제 확인 후 DELETE를 호출하고 전체 경기 목록으로 이동한다", async () => {
     deleteGame.mockResolvedValue(null);
 
     render(
       <GameDetailView
         game={{
           id: 101,
-          playedAt: "2026-03-18",
-          seasonYear: 2026,
-          gameType: "LEAGUE",
-          participationType: "BATTER",
-          teamName: "블루스톰",
-          opponentName: "레전드",
-          memo: "비 오는 날 경기",
-          batter: {
-            plateAppearances: 4,
-            atBats: 3,
-            singles: 1,
-            doubles: 1,
-            triples: 0,
-            homeRuns: 1,
-            walks: 1,
-            strikeOuts: 0,
-            hitByPitch: 0,
-            runsBattedIn: 3,
-            runs: 2,
-            stolenBases: 0,
-            caughtStealing: 0,
-            sacrificeHits: 0,
-          },
-          pitcher: null,
+          playedDate: "2026-04-05",
+          playedHour: 11,
+          playedMinute: 30,
+          plateAppearances: 4,
+          walksAndHitByPitch: 1,
+          singles: 1,
+          doubles: 0,
+          triples: 0,
+          homeRuns: 0,
+          battingAverage: 0.333,
+          onBasePercentage: 0.5,
+          sluggingPercentage: 0.333,
+          ops: 0.833,
         }}
       />,
     );
 
-    await userEvent.click(screen.getByRole("button", { name: "더보기" }));
-    await userEvent.click(screen.getByRole("menuitem", { name: "삭제" }));
     await userEvent.click(screen.getByRole("button", { name: "삭제" }));
+    await userEvent.click(screen.getByRole("button", { name: "삭제하기" }));
 
     await waitFor(() => expect(deleteGame).toHaveBeenCalledTimes(1));
     expect(pushMock).toHaveBeenCalledWith("/games");

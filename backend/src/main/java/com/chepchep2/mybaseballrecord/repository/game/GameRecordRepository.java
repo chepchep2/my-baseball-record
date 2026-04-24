@@ -16,6 +16,14 @@ public interface GameRecordRepository extends JpaRepository<GameRecord, Long> {
 
     List<GameRecord> findByUserIdOrderByPlayedAtDesc(Long userId, Pageable pageable);
 
+    List<GameRecord> findByUserIdOrderByPlayedAtDesc(Long userId);
+
+    List<GameRecord> findByUserIdAndPlayedAtBetweenOrderByPlayedAtDesc(
+            Long userId,
+            java.time.LocalDateTime startInclusive,
+            java.time.LocalDateTime endExclusive
+    );
+
     Optional<GameRecord> findByIdAndUserId(Long gameId, Long userId);
 
     boolean existsByIdAndUserId(Long gameId, Long userId);

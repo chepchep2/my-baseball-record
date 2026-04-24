@@ -110,13 +110,18 @@ export default function HomePageClient({ selectedScope = "season" }) {
               </section>
 
               <section className="milestone-home-recent-panel" aria-label="최근 경기 기록 리스트">
-                <h2 className="milestone-home-section-title">최근 경기 기록 리스트</h2>
+                <div className="milestone-home-section-header">
+                  <h2 className="milestone-home-section-title">최근 경기 기록 리스트</h2>
+                  <Link href="/games" className="milestone-home-more-link">
+                    더보기
+                  </Link>
+                </div>
                 <div className="milestone-home-recent-list">
                   {dashboard?.recentGames.map((game) => (
-                    <article key={game.id} className="milestone-home-recent-card">
+                    <Link key={game.id} href={`/games/${game.id}`} className="milestone-home-recent-card">
                       <p className="milestone-home-recent-date">{game.playedLabel}</p>
                       <p className="milestone-home-recent-summary">{game.summaryLabel}</p>
-                    </article>
+                    </Link>
                   ))}
                 </div>
               </section>

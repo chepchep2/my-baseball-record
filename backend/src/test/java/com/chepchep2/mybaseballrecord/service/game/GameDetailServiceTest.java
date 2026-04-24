@@ -4,7 +4,6 @@ import com.chepchep2.mybaseballrecord.domain.game.BatterRecord;
 import com.chepchep2.mybaseballrecord.domain.game.GameRecord;
 import com.chepchep2.mybaseballrecord.domain.game.GameType;
 import com.chepchep2.mybaseballrecord.domain.game.ParticipationType;
-import com.chepchep2.mybaseballrecord.domain.game.PitcherRecord;
 import com.chepchep2.mybaseballrecord.exception.game.GameNotFoundException;
 import com.chepchep2.mybaseballrecord.repository.game.BatterRecordRepository;
 import com.chepchep2.mybaseballrecord.repository.game.GameRecordRepository;
@@ -44,7 +43,7 @@ class GameDetailServiceTest {
     private GameQueryService gameQueryService;
 
     @Test
-    @DisplayName("경기, 타자, 투수 기록이 있으면 상세 응답으로 반환한다")
+    @DisplayName("경기, 타자 기록이 있으면 상세 응답으로 반환한다")
     void getDetailReturnsFullResponse() throws Exception {
         GameRecord game = createGame(101L);
         BatterRecord batter = BatterRecord.builder()
@@ -64,36 +63,22 @@ class GameDetailServiceTest {
                 .caughtStealing(0)
                 .sacrificeHits(0)
                 .build();
-        PitcherRecord pitcher = PitcherRecord.builder()
-                .gameId(101L)
-                .innings(1)
-                .additionalOuts(0)
-                .runsAllowed(0)
-                .earnedRuns(0)
-                .hitsAllowed(1)
-                .walks(0)
-                .hitByPitch(0)
-                .homeRunsAllowed(0)
-                .strikeOuts(2)
-                .battersFaced(4)
-                .wins(0)
-                .losses(0)
-                .saves(0)
-                .holds(0)
-                .build();
-
         when(currentUserProvider.getCurrentUserId()).thenReturn(1L);
         when(gameRecordRepository.findByIdAndUserId(101L, 1L)).thenReturn(Optional.of(game));
         when(batterRecordRepository.findByGameId(101L)).thenReturn(Optional.of(batter));
-        when(pitcherRecordRepository.findByGameId(101L)).thenReturn(Optional.of(pitcher));
 
         var response = gameQueryService.getDetail(101L);
 
-        assertThat(response.id()).isEqualTo(101L);
-        assertThat(response.gameInfo().gameType()).isEqualTo(GameType.LEAGUE);
-        assertThat(response.participationType()).isEqualTo(ParticipationType.BOTH);
-        assertThat(response.batter()).isNotNull();
-        assertThat(response.pitcher()).isNotNull();
+        assertThat(response.gameId()).isEqualTo(101L);
+        assertThat(response.playedDate()).isEqualTo(LocalDate.parse("2026-03-18"));
+        assertThat(response.playedHour()).isEqualTo(0);
+        assertThat(response.plateAppearances()).isEqualTo(4);
+        assertThat(response.atBats()).isEqualTo(3);
+        assertThat(response.hits()).isEqualTo(3);
+        assertThat(response.battingAverage()).isEqualTo(1.0);
+        assertThat(response.onBasePercentage()).isEqualTo(1.0);
+        assertThat(response.sluggingPercentage()).isEqualTo(2.333);
+        assertThat(response.ops()).isEqualTo(3.333);
     }
 
     @Test
@@ -103,7 +88,6 @@ class GameDetailServiceTest {
         when(currentUserProvider.getCurrentUserId()).thenReturn(1L);
         when(gameRecordRepository.findByIdAndUserId(102L, 1L)).thenReturn(Optional.of(game));
         when(batterRecordRepository.findByGameId(102L)).thenReturn(Optional.empty());
-        when(pitcherRecordRepository.findByGameId(102L)).thenReturn(Optional.empty());
 
         var response = gameQueryService.getDetail(102L);
 

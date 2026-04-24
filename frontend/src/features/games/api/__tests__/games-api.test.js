@@ -1,7 +1,66 @@
 import { describe, expect, it, vi } from "vitest";
-import { createGame, deleteGame, getGameDetail, updateGame } from "../games-api";
+import { createGame, deleteGame, getGameDetail, getGames, updateGame } from "../games-api";
 
 describe("games-api", () => {
+  it("GET /api/games 연도/월 목록 응답을 경기 카드 shape로 변환한다", async () => {
+    const apiClient = {
+      get: vi.fn().mockResolvedValue({
+        items: [
+          {
+            gameId: 201,
+            playedDate: "2026-04-05",
+            playedHour: 11,
+            playedMinute: 30,
+            playedAtLabel: "4/5 11:30",
+            plateAppearances: 4,
+            hits: 1,
+            battingAverage: "0.333",
+          },
+        ],
+      }),
+    };
+
+    const games = await getGames(apiClient, { year: 2026, month: 4 });
+
+    expect(apiClient.get).toHaveBeenCalledWith("/api/games?year=2026&month=4");
+    expect(games).toEqual([
+      {
+        id: 201,
+        playedDate: "2026-04-05",
+        playedLabel: "4/5 11:30",
+        summaryLabel: "타석 4 · 안타 1 · 타율 .333",
+      },
+    ]);
+  });
+
+  it("GET /api/games 월 전체 조회는 month query를 제외한다", async () => {
+    const apiClient = {
+      get: vi.fn().mockResolvedValue({ items: [] }),
+    };
+
+    await getGames(apiClient, { year: 2026, month: null });
+
+    expect(apiClient.get).toHaveBeenCalledWith("/api/games?year=2026");
+  });
+
+  it("GET /api/games 목록 응답은 최근 목록처럼 3개로 자르지 않는다", async () => {
+    const apiClient = {
+      get: vi.fn().mockResolvedValue({
+        items: [1, 2, 3, 4].map((id) => ({
+          gameId: id,
+          playedAtLabel: `4/${id} 11:30`,
+          plateAppearances: 4,
+          hits: 1,
+          battingAverage: "0.333",
+        })),
+      }),
+    };
+
+    const games = await getGames(apiClient, { year: 2026, month: null });
+
+    expect(games).toHaveLength(4);
+  });
+
   it("GET /api/games/{id} legacy 상세 응답을 현재 상세 화면 shape로 변환한다", async () => {
     const apiClient = {
       get: vi.fn().mockResolvedValue({

@@ -747,6 +747,20 @@ textarea {
   font-size: 1rem;
 }
 
+.milestone-home-section-header,
+.games-list-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.milestone-home-more-link {
+  color: var(--color-accent);
+  font-size: 0.92rem;
+  font-weight: 800;
+}
+
 .milestone-home-recent-list {
   display: grid;
   gap: 10px;
@@ -756,6 +770,7 @@ textarea {
   padding: 16px;
   display: grid;
   gap: 8px;
+  color: inherit;
 }
 
 .milestone-home-recent-date {
@@ -768,6 +783,30 @@ textarea {
   margin: 0;
   color: var(--color-muted);
   line-height: 1.45;
+}
+
+.games-list-filters {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.games-list-filter {
+  display: grid;
+  gap: 8px;
+  color: var(--color-muted);
+  font-size: 0.88rem;
+  font-weight: 800;
+}
+
+.games-list-filter select {
+  width: 100%;
+  border: 1px solid var(--color-border);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.72);
+  color: var(--color-text);
+  padding: 12px 14px;
+  font: inherit;
 }
 
 .milestone-home-fab {

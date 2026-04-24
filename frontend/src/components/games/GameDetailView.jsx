@@ -66,7 +66,7 @@ export default function GameDetailView({ game }) {
 
     try {
       await deleteGame(apiClient, game.id);
-      router.push("/games");
+      router.push("/home");
     } catch (error) {
       setDeleteError(error?.message || "삭제에 실패했습니다.");
       setIsDeleting(false);

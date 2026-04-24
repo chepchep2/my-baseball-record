@@ -88,7 +88,7 @@ export default function GameRecordEditPageClient({ gameId }) {
 
     try {
       await updateGame(apiClient, gameId, buildGameRecordUpdatePayload(game, draft));
-      router.push(`/games/${gameId}`);
+      router.push("/home");
     } catch (error) {
       setErrorMessage(error?.message || "경기 기록을 저장하지 못했습니다.");
     }

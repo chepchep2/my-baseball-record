@@ -99,6 +99,6 @@ describe("GameDetailView", () => {
     await userEvent.click(screen.getByRole("button", { name: "삭제하기" }));
 
     await waitFor(() => expect(deleteGame).toHaveBeenCalledTimes(1));
-    expect(pushMock).toHaveBeenCalledWith("/games");
+    expect(pushMock).toHaveBeenCalledWith("/home");
   });
 });

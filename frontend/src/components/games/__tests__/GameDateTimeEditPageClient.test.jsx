@@ -136,6 +136,6 @@ describe("GameDateTimeEditPageClient", () => {
       },
       pitcher: null,
     });
-    expect(pushMock).toHaveBeenCalledWith("/games/101");
+    expect(pushMock).toHaveBeenCalledWith("/home");
   });
 });

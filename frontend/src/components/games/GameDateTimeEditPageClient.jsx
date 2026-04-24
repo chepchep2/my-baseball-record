@@ -69,7 +69,7 @@ export default function GameDateTimeEditPageClient({ gameId }) {
   async function saveGameDateTime() {
     try {
       await updateGame(apiClient, gameId, buildGameDateTimeUpdatePayload(game, draft));
-      router.push(`/games/${gameId}`);
+      router.push("/home");
     } catch (error) {
       setErrorMessage(error?.message || "경기 일시를 저장하지 못했습니다.");
     }

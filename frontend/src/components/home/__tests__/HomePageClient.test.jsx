@@ -79,6 +79,8 @@ describe("HomePageClient", () => {
     expect(screen.getByText("타율")).toBeInTheDocument();
     expect(screen.getByText(".280")).toBeInTheDocument();
     expect(screen.getByText("최근 경기 기록 리스트")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "더보기" })).toHaveAttribute("href", "/games");
+    expect(screen.getByRole("link", { name: /3\/22 14:10/ })).toHaveAttribute("href", "/games/1");
     expect(screen.getByText("3/22 14:10")).toBeInTheDocument();
     expect(screen.getByText("타석 5 · 안타 2 · 타율 .500")).toBeInTheDocument();
     expect(screen.getByText("3/10 11:00")).toBeInTheDocument();

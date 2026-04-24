@@ -25,6 +25,14 @@ public class GameQueryController {
         return ResponseEntity.ok(gameQueryService.getDetail(gameId));
     }
 
+    @GetMapping
+    public ResponseEntity<RecentGamesResponse> getGames(
+            @RequestParam(required = false) Integer year,
+            @RequestParam(required = false) Integer month
+    ) {
+        return ResponseEntity.ok(gameQueryService.getGames(year, month));
+    }
+
     @GetMapping("/recent")
     public ResponseEntity<RecentGamesResponse> getRecent(@RequestParam(defaultValue = "3") int limit) {
         return ResponseEntity.ok(gameQueryService.getRecent(limit));

@@ -127,11 +127,15 @@ public class GameRecord {
     }
 
     public void updateMutableFields(
+            LocalDateTime playedAt,
+            Integer seasonYear,
             String teamName,
             String opponentName,
             String memo,
             ParticipationType participationType
     ) {
+        this.playedAt = playedAt;
+        this.seasonYear = seasonYear;
         this.teamName = teamName;
         this.opponentName = opponentName;
         this.memo = memo;

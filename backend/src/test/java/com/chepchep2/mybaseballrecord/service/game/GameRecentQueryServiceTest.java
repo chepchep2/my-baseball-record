@@ -62,6 +62,28 @@ class GameRecentQueryServiceTest {
         assertThat(response.items().get(1).gameId()).isEqualTo(100L);
     }
 
+    @Test
+    @DisplayName("전체 경기 목록은 현재 사용자와 연도/월 기준 playedAt desc로 반환한다")
+    void getGamesReturnsFilteredItems() throws Exception {
+        GameRecord aprilGame = createGame(201L, LocalDateTime.parse("2026-04-05T11:30:00"));
+
+        when(currentUserProvider.getCurrentUserId()).thenReturn(1L);
+        when(gameRecordRepository.findByUserIdAndPlayedAtBetweenOrderByPlayedAtDesc(
+                1L,
+                LocalDateTime.parse("2026-04-01T00:00:00"),
+                LocalDateTime.parse("2026-05-01T00:00:00")
+        )).thenReturn(List.of(aprilGame));
+        when(batterRecordRepository.findByGameId(201L)).thenReturn(Optional.of(createBatter(201L, 4, 3, 1, 0, 0, 0, 1)));
+
+        RecentGamesResponse response = gameQueryService.getGames(2026, 4);
+
+        assertThat(response.items()).hasSize(1);
+        assertThat(response.items().get(0).gameId()).isEqualTo(201L);
+        assertThat(response.items().get(0).playedDate()).isEqualTo("2026-04-05");
+        assertThat(response.items().get(0).playedAtLabel()).isEqualTo("4/5 11:30");
+        assertThat(response.items().get(0).ops()).isEqualTo("0.833");
+    }
+
     private GameRecord createGame(long id, LocalDateTime playedAt) throws Exception {
         GameRecord game = GameRecord.builder()
                 .playedAt(playedAt)

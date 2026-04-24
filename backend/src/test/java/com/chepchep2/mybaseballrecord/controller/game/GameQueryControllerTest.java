@@ -52,4 +52,26 @@ class GameQueryControllerTest {
                 .andExpect(jsonPath("$.items[0].playedAtLabel").value("3/27 19:00"))
                 .andExpect(jsonPath("$.items[0].ops").value("2.300"));
     }
+
+    @Test
+    @DisplayName("GET /api/games?year=2026&month=4 - 전체 경기 목록을 연도/월 기준으로 반환한다")
+    void getGamesReturnsGamesByYearAndMonth() throws Exception {
+        given(gameQueryService.getGames(2026, 4))
+                .willReturn(new RecentGamesResponse(List.of(
+                        new RecentGameItemResponse(
+                                201L, "2026-04-05", 11, 30, "4/5 11:30",
+                                4, 1, 1, 0, 0, 0,
+                                3, 1, "0.333", "0.500", "0.333", "0.833"
+                        )
+                )));
+
+        mockMvc.perform(get("/api/games")
+                        .queryParam("year", "2026")
+                        .queryParam("month", "4"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.items.length()").value(1))
+                .andExpect(jsonPath("$.items[0].gameId").value(201))
+                .andExpect(jsonPath("$.items[0].playedAtLabel").value("4/5 11:30"))
+                .andExpect(jsonPath("$.items[0].battingAverage").value("0.333"));
+    }
 }

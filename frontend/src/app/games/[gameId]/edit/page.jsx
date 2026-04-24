@@ -1,6 +1,6 @@
-import GameForm from "@/lib/GameForm";
+import GameRecordEditPageClient from "@/components/games/GameRecordEditPageClient";
 
 export default async function GameEditPage({ params }) {
   const resolvedParams = await params;
-  return <GameForm mode="edit" gameId={resolvedParams.gameId} />;
+  return <GameRecordEditPageClient gameId={resolvedParams.gameId} />;
 }

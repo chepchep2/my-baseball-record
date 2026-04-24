@@ -1,5 +1,6 @@
 package com.chepchep2.mybaseballrecord.dto.game.response;
 
+import com.chepchep2.mybaseballrecord.domain.game.GameType;
 import com.chepchep2.mybaseballrecord.domain.game.ParticipationType;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
@@ -24,6 +25,11 @@ public class GameDetailResponse {
     private final Double onBasePercentage;
     private final Double sluggingPercentage;
     private final Double ops;
+    private final Integer seasonYear;
+    private final GameType gameType;
+    private final String teamName;
+    private final String opponentName;
+    private final String memo;
     private final Long id;
     private final GameInfoResponse gameInfo;
     private final ParticipationType participationType;
@@ -66,6 +72,11 @@ public class GameDetailResponse {
         this.onBasePercentage = onBasePercentage;
         this.sluggingPercentage = sluggingPercentage;
         this.ops = ops;
+        this.seasonYear = null;
+        this.gameType = null;
+        this.teamName = null;
+        this.opponentName = null;
+        this.memo = null;
         this.id = null;
         this.gameInfo = null;
         this.participationType = null;
@@ -97,8 +108,69 @@ public class GameDetailResponse {
         this.onBasePercentage = null;
         this.sluggingPercentage = null;
         this.ops = null;
+        this.seasonYear = gameInfo == null ? null : gameInfo.seasonYear();
+        this.gameType = gameInfo == null ? null : gameInfo.gameType();
+        this.teamName = gameInfo == null ? null : gameInfo.teamName();
+        this.opponentName = gameInfo == null ? null : gameInfo.opponentName();
+        this.memo = gameInfo == null ? null : gameInfo.memo();
         this.id = id;
         this.gameInfo = gameInfo;
+        this.participationType = participationType;
+        this.batter = batter;
+        this.pitcher = pitcher;
+    }
+
+    public GameDetailResponse(
+            long gameId,
+            LocalDate playedDate,
+            Integer playedHour,
+            Integer playedMinute,
+            String playedAtLabel,
+            Integer plateAppearances,
+            Integer walksAndHitByPitch,
+            Integer singles,
+            Integer doubles,
+            Integer triples,
+            Integer homeRuns,
+            Integer atBats,
+            Integer hits,
+            Double battingAverage,
+            Double onBasePercentage,
+            Double sluggingPercentage,
+            Double ops,
+            Integer seasonYear,
+            GameType gameType,
+            String teamName,
+            String opponentName,
+            String memo,
+            ParticipationType participationType,
+            GameBatterResponse batter,
+            GamePitcherResponse pitcher
+    ) {
+        this.gameId = gameId;
+        this.playedDate = playedDate;
+        this.playedHour = playedHour;
+        this.playedMinute = playedMinute;
+        this.playedAtLabel = playedAtLabel;
+        this.plateAppearances = plateAppearances;
+        this.walksAndHitByPitch = walksAndHitByPitch;
+        this.singles = singles;
+        this.doubles = doubles;
+        this.triples = triples;
+        this.homeRuns = homeRuns;
+        this.atBats = atBats;
+        this.hits = hits;
+        this.battingAverage = battingAverage;
+        this.onBasePercentage = onBasePercentage;
+        this.sluggingPercentage = sluggingPercentage;
+        this.ops = ops;
+        this.seasonYear = seasonYear;
+        this.gameType = gameType;
+        this.teamName = teamName;
+        this.opponentName = opponentName;
+        this.memo = memo;
+        this.id = null;
+        this.gameInfo = null;
         this.participationType = participationType;
         this.batter = batter;
         this.pitcher = pitcher;
@@ -170,6 +242,26 @@ public class GameDetailResponse {
 
     public Double ops() {
         return ops;
+    }
+
+    public Integer seasonYear() {
+        return seasonYear;
+    }
+
+    public GameType gameType() {
+        return gameType;
+    }
+
+    public String teamName() {
+        return teamName;
+    }
+
+    public String opponentName() {
+        return opponentName;
+    }
+
+    public String memo() {
+        return memo;
     }
 
     public long id() {
@@ -258,6 +350,26 @@ public class GameDetailResponse {
 
     public Double getOps() {
         return ops;
+    }
+
+    public Integer getSeasonYear() {
+        return seasonYear;
+    }
+
+    public GameType getGameType() {
+        return gameType;
+    }
+
+    public String getTeamName() {
+        return teamName;
+    }
+
+    public String getOpponentName() {
+        return opponentName;
+    }
+
+    public String getMemo() {
+        return memo;
     }
 
     public long getId() {

@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import Link from "next/link";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import styles from "./GameDetailView.module.css";
@@ -78,27 +79,24 @@ export default function GameDetailView({ game }) {
         <div className={styles.layout}>
           <header className={styles.headerRow}>
             <h1 className="page-title">경기 기록</h1>
-            <button
-              type="button"
-              className={styles.editLink}
-              disabled
-              title="기록 수정은 다음 단계에서 구현합니다."
-            >
+            <Link href={`/games/${game.id}/edit`} className={styles.editLink}>
               수정
-            </button>
+            </Link>
           </header>
 
           <section className={styles.fieldSection} aria-label="날짜와 시간">
-            <div className={styles.infoCard}>
-              <div className={styles.infoRow}>
-                <span className={styles.fieldLabel}>날짜</span>
-                <strong className={styles.infoValue}>{formatDate(game.playedDate ?? game.playedAt)}</strong>
+            <Link href={`/games/${game.id}/date-time`} className={styles.infoLink} aria-label="날짜와 시간 수정">
+              <div className={styles.infoCard}>
+                <div className={styles.infoRow}>
+                  <span className={styles.fieldLabel}>날짜</span>
+                  <strong className={styles.infoValue}>{formatDate(game.playedDate ?? game.playedAt)}</strong>
+                </div>
+                <div className={styles.infoRow}>
+                  <span className={styles.fieldLabel}>시간</span>
+                  <strong className={styles.infoValue}>{formatTime(game.playedHour, game.playedMinute)}</strong>
+                </div>
               </div>
-              <div className={styles.infoRow}>
-                <span className={styles.fieldLabel}>시간</span>
-                <strong className={styles.infoValue}>{formatTime(game.playedHour, game.playedMinute)}</strong>
-              </div>
-            </div>
+            </Link>
           </section>
 
           <section className={styles.metricGrid} aria-label="자동 계산 기록">

@@ -54,7 +54,8 @@ describe("GameDetailView", () => {
     );
 
     expect(screen.getByRole("heading", { name: "경기 기록" })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "수정" })).toBeDisabled();
+    expect(screen.getByRole("link", { name: "수정" })).toHaveAttribute("href", "/games/101/edit");
+    expect(screen.getByRole("link", { name: "날짜와 시간 수정" })).toHaveAttribute("href", "/games/101/date-time");
     expect(screen.getByText("2026년 4월 5일")).toBeInTheDocument();
     expect(screen.getByText("11:30")).toBeInTheDocument();
     expect(screen.getByText("타석")).toBeInTheDocument();

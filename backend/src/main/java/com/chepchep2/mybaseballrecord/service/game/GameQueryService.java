@@ -2,6 +2,7 @@ package com.chepchep2.mybaseballrecord.service.game;
 
 import com.chepchep2.mybaseballrecord.domain.game.BatterRecord;
 import com.chepchep2.mybaseballrecord.domain.game.GameRecord;
+import com.chepchep2.mybaseballrecord.dto.game.response.GameBatterResponse;
 import com.chepchep2.mybaseballrecord.dto.game.response.GameDetailResponse;
 import com.chepchep2.mybaseballrecord.dto.game.response.RecentGameItemResponse;
 import com.chepchep2.mybaseballrecord.dto.game.response.RecentGamesResponse;
@@ -81,6 +82,25 @@ public class GameQueryService {
         return new RecentGamesResponse(games.stream().map(this::toRecentItem).toList());
     }
 
+    private GameBatterResponse toBatterResponse(BatterRecord batter) {
+        return new GameBatterResponse(
+                batter.plateAppearances(),
+                batter.atBats(),
+                batter.singles(),
+                batter.doubles(),
+                batter.triples(),
+                batter.homeRuns(),
+                batter.walks(),
+                batter.strikeOuts(),
+                batter.hitByPitch(),
+                batter.runsBattedIn(),
+                batter.runs(),
+                batter.stolenBases(),
+                batter.caughtStealing(),
+                batter.sacrificeHits()
+        );
+    }
+
     private RecentGameItemResponse toRecentItem(GameRecord game) {
         BatterRecord batter = batterRecordRepository.findByGameId(game.id()).orElse(null);
         int plateAppearances = batter == null ? 0 : batter.plateAppearances();
@@ -137,6 +157,14 @@ public class GameQueryService {
                     null,
                     null,
                     null,
+                    null,
+                    game.seasonYear(),
+                    game.gameType(),
+                    game.teamName(),
+                    game.opponentName(),
+                    game.memo(),
+                    game.participationType(),
+                    null,
                     null
             );
         }
@@ -165,7 +193,15 @@ public class GameQueryService {
                 round3(battingAverage),
                 round3(onBasePercentage),
                 round3(sluggingPercentage),
-                round3(ops)
+                round3(ops),
+                game.seasonYear(),
+                game.gameType(),
+                game.teamName(),
+                game.opponentName(),
+                game.memo(),
+                game.participationType(),
+                toBatterResponse(batter),
+                null
         );
     }
 

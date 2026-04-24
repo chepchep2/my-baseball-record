@@ -9,11 +9,11 @@ export function toGameDetailViewModel(response) {
       playedHour: response.playedHour,
       playedMinute: response.playedMinute,
       playedAtLabel: response.playedAtLabel,
-      seasonYear: playedDate ? Number(String(playedDate).slice(0, 4)) : undefined,
-      gameType: "LEAGUE",
-      teamName: "",
-      opponentName: "",
-      memo: "",
+      seasonYear: response.seasonYear ?? (playedDate ? Number(String(playedDate).slice(0, 4)) : undefined),
+      gameType: response.gameType ?? "LEAGUE",
+      teamName: response.teamName ?? "",
+      opponentName: response.opponentName ?? "",
+      memo: response.memo ?? "",
       plateAppearances: response.plateAppearances,
       walksAndHitByPitch: response.walksAndHitByPitch,
       singles: response.singles,
@@ -26,8 +26,8 @@ export function toGameDetailViewModel(response) {
       onBasePercentage: response.onBasePercentage,
       sluggingPercentage: response.sluggingPercentage,
       ops: response.ops,
-      participationType: "BATTER",
-      batter: {
+      participationType: response.participationType ?? "BATTER",
+      batter: response.batter ?? {
         plateAppearances: response.plateAppearances ?? 0,
         atBats: response.atBats ?? 0,
         singles: response.singles ?? 0,
@@ -43,7 +43,7 @@ export function toGameDetailViewModel(response) {
         caughtStealing: 0,
         sacrificeHits: 0,
       },
-      pitcher: null,
+      pitcher: response.pitcher ?? null,
     };
   }
 

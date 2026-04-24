@@ -9,7 +9,6 @@ import com.chepchep2.mybaseballrecord.dto.game.request.BatterRecordRequest;
 import com.chepchep2.mybaseballrecord.dto.game.request.GameUpdateInfoRequest;
 import com.chepchep2.mybaseballrecord.dto.game.request.GameUpdateRequest;
 import com.chepchep2.mybaseballrecord.dto.game.request.PitcherRecordRequest;
-import com.chepchep2.mybaseballrecord.exception.game.GameImmutableFieldException;
 import com.chepchep2.mybaseballrecord.repository.game.BatterRecordRepository;
 import com.chepchep2.mybaseballrecord.repository.game.GameRecordRepository;
 import com.chepchep2.mybaseballrecord.repository.game.PitcherRecordRepository;
@@ -27,7 +26,6 @@ import java.time.LocalDateTime;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -51,8 +49,8 @@ class GameUpdateServiceTest {
     private GameCommandService gameCommandService;
 
     @Test
-    @DisplayName("playedAt 변경 시도는 실패한다")
-    void updateFailsWhenPlayedAtChanged() throws Exception {
+    @DisplayName("날짜와 시간 변경 시 playedAt과 seasonYear를 함께 갱신한다")
+    void updateSucceedsWhenPlayedAtChanged() throws Exception {
         GameRecord existing = gameWithId(
                 101L,
                 LocalDate.parse("2026-03-18"),
@@ -68,8 +66,10 @@ class GameUpdateServiceTest {
 
         GameUpdateRequest request = new GameUpdateRequest(
                 new GameUpdateInfoRequest(
-                        LocalDate.parse("2026-03-19"),
-                        2026,
+                        LocalDate.parse("2027-03-19"),
+                        10,
+                        30,
+                        null,
                         GameType.LEAGUE,
                         "수정팀",
                         "수정상대",
@@ -79,8 +79,18 @@ class GameUpdateServiceTest {
                 null
         );
 
-        assertThatThrownBy(() -> gameCommandService.update(101L, request))
-                .isInstanceOf(GameImmutableFieldException.class);
+        when(gameRecordRepository.save(any(GameRecord.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(batterRecordRepository.findByGameId(101L)).thenReturn(Optional.of(
+                new BatterRecord(101L, 4, 3, 1, 1, 0, 1, 1, 0, 0, 3, 2, 0, 0, 0)
+        ));
+        when(pitcherRecordRepository.findByGameId(101L)).thenReturn(Optional.empty());
+
+        var response = gameCommandService.update(101L, request);
+
+        assertThat(response.gameInfo().playedAt()).isEqualTo(LocalDate.parse("2027-03-19"));
+        assertThat(response.gameInfo().seasonYear()).isEqualTo(2027);
+        assertThat(existing.playedAt()).isEqualTo(LocalDateTime.of(2027, 3, 19, 10, 30));
+        assertThat(existing.seasonYear()).isEqualTo(2027);
     }
 
     @Test
@@ -109,6 +119,8 @@ class GameUpdateServiceTest {
         GameUpdateRequest request = new GameUpdateRequest(
                 new GameUpdateInfoRequest(
                         LocalDate.parse("2026-03-18"),
+                        null,
+                        null,
                         2026,
                         GameType.LEAGUE,
                         "수정팀",
@@ -150,6 +162,8 @@ class GameUpdateServiceTest {
         GameUpdateRequest request = new GameUpdateRequest(
                 new GameUpdateInfoRequest(
                         LocalDate.parse("2026-03-18"),
+                        null,
+                        null,
                         2026,
                         GameType.LEAGUE,
                         null,
@@ -189,6 +203,8 @@ class GameUpdateServiceTest {
         GameUpdateRequest request = new GameUpdateRequest(
                 new GameUpdateInfoRequest(
                         LocalDate.parse("2026-03-18"),
+                        null,
+                        null,
                         2026,
                         GameType.LEAGUE,
                         "수정팀",

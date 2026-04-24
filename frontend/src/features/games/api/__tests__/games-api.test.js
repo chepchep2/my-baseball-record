@@ -65,15 +65,17 @@ describe("games-api", () => {
     const apiClient = {
       get: vi.fn().mockResolvedValue({
         id: 101,
-        gameInfo: {
-          playedAt: "2026-03-18",
-          seasonYear: 2026,
-          gameType: "LEAGUE",
-          teamName: "블루스톰",
-          opponentName: "레전드",
-          memo: "비 오는 날 경기",
-        },
-        participationType: "BOTH",
+        gameId: 101,
+        playedDate: "2026-03-18",
+        playedHour: 10,
+        playedMinute: 0,
+        playedAtLabel: "3/18 10:00",
+        seasonYear: 2026,
+        gameType: "LEAGUE",
+        teamName: "블루스톰",
+        opponentName: "레전드",
+        memo: "비 오는 날 경기",
+        participationType: "BATTER",
         batter: {
           plateAppearances: 4,
           atBats: 3,
@@ -105,7 +107,11 @@ describe("games-api", () => {
       teamName: "블루스톰",
       opponentName: "레전드",
       memo: "비 오는 날 경기",
-      participationType: "BOTH",
+      participationType: "BATTER",
+      batter: {
+        strikeOuts: 0,
+        runsBattedIn: 3,
+      },
     });
   });
 

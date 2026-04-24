@@ -72,9 +72,14 @@ class GameDetailServiceTest {
         assertThat(response.gameId()).isEqualTo(101L);
         assertThat(response.playedDate()).isEqualTo(LocalDate.parse("2026-03-18"));
         assertThat(response.playedHour()).isEqualTo(0);
+        assertThat(response.seasonYear()).isEqualTo(2026);
+        assertThat(response.teamName()).isEqualTo("블루스톰");
+        assertThat(response.opponentName()).isEqualTo("레전드");
+        assertThat(response.memo()).isEqualTo("비 오는 날 경기");
         assertThat(response.plateAppearances()).isEqualTo(4);
         assertThat(response.atBats()).isEqualTo(3);
         assertThat(response.hits()).isEqualTo(3);
+        assertThat(response.batter()).isNotNull();
         assertThat(response.battingAverage()).isEqualTo(1.0);
         assertThat(response.onBasePercentage()).isEqualTo(1.0);
         assertThat(response.sluggingPercentage()).isEqualTo(2.333);

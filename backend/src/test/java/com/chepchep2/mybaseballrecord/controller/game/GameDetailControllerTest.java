@@ -1,11 +1,6 @@
 package com.chepchep2.mybaseballrecord.controller.game;
 
-import com.chepchep2.mybaseballrecord.domain.game.GameType;
-import com.chepchep2.mybaseballrecord.domain.game.ParticipationType;
-import com.chepchep2.mybaseballrecord.dto.game.response.GameBatterResponse;
 import com.chepchep2.mybaseballrecord.dto.game.response.GameDetailResponse;
-import com.chepchep2.mybaseballrecord.dto.game.response.GameInfoResponse;
-import com.chepchep2.mybaseballrecord.dto.game.response.GamePitcherResponse;
 import com.chepchep2.mybaseballrecord.exception.game.GameNotFoundException;
 import com.chepchep2.mybaseballrecord.service.game.GameQueryService;
 import org.junit.jupiter.api.DisplayName;
@@ -39,26 +34,32 @@ class GameDetailControllerTest {
         given(gameQueryService.getDetail(101L))
                 .willReturn(new GameDetailResponse(
                         101L,
-                        new GameInfoResponse(
-                                LocalDate.parse("2026-03-18"),
-                                2026,
-                                GameType.LEAGUE,
-                                "블루스톰",
-                                "레전드",
-                                "비 오는 날 경기"
-                        ),
-                        ParticipationType.BOTH,
-                        new GameBatterResponse(4, 3, 1, 1, 0, 1, 1, 0, 0, 3, 2, 0, 0, 0),
-                        new GamePitcherResponse(1, 0, 0, 0, 1, 0, 0, 0, 2, 4, 0, 0, 0, 0)
+                        LocalDate.parse("2026-03-18"),
+                        0,
+                        0,
+                        "3/18 00:00",
+                        4,
+                        1,
+                        1,
+                        1,
+                        0,
+                        1,
+                        3,
+                        3,
+                        1.0,
+                        1.0,
+                        1.667,
+                        2.667
                 ));
 
         mockMvc.perform(get("/api/games/101"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(101))
-                .andExpect(jsonPath("$.gameInfo.gameType").value("LEAGUE"))
-                .andExpect(jsonPath("$.participationType").value("BOTH"))
-                .andExpect(jsonPath("$.batter.atBats").value(3))
-                .andExpect(jsonPath("$.pitcher.innings").value(1));
+                .andExpect(jsonPath("$.gameId").value(101))
+                .andExpect(jsonPath("$.playedDate").value("2026-03-18"))
+                .andExpect(jsonPath("$.plateAppearances").value(4))
+                .andExpect(jsonPath("$.atBats").value(3))
+                .andExpect(jsonPath("$.hits").value(3))
+                .andExpect(jsonPath("$.battingAverage").value(1.0));
     }
 
     @Test

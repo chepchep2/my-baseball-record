@@ -1,83 +1,64 @@
 "use client";
 
+import React from "react";
 import Link from "next/link";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import styles from "./GameDetailView.module.css";
-import BottomTabBar from "@/components/navigation/BottomTabBar";
 import { useAuthSession } from "@/features/auth/session/useAuthSession";
 import { deleteGame } from "@/features/games/api/games-api";
-import {
-  formatCalendarDate,
-  formatGameTypeLabel,
-  formatParticipationLabel,
-  formatPitchingInnings,
-} from "@/lib/mock-games";
 
-function statItemsForBatter(batter) {
-  return [
-    ["타석", batter.plateAppearances],
-    ["타수", batter.atBats],
-    ["1루타", batter.singles],
-    ["2루타", batter.doubles],
-    ["3루타", batter.triples],
-    ["홈런", batter.homeRuns],
-    ["볼넷", batter.walks],
-    ["삼진", batter.strikeOuts],
-    ["사구", batter.hitByPitch],
-    ["타점", batter.runsBattedIn],
-    ["득점", batter.runs],
-    ["도루", batter.stolenBases],
-    ["도루자", batter.caughtStealing],
-    ["희타", batter.sacrificeHits],
-  ];
+function formatDate(value) {
+  if (!value) {
+    return "-";
+  }
+
+  const [year, month, day] = value.split("-");
+  return `${Number(year)}년 ${Number(month)}월 ${Number(day)}일`;
 }
 
-function statItemsForPitcher(pitcher) {
-  return [
-    ["이닝", formatPitchingInnings(pitcher.innings, pitcher.additionalOuts)],
-    ["실점", pitcher.runsAllowed],
-    ["자책", pitcher.earnedRuns],
-    ["피안타", pitcher.hitsAllowed],
-    ["볼넷", pitcher.walks],
-    ["삼진", pitcher.strikeOuts],
-    ["사구", pitcher.hitByPitch],
-    ["피홈런", pitcher.homeRunsAllowed],
-    ["상대한 타자 수", pitcher.battersFaced],
-    ["승", pitcher.wins],
-    ["패", pitcher.losses],
-    ["세이브", pitcher.saves],
-    ["홀드", pitcher.holds],
-  ];
+function formatTime(hour, minute) {
+  const safeHour = String(hour ?? 0).padStart(2, "0");
+  const safeMinute = String(minute ?? 0).padStart(2, "0");
+  return `${safeHour}:${safeMinute}`;
 }
 
-function DetailPairs({ items }) {
+function formatMetric(value) {
+  if (value === null || value === undefined) {
+    return ".000";
+  }
+
+  const fixed = Number(value).toFixed(3);
+  return fixed.startsWith("0") ? fixed.slice(1) : fixed;
+}
+
+function formatCount(value) {
+  return value ?? 0;
+}
+
+function CountCard({ label, value }) {
   return (
-    <div className="detail-row">
-      {items.map(([label, value]) => (
-        <div key={label} className="detail-pair">
-          <span>{label}</span>
-          <strong>{value}</strong>
-        </div>
-      ))}
-    </div>
+    <article className="detail-pair">
+      <span>{label}</span>
+      <strong>{formatCount(value)}</strong>
+    </article>
   );
 }
 
 export default function GameDetailView({ game }) {
   const router = useRouter();
   const { apiClient } = useAuthSession();
-  const [selectedRecordType, setSelectedRecordType] = useState(
-    game.participationType === "PITCHER" ? "pitcher" : "batter",
-  );
-  const [menuOpen, setMenuOpen] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [deleteError, setDeleteError] = useState("");
-
-  const batterItems = game.batter ? statItemsForBatter(game.batter) : [];
-  const pitcherItems = game.pitcher ? statItemsForPitcher(game.pitcher) : [];
-  const visibleItems = selectedRecordType === "pitcher" ? pitcherItems : batterItems;
+  const countItems = [
+    ["타석", game.plateAppearances],
+    ["사사구", game.walksAndHitByPitch],
+    ["1루타", game.singles],
+    ["2루타", game.doubles],
+    ["3루타", game.triples],
+    ["홈런", game.homeRuns],
+  ];
 
   async function handleDelete() {
     setIsDeleting(true);
@@ -85,7 +66,7 @@ export default function GameDetailView({ game }) {
 
     try {
       await deleteGame(apiClient, game.id);
-      router.push("/games");
+      router.push("/home");
     } catch (error) {
       setDeleteError(error?.message || "삭제에 실패했습니다.");
       setIsDeleting(false);
@@ -96,115 +77,44 @@ export default function GameDetailView({ game }) {
     <>
       <section className="panel detail-screen-panel">
         <div className={styles.layout}>
-          <div className={styles.headerRow}>
-            <div className="page-title-block">
-              <p className="eyebrow">My Baseball Record</p>
-              <h1 className="page-title">개별 경기 상세</h1>
-            </div>
+          <header className={styles.headerRow}>
+            <h1 className="page-title">경기 기록</h1>
+            <Link href={`/games/${game.id}/edit`} className={styles.editLink}>
+              수정
+            </Link>
+          </header>
 
-            <div className={styles.headerActions}>
-              <div className={styles.menuWrap}>
-                <button
-                  type="button"
-                  className={styles.menuButton}
-                  aria-haspopup="menu"
-                  aria-expanded={menuOpen}
-                  aria-label="더보기"
-                  onClick={() => setMenuOpen((current) => !current)}
-                >
-                  ⋯
-                </button>
-
-                {menuOpen ? (
-                  <div className="profile-menu" role="menu" aria-label="경기 메뉴">
-                    <Link
-                      className="profile-menu-item"
-                      href={`/games/${game.id}/edit`}
-                      role="menuitem"
-                      onClick={() => setMenuOpen(false)}
-                    >
-                      수정
-                    </Link>
-                    <button
-                      type="button"
-                      className="profile-menu-item"
-                      role="menuitem"
-                      onClick={() => {
-                        setMenuOpen(false);
-                        setShowDeleteModal(true);
-                      }}
-                    >
-                      삭제
-                    </button>
-                  </div>
-                ) : null}
+          <section className={styles.fieldSection} aria-label="날짜와 시간">
+            <Link href={`/games/${game.id}/date-time`} className={styles.infoLink} aria-label="날짜와 시간 수정">
+              <div className={styles.infoCard}>
+                <div className={styles.infoRow}>
+                  <span className={styles.fieldLabel}>날짜</span>
+                  <strong className={styles.infoValue}>{formatDate(game.playedDate ?? game.playedAt)}</strong>
+                </div>
+                <div className={styles.infoRow}>
+                  <span className={styles.fieldLabel}>시간</span>
+                  <strong className={styles.infoValue}>{formatTime(game.playedHour, game.playedMinute)}</strong>
+                </div>
               </div>
-            </div>
-          </div>
-
-          <section className="inline-summary-grid" aria-label="경기 정보">
-            <article className="detail-pair">
-              <span>날짜</span>
-              <strong>{formatCalendarDate(game.playedAt)}</strong>
-            </article>
-            <article className="detail-pair">
-              <span>경기 유형</span>
-              <strong>{formatGameTypeLabel(game.gameType)}</strong>
-            </article>
-            <article className="detail-pair">
-              <span>참여 형태</span>
-              <strong>{formatParticipationLabel(game.participationType)}</strong>
-            </article>
-            <article className="detail-pair">
-              <span>시즌</span>
-              <strong>{game.seasonYear}</strong>
-            </article>
-            <article className="detail-pair">
-              <span>소속 팀</span>
-              <strong>{game.teamName}</strong>
-            </article>
-            <article className="detail-pair">
-              <span>상대 팀</span>
-              <strong>{game.opponentName}</strong>
-            </article>
-            <article className="detail-pair full-width">
-              <span>메모</span>
-              <strong>{game.memo || "메모 없음"}</strong>
-            </article>
+            </Link>
           </section>
 
-          <div className="tab-row" role="tablist" aria-label="기록 보기 전환">
-            <button
-              type="button"
-              className={selectedRecordType === "batter" ? "tab-button active" : "tab-button"}
-              onClick={() => setSelectedRecordType("batter")}
-              aria-pressed={selectedRecordType === "batter"}
-            >
-              타자
-            </button>
-            <button
-              type="button"
-              className={selectedRecordType === "pitcher" ? "tab-button active" : "tab-button"}
-              onClick={() => setSelectedRecordType("pitcher")}
-              aria-pressed={selectedRecordType === "pitcher"}
-            >
-              투수
-            </button>
-          </div>
-
-          <section className={styles.recordSection} aria-label="기록 상세">
-            <p className="detail-section-label">
-              {selectedRecordType === "pitcher" ? "투수 기록" : "타자 기록"}
-            </p>
-
-            {visibleItems.length > 0 ? (
-              <DetailPairs items={visibleItems} />
-            ) : (
-              <p className="section-copy">이 기록 유형은 현재 경기에서 비어 있습니다.</p>
-            )}
+          <section className={styles.metricGrid} aria-label="자동 계산 기록">
+            <p>타율 {formatMetric(game.battingAverage)}</p>
+            <p>출루율 {formatMetric(game.onBasePercentage)}</p>
+            <p>장타율 {formatMetric(game.sluggingPercentage)}</p>
+            <p>OPS {formatMetric(game.ops)}</p>
           </section>
 
-          <BottomTabBar className="in-panel" />
+          <section className={styles.recordsGrid} aria-label="경기 기록 값">
+            {countItems.map(([label, value]) => (
+              <CountCard key={label} label={label} value={value} />
+            ))}
+          </section>
+
+          <button type="button" className={styles.deleteButton} onClick={() => setShowDeleteModal(true)}>
+            삭제
+          </button>
         </div>
       </section>
 
@@ -243,7 +153,7 @@ export default function GameDetailView({ game }) {
                 disabled={isDeleting}
                 onClick={handleDelete}
               >
-                {isDeleting ? "삭제 중..." : "삭제"}
+                {isDeleting ? "삭제 중..." : "삭제하기"}
               </button>
             </div>
           </div>

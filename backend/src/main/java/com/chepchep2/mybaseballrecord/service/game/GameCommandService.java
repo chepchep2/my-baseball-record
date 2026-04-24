@@ -24,6 +24,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.Clock;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 
@@ -123,8 +124,11 @@ public class GameCommandService {
                 .orElseThrow(() -> new GameNotFoundException(gameId));
 
         validateImmutableFields(game, request.gameInfo());
+        LocalDateTime updatedPlayedAt = resolvePlayedAt(game, request.gameInfo());
         ParticipationType participationType = resolveParticipationType(request);
         game.updateMutableFields(
+                updatedPlayedAt,
+                updatedPlayedAt.getYear(),
                 normalizeOptionalName(request.gameInfo().teamName()),
                 normalizeOptionalName(request.gameInfo().opponentName()),
                 request.gameInfo().memo(),
@@ -253,15 +257,17 @@ public class GameCommandService {
     }
 
     private void validateImmutableFields(GameRecord game, GameUpdateInfoRequest gameInfo) {
-        if (gameInfo.playedAt() != null && !game.playedAt().toLocalDate().equals(gameInfo.playedAt())) {
-            throw new GameImmutableFieldException("playedAt");
-        }
         if (gameInfo.gameType() != null && !game.gameType().equals(gameInfo.gameType())) {
             throw new GameImmutableFieldException("gameType");
         }
-        if (gameInfo.seasonYear() != null && !game.seasonYear().equals(gameInfo.seasonYear())) {
-            throw new GameImmutableFieldException("seasonYear");
-        }
+    }
+
+    private LocalDateTime resolvePlayedAt(GameRecord game, GameUpdateInfoRequest gameInfo) {
+        LocalDateTime existingPlayedAt = game.playedAt();
+        var playedDate = gameInfo.playedDate() != null ? gameInfo.playedDate() : existingPlayedAt.toLocalDate();
+        int playedHour = gameInfo.playedHour() != null ? gameInfo.playedHour() : existingPlayedAt.getHour();
+        int playedMinute = gameInfo.playedMinute() != null ? gameInfo.playedMinute() : existingPlayedAt.getMinute();
+        return LocalDateTime.of(playedDate, LocalTime.of(playedHour, playedMinute));
     }
 
     private GameDetailResponse toDetailResponse(

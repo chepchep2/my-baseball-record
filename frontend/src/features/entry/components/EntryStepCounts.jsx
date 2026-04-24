@@ -70,6 +70,11 @@ function NumericField({
         maxLength={2}
         value={value}
         disabled={!isSelectable}
+        onClick={() => {
+          if (isSelectable && !isActive) {
+            onActivate();
+          }
+        }}
         onFocus={() => {
           if (isSelectable && !isActive) {
             onActivate();
@@ -98,6 +103,10 @@ export default function EntryStepCounts({
   canProceed,
   onChange,
   onSubmit,
+  title = "경기 기록 입력",
+  showProgress = true,
+  onSecondaryAction = null,
+  secondaryActionLabel = "취소",
 }) {
   const inputRefs = useRef({});
   const keyboardInset = useKeyboardInset();
@@ -223,8 +232,8 @@ export default function EntryStepCounts({
 
   return (
     <section className="entry-step-panel">
-      <EntryProgress step={2} total={2} />
-      <h1 className="entry-step-title">경기 기록 입력</h1>
+      {showProgress ? <EntryProgress step={2} total={2} /> : null}
+      <h1 className="entry-step-title">{title}</h1>
       {isIOS ? (
         <>
           {fieldsMarkup}
@@ -247,14 +256,21 @@ export default function EntryStepCounts({
               {isLastField ? "저장" : "다음"}
             </button>
           ) : (
-            <button
-              type="button"
-              className="entry-primary-button"
-              onClick={goNextFieldOrSubmit}
-              disabled={!canProceed}
-            >
-              {isLastField ? "저장" : "다음"}
-            </button>
+            <div className="footer-action-row">
+              {onSecondaryAction ? (
+                <button type="button" className="ghost-button full-width-button" onClick={onSecondaryAction}>
+                  {secondaryActionLabel}
+                </button>
+              ) : null}
+              <button
+                type="button"
+                className="entry-primary-button"
+                onClick={goNextFieldOrSubmit}
+                disabled={!canProceed}
+              >
+                {isLastField ? "저장" : "다음"}
+              </button>
+            </div>
           )}
         </>
       ) : (
@@ -266,14 +282,21 @@ export default function EntryStepCounts({
           {error ? <p className="entry-error-message">{error}</p> : null}
 
           {keyboardInset === 0 ? (
-            <button
-              type="button"
-              className="entry-primary-button"
-              onClick={goNextFieldOrSubmit}
-              disabled={!canProceed}
-            >
-              {isLastField ? "저장" : "다음"}
-            </button>
+            <div className="footer-action-row">
+              {onSecondaryAction ? (
+                <button type="button" className="ghost-button full-width-button" onClick={onSecondaryAction}>
+                  {secondaryActionLabel}
+                </button>
+              ) : null}
+              <button
+                type="button"
+                className="entry-primary-button"
+                onClick={goNextFieldOrSubmit}
+                disabled={!canProceed}
+              >
+                {isLastField ? "저장" : "다음"}
+              </button>
+            </div>
           ) : null}
           <button type="submit" className="entry-hidden-submit" aria-hidden="true" tabIndex={-1}>
             {isLastField ? "저장" : "다음"}

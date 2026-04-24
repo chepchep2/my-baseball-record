@@ -4,7 +4,15 @@ import EntryProgress from "@/features/entry/components/EntryProgress";
 import useKeyboardInset from "@/features/entry/components/useKeyboardInset";
 import { formatEntryDate, roundUpToNextTenMinutes } from "@/features/entry/model/entry-form";
 
-export default function EntryStepDateTime({ draft, onChangeDate, onChangeTime, onNext }) {
+export default function EntryStepDateTime({
+  draft,
+  onChangeDate,
+  onChangeTime,
+  onNext,
+  title = "경기 기록 입력",
+  primaryActionLabel = "다음",
+  showProgress = true,
+}) {
   const now = new Date();
   const keyboardInset = useKeyboardInset();
   const isToday = draft.date === formatEntryDate(now);
@@ -21,8 +29,8 @@ export default function EntryStepDateTime({ draft, onChangeDate, onChangeTime, o
 
   return (
     <section className="entry-step-panel">
-      <EntryProgress step={1} total={2} />
-      <h1 className="entry-step-title">경기 기록 입력</h1>
+      {showProgress ? <EntryProgress step={1} total={2} /> : null}
+      <h1 className="entry-step-title">{title}</h1>
 
       <div className="entry-field-block">
         <span>날짜</span>
@@ -61,7 +69,7 @@ export default function EntryStepDateTime({ draft, onChangeDate, onChangeTime, o
         style={keyboardInset > 0 ? { bottom: `${keyboardInset + 12}px` } : undefined}
         onClick={onNext}
       >
-        다음
+        {primaryActionLabel}
       </button>
     </section>
   );

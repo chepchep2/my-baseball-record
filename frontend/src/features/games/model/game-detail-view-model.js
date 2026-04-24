@@ -1,11 +1,19 @@
 export function toGameDetailViewModel(response) {
   if (!response?.gameInfo) {
+    const playedDate = response.playedDate;
+
     return {
       id: response.gameId ?? response.id,
+      playedAt: playedDate,
       playedDate: response.playedDate,
       playedHour: response.playedHour,
       playedMinute: response.playedMinute,
       playedAtLabel: response.playedAtLabel,
+      seasonYear: response.seasonYear ?? (playedDate ? Number(String(playedDate).slice(0, 4)) : undefined),
+      gameType: response.gameType ?? "LEAGUE",
+      teamName: response.teamName ?? "",
+      opponentName: response.opponentName ?? "",
+      memo: response.memo ?? "",
       plateAppearances: response.plateAppearances,
       walksAndHitByPitch: response.walksAndHitByPitch,
       singles: response.singles,
@@ -18,9 +26,24 @@ export function toGameDetailViewModel(response) {
       onBasePercentage: response.onBasePercentage,
       sluggingPercentage: response.sluggingPercentage,
       ops: response.ops,
-      participationType: "BATTER",
-      batter: null,
-      pitcher: null,
+      participationType: response.participationType ?? "BATTER",
+      batter: response.batter ?? {
+        plateAppearances: response.plateAppearances ?? 0,
+        atBats: response.atBats ?? 0,
+        singles: response.singles ?? 0,
+        doubles: response.doubles ?? 0,
+        triples: response.triples ?? 0,
+        homeRuns: response.homeRuns ?? 0,
+        walks: response.walksAndHitByPitch ?? 0,
+        strikeOuts: 0,
+        hitByPitch: 0,
+        runsBattedIn: 0,
+        runs: 0,
+        stolenBases: 0,
+        caughtStealing: 0,
+        sacrificeHits: 0,
+      },
+      pitcher: response.pitcher ?? null,
     };
   }
 

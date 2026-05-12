@@ -30,7 +30,7 @@ describe("entry-validation", () => {
       validateStep3(buildDraft({ plateAppearances: "5", walksAndHitByPitch: "1", singles: "3", doubles: "2" })),
     ).toEqual({
       isValid: false,
-      error: "1루타와 2루타 합은 타수보다 클 수 없습니다.",
+      error: "안타의 합은 타수보다 클 수 없습니다.",
     });
   });
 
@@ -39,7 +39,7 @@ describe("entry-validation", () => {
       validateStep4(buildDraft({ plateAppearances: "5", walksAndHitByPitch: "1", singles: "2", doubles: "1", homeRuns: "2" })),
     ).toEqual({
       isValid: false,
-      error: "안타 종류의 합은 타수보다 클 수 없습니다.",
+      error: "안타의 합은 타수보다 클 수 없습니다.",
     });
   });
 

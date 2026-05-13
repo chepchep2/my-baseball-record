@@ -47,16 +47,22 @@ describe("HomePageClient", () => {
         { key: "career", label: "통산", active: false },
       ],
       seasonSummaryItems: [
+        ["경기", "12"],
+        ["타석", "39"],
         ["타율", ".280"],
         ["OPS", ".750"],
         ["안타", "24"],
+        ["사사구", "7"],
         ["출루율", ".350"],
         ["장타율", ".400"],
       ],
       careerSummaryItems: [
+        ["경기", "31"],
+        ["타석", "107"],
         ["타율", ".265"],
         ["OPS", ".720"],
         ["안타", "87"],
+        ["사사구", "15"],
         ["출루율", ".330"],
         ["장타율", ".390"],
       ],
@@ -76,8 +82,14 @@ describe("HomePageClient", () => {
 
     expect(screen.getByText("올해 시즌")).toBeInTheDocument();
     expect(screen.getByText("통산")).toBeInTheDocument();
+    expect(screen.getByText("경기")).toBeInTheDocument();
+    expect(screen.getByText("12")).toBeInTheDocument();
+    expect(screen.getByText("타석")).toBeInTheDocument();
+    expect(screen.getByText("39")).toBeInTheDocument();
     expect(screen.getByText("타율")).toBeInTheDocument();
     expect(screen.getByText(".280")).toBeInTheDocument();
+    expect(screen.getByText("사사구")).toBeInTheDocument();
+    expect(screen.getByText("7")).toBeInTheDocument();
     expect(screen.getByText("최근 경기 기록 리스트")).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "더보기" })).toHaveAttribute("href", "/games");
     expect(screen.getByRole("link", { name: /3\/22 14:10/ })).toHaveAttribute("href", "/games/1");

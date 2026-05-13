@@ -16,9 +16,12 @@ function toRecentSummaryLabel(game) {
 
 export function toHomeSummaryItems(summary) {
   return [
+    ["경기", formatCount(summary.games)],
+    ["타석", formatCount(summary.plateAppearances)],
     ["타율", formatAverage(summary.battingAverage)],
     ["OPS", formatAverage(summary.ops)],
     ["안타", formatCount(summary.hits)],
+    ["사사구", formatCount(summary.walksAndHitByPitch)],
     ["출루율", formatAverage(summary.onBasePercentage)],
     ["장타율", formatAverage(summary.sluggingPercentage)],
   ];

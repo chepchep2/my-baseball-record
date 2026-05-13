@@ -1,19 +1,67 @@
 const STORAGE_KEY = "milestone-1.mock-games";
+const DEFAULT_MOCK_GAMES = [
+  {
+    id: 301,
+    gameId: 301,
+    playedAt: "2026-05-11",
+    playedTime: "19:00",
+    playedAtLabel: "5/11 19:00",
+    plateAppearances: 4,
+    walksAndHitByPitch: 1,
+    singles: 1,
+    doubles: 1,
+    triples: 0,
+    homeRuns: 0,
+    hits: 2,
+    battingAverage: "0.667",
+  },
+  {
+    id: 302,
+    gameId: 302,
+    playedAt: "2026-05-04",
+    playedTime: "14:10",
+    playedAtLabel: "5/4 14:10",
+    plateAppearances: 5,
+    walksAndHitByPitch: 0,
+    singles: 1,
+    doubles: 0,
+    triples: 0,
+    homeRuns: 1,
+    hits: 2,
+    battingAverage: "0.400",
+  },
+  {
+    id: 303,
+    gameId: 303,
+    playedAt: "2026-04-27",
+    playedTime: "10:30",
+    playedAtLabel: "4/27 10:30",
+    plateAppearances: 3,
+    walksAndHitByPitch: 1,
+    singles: 0,
+    doubles: 0,
+    triples: 0,
+    homeRuns: 0,
+    hits: 0,
+    battingAverage: "0.000",
+  },
+];
 
 function readRawGames() {
   if (typeof window === "undefined") {
-    return [];
+    return DEFAULT_MOCK_GAMES;
   }
 
   const raw = window.localStorage.getItem(STORAGE_KEY);
   if (!raw) {
-    return [];
+    return DEFAULT_MOCK_GAMES;
   }
 
   try {
-    return JSON.parse(raw);
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) && parsed.length > 0 ? parsed : DEFAULT_MOCK_GAMES;
   } catch {
-    return [];
+    return DEFAULT_MOCK_GAMES;
   }
 }
 
@@ -76,6 +124,9 @@ function summarizeGames(games) {
   const ops = formatAverage(Number(onBasePercentage) + Number(sluggingPercentage));
 
   return {
+    games: games.length,
+    plateAppearances: totals.plateAppearances,
+    walksAndHitByPitch: totals.walksAndHitByPitch,
     battingAverage,
     ops,
     hits: totals.hits,
@@ -99,6 +150,9 @@ export function buildHomeDashboardData(selectedScope = "season") {
   if (games.length === 0) {
     return {
       seasonSummary: {
+        games: 0,
+        plateAppearances: 0,
+        walksAndHitByPitch: 0,
         battingAverage: "0.000",
         ops: "0.000",
         hits: 0,
@@ -106,6 +160,9 @@ export function buildHomeDashboardData(selectedScope = "season") {
         sluggingPercentage: "0.000",
       },
       careerSummary: {
+        games: 0,
+        plateAppearances: 0,
+        walksAndHitByPitch: 0,
         battingAverage: "0.000",
         ops: "0.000",
         hits: 0,

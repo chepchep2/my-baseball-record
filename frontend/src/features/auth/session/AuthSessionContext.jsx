@@ -88,7 +88,10 @@ export function AuthSessionProvider({ children }) {
       }
 
       if (isMockAuthMode()) {
+        const session = await getAuthSession();
+        saveSessionTokens(session);
         if (active) {
+          setUser(session.user ?? null);
           setAuthError(null);
           setIsBootstrapping(false);
         }

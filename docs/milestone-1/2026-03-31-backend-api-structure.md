@@ -93,6 +93,7 @@
 엔드포인트:
 
 - `GET /api/games/{gameId}`
+- `GET /api/games?year=<yyyy>&month=<mm>`
 - `GET /api/games/recent?limit=3`
 
 현재 milestone-1 핵심:
@@ -113,6 +114,7 @@
 
 - 홈 화면용 단순 요약 통계 제공
 - season/career 두 범위 지원
+- seasonYear, recordType, gameFilter query 조합 지원
 
 현재 홈 화면 summary 기준 필드:
 
@@ -147,10 +149,10 @@
 - 게임 create는 flat request 기준으로 정리된 최신 계약을 본다
 - stats는 홈 화면의 8개 요약 지표를 바로 그릴 수 있는 summary 응답을 제공한다
 - recent는 홈 화면 요구사항에 맞춘 최근 경기 목록 응답을 제공한다
-- update/delete/detail은 존재하지만, milestone-1 프론트 주요 흐름은 create/home 중심이다
+- update/delete/detail과 월별 경기 목록도 현재 프론트 흐름에서 사용한다
 
-## TODO
+## 배포 기준 메모
 
-- `created_at`, `updated_at`은 운영/감사 성격의 절대 시점이므로 `TIMESTAMPTZ` 통일을 검토한다.
-- `played_at`은 현재 경기 로컬 시각 저장 목적으로 `TIMESTAMP`를 쓰고 있지만, 이후 다국가/다시간대 확장 계획이 생기면 `TIMESTAMPTZ` 전환 여부를 다시 판단한다.
-- `auth_user`에는 아직 `created_at`, `updated_at`, `last_login_at`이 없다. 인증/운영 추적을 위해 auth 스키마 확장 후보로 유지한다.
+- 기준 브랜치: `main`
+- 현재 공개 백엔드는 `https://api.mybaseball.cloud`
+- 인증 없는 `GET /api/auth/session` 호출은 `401`이 정상이다

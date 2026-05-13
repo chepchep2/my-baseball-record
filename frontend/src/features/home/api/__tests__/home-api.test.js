@@ -1,12 +1,22 @@
 import { describe, expect, it, vi } from "vitest";
 import { getHomeDashboard } from "../home-api";
 
+vi.mock("@/features/auth/api/auth-api", () => ({
+  isMockAuthMode: vi.fn(() => false),
+}));
+
+import { isMockAuthMode } from "@/features/auth/api/auth-api";
+
 describe("home-api", () => {
   it("season/career stats와 recent games를 합쳐 홈 대시보드를 만든다", async () => {
+    isMockAuthMode.mockReturnValue(false);
     const apiClient = {
       get: vi.fn()
         .mockResolvedValueOnce({
           scope: "season",
+          games: 12,
+          plateAppearances: 39,
+          walksAndHitByPitch: 7,
           battingAverage: "0.280",
           ops: "0.750",
           hits: 24,
@@ -15,6 +25,9 @@ describe("home-api", () => {
         })
         .mockResolvedValueOnce({
           scope: "career",
+          games: 31,
+          plateAppearances: 107,
+          walksAndHitByPitch: 15,
           battingAverage: "0.265",
           ops: "0.720",
           hits: 87,
@@ -51,9 +64,12 @@ describe("home-api", () => {
       { key: "career", label: "통산", active: false },
     ]);
     expect(result.seasonSummaryItems).toEqual([
+      ["경기", "12"],
+      ["타석", "39"],
       ["타율", ".280"],
       ["OPS", ".750"],
       ["안타", "24"],
+      ["사사구", "7"],
       ["출루율", ".350"],
       ["장타율", ".400"],
     ]);
@@ -65,10 +81,14 @@ describe("home-api", () => {
   });
 
   it("recent games가 비어 있으면 빈 홈 모델을 반환한다", async () => {
+    isMockAuthMode.mockReturnValue(false);
     const apiClient = {
       get: vi.fn()
         .mockResolvedValueOnce({
           scope: "season",
+          games: 0,
+          plateAppearances: 0,
+          walksAndHitByPitch: 0,
           battingAverage: "0.000",
           ops: "0.000",
           hits: 0,
@@ -77,6 +97,9 @@ describe("home-api", () => {
         })
         .mockResolvedValueOnce({
           scope: "career",
+          games: 0,
+          plateAppearances: 0,
+          walksAndHitByPitch: 0,
           battingAverage: "0.000",
           ops: "0.000",
           hits: 0,
@@ -91,5 +114,26 @@ describe("home-api", () => {
     expect(result.isEmpty).toBe(true);
     expect(result.recentGames).toEqual([]);
     expect(result.tabs[1].active).toBe(true);
+  });
+
+  it("mock auth mode면 로컬 목데이터로 홈 대시보드를 만든다", async () => {
+    isMockAuthMode.mockReturnValue(true);
+    const apiClient = { get: vi.fn() };
+
+    const result = await getHomeDashboard(apiClient, { selectedScope: "season" });
+
+    expect(apiClient.get).not.toHaveBeenCalled();
+    expect(result.seasonSummaryItems).toEqual([
+      ["경기", "3"],
+      ["타석", "12"],
+      ["타율", ".400"],
+      ["OPS", "1.300"],
+      ["안타", "4"],
+      ["사사구", "2"],
+      ["출루율", ".500"],
+      ["장타율", ".800"],
+    ]);
+    expect(result.recentGames).toHaveLength(3);
+    expect(result.isEmpty).toBe(false);
   });
 });

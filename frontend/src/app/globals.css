@@ -715,6 +715,7 @@ textarea {
 .milestone-home-summary-card {
   padding: 16px;
   display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 12px;
 }
 
@@ -723,6 +724,9 @@ textarea {
   grid-template-columns: auto 1fr;
   gap: 12px;
   align-items: center;
+  padding: 10px 12px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.45);
 }
 
 .milestone-home-stat-label {
@@ -735,6 +739,24 @@ textarea {
   min-width: 0;
   text-align: right;
   font-size: 1.05rem;
+}
+
+@media (max-width: 420px) {
+  .milestone-home-summary-card {
+    gap: 10px;
+  }
+
+  .milestone-home-stat-row {
+    padding: 9px 10px;
+  }
+
+  .milestone-home-stat-label {
+    font-size: 0.9rem;
+  }
+
+  .milestone-home-stat-value {
+    font-size: 1rem;
+  }
 }
 
 .milestone-home-recent-panel {

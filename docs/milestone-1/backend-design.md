@@ -482,13 +482,27 @@
 ```json
 {
   "scope": "career",
+  "games": 24,
+  "plateAppearances": 93,
+  "walksAndHitByPitch": 12,
+  "hits": 84,
   "battingAverage": 0.287,
   "ops": 0.801,
-  "hits": 84,
   "onBasePercentage": 0.361,
   "sluggingPercentage": 0.440
 }
 ```
+
+홈 화면 상단 카드는 이 summary 응답을 기준으로 아래 8개 지표를 바로 구성한다.
+
+- 경기
+- 타석
+- 타율
+- OPS
+- 안타
+- 사사구
+- 출루율
+- 장타율
 
 ### 6.9 최근 경기 목록 조회
 

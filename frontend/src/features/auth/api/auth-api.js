@@ -1,8 +1,15 @@
 const CONFIGURED_API_BASE_URL = (
   typeof process !== "undefined" && process.env ? process.env.NEXT_PUBLIC_API_BASE_URL || "" : ""
 ).replace(/\/$/, "");
+const MOCK_AUTH_ENABLED = (
+  typeof process !== "undefined" && process.env ? process.env.NEXT_PUBLIC_ENABLE_MOCK_AUTH || "" : ""
+) === "true";
 
 function getApiBaseUrl() {
+  if (MOCK_AUTH_ENABLED) {
+    return "";
+  }
+
   if (CONFIGURED_API_BASE_URL) {
     return CONFIGURED_API_BASE_URL;
   }
@@ -18,7 +25,7 @@ function getApiBaseUrl() {
 }
 
 export function isMockAuthMode() {
-  return getApiBaseUrl() === "";
+  return MOCK_AUTH_ENABLED;
 }
 
 function buildUrl(path) {

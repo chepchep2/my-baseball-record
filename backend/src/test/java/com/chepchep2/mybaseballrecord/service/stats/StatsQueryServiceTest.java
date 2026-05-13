@@ -78,6 +78,9 @@ class StatsQueryServiceTest {
         BatterStatsSummaryResponse response = statsQueryService.query("season");
 
         assertThat(response.scope()).isEqualTo("season");
+        assertThat(response.games()).isEqualTo(1);
+        assertThat(response.plateAppearances()).isEqualTo(4);
+        assertThat(response.walksAndHitByPitch()).isEqualTo(1);
         assertThat(response.battingAverage()).isEqualTo("0.667");
         assertThat(response.ops()).isEqualTo("1.750");
         assertThat(response.hits()).isEqualTo(2);
@@ -134,6 +137,9 @@ class StatsQueryServiceTest {
         BatterStatsSummaryResponse response = statsQueryService.query("career");
 
         assertThat(response.scope()).isEqualTo("career");
+        assertThat(response.games()).isEqualTo(2);
+        assertThat(response.plateAppearances()).isEqualTo(9);
+        assertThat(response.walksAndHitByPitch()).isEqualTo(2);
         assertThat(response.hits()).isEqualTo(4);
         assertThat(response.battingAverage()).isEqualTo("0.571");
         assertThat(response.onBasePercentage()).isEqualTo("0.667");

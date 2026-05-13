@@ -1,3 +1,5 @@
+import { isMockAuthMode } from "@/features/auth/api/auth-api";
+import { buildHomeDashboardData } from "@/features/home/api/mock-home-store";
 import { toHomeViewModel } from "@/features/home/model/home-view-model";
 
 async function getStatsSummary(apiClient, scope) {
@@ -10,6 +12,10 @@ async function getRecentGames(apiClient) {
 }
 
 export async function getHomeDashboard(apiClient, { selectedScope = "season" } = {}) {
+  if (isMockAuthMode()) {
+    return toHomeViewModel(buildHomeDashboardData(selectedScope));
+  }
+
   const [seasonSummary, careerSummary, recentGames] = await Promise.all([
     getStatsSummary(apiClient, "season"),
     getStatsSummary(apiClient, "career"),

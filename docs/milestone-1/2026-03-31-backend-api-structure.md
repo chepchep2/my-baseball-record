@@ -116,6 +116,17 @@
 - season/career 두 범위 지원
 - seasonYear, recordType, gameFilter query 조합 지원
 
+현재 홈 화면 summary 기준 필드:
+
+- `games`
+- `plateAppearances`
+- `walksAndHitByPitch`
+- `hits`
+- `battingAverage`
+- `ops`
+- `onBasePercentage`
+- `sluggingPercentage`
+
 ## 현재 인증 방식
 
 ### 세션 복구
@@ -136,7 +147,8 @@
 
 - refresh token과 access token 사용 방식이 다르다
 - 게임 create는 flat request 기준으로 정리된 최신 계약을 본다
-- stats/recent는 홈 화면 요구사항에 맞춘 최소 응답 중심이다
+- stats는 홈 화면의 8개 요약 지표를 바로 그릴 수 있는 summary 응답을 제공한다
+- recent는 홈 화면 요구사항에 맞춘 최근 경기 목록 응답을 제공한다
 - update/delete/detail과 월별 경기 목록도 현재 프론트 흐름에서 사용한다
 
 ## 배포 기준 메모

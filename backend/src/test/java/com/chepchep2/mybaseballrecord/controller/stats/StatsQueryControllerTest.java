@@ -32,6 +32,9 @@ class StatsQueryControllerTest {
         given(statsQueryService.query("season"))
                 .willReturn(new BatterStatsSummaryResponse(
                         "season",
+                        8,
+                        31,
+                        4,
                         "0.321",
                         "0.912",
                         18,
@@ -44,6 +47,9 @@ class StatsQueryControllerTest {
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.scope").value("season"))
+                .andExpect(jsonPath("$.games").value(8))
+                .andExpect(jsonPath("$.plateAppearances").value(31))
+                .andExpect(jsonPath("$.walksAndHitByPitch").value(4))
                 .andExpect(jsonPath("$.battingAverage").value("0.321"))
                 .andExpect(jsonPath("$.ops").value("0.912"))
                 .andExpect(jsonPath("$.hits").value(18))
@@ -57,6 +63,9 @@ class StatsQueryControllerTest {
         given(statsQueryService.query("career"))
                 .willReturn(new BatterStatsSummaryResponse(
                         "career",
+                        24,
+                        93,
+                        12,
                         "0.287",
                         "0.801",
                         84,
@@ -69,6 +78,9 @@ class StatsQueryControllerTest {
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.scope").value("career"))
+                .andExpect(jsonPath("$.games").value(24))
+                .andExpect(jsonPath("$.plateAppearances").value(93))
+                .andExpect(jsonPath("$.walksAndHitByPitch").value(12))
                 .andExpect(jsonPath("$.hits").value(84));
     }
 }

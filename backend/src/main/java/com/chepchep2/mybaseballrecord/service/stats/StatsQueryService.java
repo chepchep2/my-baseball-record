@@ -52,22 +52,27 @@ public class StatsQueryService {
                 : batterRecordRepository.findAllByGameIdIn(gameIds);
 
         int atBats = sumBatters(batters, BatterRecord::atBats);
+        int plateAppearances = sumBatters(batters, BatterRecord::plateAppearances);
         int singles = sumBatters(batters, BatterRecord::singles);
         int doubles = sumBatters(batters, BatterRecord::doubles);
         int triples = sumBatters(batters, BatterRecord::triples);
         int homeRuns = sumBatters(batters, BatterRecord::homeRuns);
         int walks = sumBatters(batters, BatterRecord::walks);
         int hitByPitch = sumBatters(batters, BatterRecord::hitByPitch);
+        int walksAndHitByPitch = walks + hitByPitch;
 
         int hits = singles + doubles + triples + homeRuns;
         int totalBases = singles + (doubles * 2) + (triples * 3) + (homeRuns * 4);
         double battingAverage = ratio(hits, atBats);
-        double onBasePercentage = ratio(hits + walks + hitByPitch, atBats + walks + hitByPitch);
+        double onBasePercentage = ratio(hits + walksAndHitByPitch, atBats + walksAndHitByPitch);
         double sluggingPercentage = ratio(totalBases, atBats);
         double ops = onBasePercentage + sluggingPercentage;
 
         return new BatterStatsSummaryResponse(
                 scope,
+                games.size(),
+                plateAppearances,
+                walksAndHitByPitch,
                 formatDecimal(battingAverage, 3),
                 formatDecimal(ops, 3),
                 hits,

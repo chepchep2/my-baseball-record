@@ -2,19 +2,25 @@ import { describe, expect, it } from "vitest";
 import { toHomeSummaryItems, toHomeViewModel } from "../home-view-model";
 
 describe("home-view-model", () => {
-  it("홈 요약 지표를 5개 카드 shape로 변환한다", () => {
+  it("홈 요약 지표를 8개 카드 shape로 변환한다", () => {
     expect(
       toHomeSummaryItems({
+        games: 12,
+        plateAppearances: 39,
         battingAverage: "0.280",
         ops: "0.750",
         hits: 24,
+        walksAndHitByPitch: 7,
         onBasePercentage: "0.350",
         sluggingPercentage: "0.400",
       }),
     ).toEqual([
+      ["경기", "12"],
+      ["타석", "39"],
       ["타율", ".280"],
       ["OPS", ".750"],
       ["안타", "24"],
+      ["사사구", "7"],
       ["출루율", ".350"],
       ["장타율", ".400"],
     ]);
@@ -23,16 +29,22 @@ describe("home-view-model", () => {
   it("최근 경기 리스트는 최대 3개까지만 유지한다", () => {
     const result = toHomeViewModel({
       seasonSummary: {
+        games: 12,
+        plateAppearances: 39,
         battingAverage: "0.280",
         ops: "0.750",
         hits: 24,
+        walksAndHitByPitch: 7,
         onBasePercentage: "0.350",
         sluggingPercentage: "0.400",
       },
       careerSummary: {
+        games: 31,
+        plateAppearances: 107,
         battingAverage: "0.265",
         ops: "0.720",
         hits: 87,
+        walksAndHitByPitch: 15,
         onBasePercentage: "0.330",
         sluggingPercentage: "0.390",
       },

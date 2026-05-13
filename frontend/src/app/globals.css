@@ -1121,15 +1121,33 @@ textarea {
   font-weight: 700;
 }
 
+.entry-calendar-weekdays,
 .entry-calendar-grid {
   display: grid;
   grid-template-columns: repeat(7, minmax(0, 1fr));
   gap: 8px;
 }
 
+.entry-calendar-weekday {
+  text-align: center;
+  color: var(--color-muted);
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
 .calendar-day {
   min-height: 42px;
   padding: 8px 0;
+}
+
+.calendar-day.is-adjacent-month {
+  color: rgba(110, 105, 86, 0.62);
+  background: rgba(255, 255, 255, 0.28);
+}
+
+.calendar-day.is-today:not(.is-selected) {
+  border-color: var(--color-accent);
+  box-shadow: inset 0 0 0 1px var(--color-accent);
 }
 
 .calendar-day:disabled {

@@ -1,11 +1,32 @@
 import React, { useMemo, useState } from "react";
 
+const WEEKDAYS = ["일", "월", "화", "수", "목", "금", "토"];
+
 function daysInMonth(year, month) {
   return new Date(year, month + 1, 0).getDate();
 }
 
 function formatDateKey(date) {
   return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+}
+
+function buildCalendarCells(year, month, todayKey) {
+  const firstWeekday = new Date(year, month, 1).getDay();
+
+  return Array.from({ length: 42 }, (_, index) => {
+    const date = new Date(year, month, 1 - firstWeekday + index);
+    const dateKey = formatDateKey(date);
+
+    return {
+      dateKey,
+      day: date.getDate(),
+      year: date.getFullYear(),
+      month: date.getMonth(),
+      isCurrentMonth: date.getFullYear() === year && date.getMonth() === month,
+      isFutureDate: dateKey > todayKey,
+      isToday: dateKey === todayKey,
+    };
+  });
 }
 
 export default function EntryCalendarSheet({
@@ -30,9 +51,9 @@ export default function EntryCalendarSheet({
     ? Array.from({ length: today.getMonth() + 1 }, (_, index) => index)
     : Array.from({ length: 12 }, (_, index) => index);
 
-  const dayItems = useMemo(
-    () => Array.from({ length: daysInMonth(viewYear, viewMonth) }, (_, index) => index + 1),
-    [viewMonth, viewYear],
+  const calendarCells = useMemo(
+    () => buildCalendarCells(viewYear, viewMonth, todayKey),
+    [todayKey, viewMonth, viewYear],
   );
 
   if (!open) {
@@ -72,28 +93,45 @@ export default function EntryCalendarSheet({
         </div>
       ) : null}
 
+      <div className="entry-calendar-weekdays" aria-hidden="true">
+        {WEEKDAYS.map((weekday) => (
+          <div key={weekday} className="entry-calendar-weekday">
+            {weekday}
+          </div>
+        ))}
+      </div>
+
       <div className="entry-calendar-grid">
-        {dayItems.map((day) => {
-          const candidate = `${viewYear}-${String(viewMonth + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
-          const isSelected = candidate === selectedDate;
-          const isFutureDate = candidate > todayKey;
+        {calendarCells.map((cell) => {
+          const isSelected = cell.dateKey === selectedDate;
+          const className = [
+            "calendar-day",
+            isSelected ? "is-selected" : "",
+            cell.isToday ? "is-today" : "",
+            !cell.isCurrentMonth ? "is-adjacent-month" : "",
+          ]
+            .filter(Boolean)
+            .join(" ");
 
           return (
             <button
-              key={candidate}
+              key={cell.dateKey}
               type="button"
-              className={isSelected ? "calendar-day is-selected" : "calendar-day"}
-              disabled={isFutureDate}
+              className={className}
+              aria-label={cell.dateKey}
+              disabled={cell.isFutureDate}
               onClick={() => {
-                if (isFutureDate) {
+                if (cell.isFutureDate) {
                   return;
                 }
 
-                onSelectDate(candidate);
+                setViewYear(cell.year);
+                setViewMonth(cell.month);
+                onSelectDate(cell.dateKey);
                 setShowMonthPicker(false);
               }}
             >
-              {day}
+              {cell.day}
             </button>
           );
         })}

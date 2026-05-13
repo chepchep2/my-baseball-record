@@ -60,6 +60,7 @@
   - 4단계 진행, 검증, 저장, 뒤로가기 테스트.
 - `frontend/src/features/entry/components/__tests__/EntryCalendarSheet.test.jsx`
   - 바텀시트 달력 표시/연월 전환 테스트.
+  - 실제 시작 요일 배치, 앞달/다음달 날짜 노출, 미래 날짜 disabled 테스트.
 
 ### Modify
 

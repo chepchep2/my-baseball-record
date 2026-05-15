@@ -93,7 +93,8 @@ v2 문서는 아래 순서로 읽는 것을 권장한다.
 3. `scenario.md`
 4. `screen-design.md`
 5. `ASCII-LAYOUT.md`
-6. 기능 spec
+6. `current-erd.md`
+7. 기능 spec
 
 ## 9. 현재 연결된 하위 spec
 

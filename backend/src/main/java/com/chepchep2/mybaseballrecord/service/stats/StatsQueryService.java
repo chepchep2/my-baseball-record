@@ -44,12 +44,12 @@ public class StatsQueryService {
         long userId = currentUserProvider.getCurrentUserId();
         Integer seasonYear = resolveScope(scope);
         List<GameRecord> games = seasonYear == null
-                ? gameRecordRepository.findAllByUserId(userId)
-                : gameRecordRepository.findAllByUserIdAndSeasonYear(userId, seasonYear);
+                ? gameRecordRepository.findAllVisibleByUserId(userId)
+                : gameRecordRepository.findAllVisibleByUserIdAndSeasonYear(userId, seasonYear);
         List<Long> gameIds = games.stream().map(GameRecord::id).toList();
         List<BatterRecord> batters = gameIds.isEmpty()
                 ? List.of()
-                : batterRecordRepository.findAllByGameIdIn(gameIds);
+                : batterRecordRepository.findAllByUserIdAndGameIdIn(userId, gameIds);
 
         int atBats = sumBatters(batters, BatterRecord::atBats);
         int plateAppearances = sumBatters(batters, BatterRecord::plateAppearances);

@@ -41,7 +41,7 @@ public class GameQueryService {
         GameRecord game = gameRecordRepository.findByIdAndUserId(gameId, userId)
                 .orElseThrow(() -> new GameNotFoundException(gameId));
 
-        BatterRecord batter = batterRecordRepository.findByGameId(gameId).orElse(null);
+        BatterRecord batter = batterRecordRepository.findByGameIdAndUserId(gameId, userId).orElse(null);
 
         return toMilestoneDetail(game, batter);
     }
@@ -51,17 +51,19 @@ public class GameQueryService {
         List<GameRecord> games;
 
         if (year == null) {
-            games = gameRecordRepository.findByUserIdOrderByPlayedAtDesc(userId);
+            games = gameRecordRepository.findAllVisibleByUserId(userId).stream()
+                    .sorted(java.util.Comparator.comparing(GameRecord::playedAt).reversed())
+                    .toList();
         } else if (month == null) {
             LocalDate start = LocalDate.of(year, 1, 1);
-            games = gameRecordRepository.findByUserIdAndPlayedAtBetweenOrderByPlayedAtDesc(
+            games = gameRecordRepository.findVisibleByUserIdAndPlayedAtBetweenOrderByPlayedAtDesc(
                     userId,
                     start.atStartOfDay(),
                     start.plusYears(1).atStartOfDay()
             );
         } else {
             LocalDate start = LocalDate.of(year, month, 1);
-            games = gameRecordRepository.findByUserIdAndPlayedAtBetweenOrderByPlayedAtDesc(
+            games = gameRecordRepository.findVisibleByUserIdAndPlayedAtBetweenOrderByPlayedAtDesc(
                     userId,
                     start.atStartOfDay(),
                     start.plusMonths(1).atStartOfDay()
@@ -74,7 +76,7 @@ public class GameQueryService {
     public RecentGamesResponse getRecent(int limit) {
         long userId = currentUserProvider.getCurrentUserId();
         int boundedLimit = Math.max(1, Math.min(limit, 20));
-        List<GameRecord> games = gameRecordRepository.findByUserIdOrderByPlayedAtDesc(
+        List<GameRecord> games = gameRecordRepository.findVisibleByUserIdOrderByPlayedAtDesc(
                 userId,
                 PageRequest.of(0, boundedLimit)
         );
@@ -102,7 +104,8 @@ public class GameQueryService {
     }
 
     private RecentGameItemResponse toRecentItem(GameRecord game) {
-        BatterRecord batter = batterRecordRepository.findByGameId(game.id()).orElse(null);
+        long userId = currentUserProvider.getCurrentUserId();
+        BatterRecord batter = batterRecordRepository.findByGameIdAndUserId(game.id(), userId).orElse(null);
         int plateAppearances = batter == null ? 0 : batter.plateAppearances();
         int walksAndHitByPitch = batter == null ? 0 : batter.walks() + batter.hitByPitch();
         int singles = batter == null ? 0 : batter.singles();

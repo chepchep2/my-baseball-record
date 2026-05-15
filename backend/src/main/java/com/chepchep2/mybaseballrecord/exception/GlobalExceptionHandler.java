@@ -10,6 +10,10 @@ import com.chepchep2.mybaseballrecord.exception.auth.RefreshTokenRevokedExceptio
 import com.chepchep2.mybaseballrecord.exception.game.GameImmutableFieldException;
 import com.chepchep2.mybaseballrecord.exception.game.InvalidGameCreateException;
 import com.chepchep2.mybaseballrecord.exception.game.GameNotFoundException;
+import com.chepchep2.mybaseballrecord.exception.game.BatterRecordNotFoundException;
+import com.chepchep2.mybaseballrecord.exception.game.DuplicateMatchRecordException;
+import com.chepchep2.mybaseballrecord.exception.game.DuplicateMatchVerificationException;
+import com.chepchep2.mybaseballrecord.exception.game.MatchVerificationNotAllowedException;
 import com.chepchep2.mybaseballrecord.exception.stats.InvalidStatsQueryException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -137,6 +141,18 @@ public class GlobalExceptionHandler {
         );
     }
 
+    @ExceptionHandler(BatterRecordNotFoundException.class)
+    public ResponseEntity<ApiErrorResponse> handleBatterRecordNotFound(BatterRecordNotFoundException ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
+                new ApiErrorResponse(
+                        "BATTER_RECORD_NOT_FOUND",
+                        ex.getMessage(),
+                        List.of(),
+                        false
+                )
+        );
+    }
+
     @ExceptionHandler(GameImmutableFieldException.class)
     public ResponseEntity<ApiErrorResponse> handleGameImmutableField(GameImmutableFieldException ex) {
         return ResponseEntity.badRequest().body(
@@ -156,6 +172,42 @@ public class GlobalExceptionHandler {
                         "VALIDATION_ERROR",
                         "입력값을 확인해주세요.",
                         List.of(new ApiErrorResponse.FieldError(ex.field(), ex.getMessage())),
+                        false
+                )
+        );
+    }
+
+    @ExceptionHandler(DuplicateMatchRecordException.class)
+    public ResponseEntity<ApiErrorResponse> handleDuplicateMatchRecord(DuplicateMatchRecordException ex) {
+        return ResponseEntity.badRequest().body(
+                new ApiErrorResponse(
+                        "DUPLICATE_MATCH_RECORD",
+                        ex.getMessage(),
+                        List.of(),
+                        false
+                )
+        );
+    }
+
+    @ExceptionHandler(DuplicateMatchVerificationException.class)
+    public ResponseEntity<ApiErrorResponse> handleDuplicateMatchVerification(DuplicateMatchVerificationException ex) {
+        return ResponseEntity.badRequest().body(
+                new ApiErrorResponse(
+                        "DUPLICATE_MATCH_VERIFICATION",
+                        ex.getMessage(),
+                        List.of(),
+                        false
+                )
+        );
+    }
+
+    @ExceptionHandler(MatchVerificationNotAllowedException.class)
+    public ResponseEntity<ApiErrorResponse> handleMatchVerificationNotAllowed(MatchVerificationNotAllowedException ex) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(
+                new ApiErrorResponse(
+                        "MATCH_VERIFICATION_NOT_ALLOWED",
+                        ex.getMessage(),
+                        List.of(),
                         false
                 )
         );

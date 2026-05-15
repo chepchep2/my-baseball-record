@@ -1,6 +1,7 @@
 package com.chepchep2.mybaseballrecord.infrastructure.config;
 
 import com.chepchep2.mybaseballrecord.infrastructure.auth.JwtAccessTokenAuthenticationFilter;
+import com.chepchep2.mybaseballrecord.infrastructure.auth.LocalMockUserAuthenticationFilter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -16,6 +17,7 @@ import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.time.Clock;
+import java.util.Arrays;
 import java.util.List;
 
 @Configuration
@@ -25,8 +27,13 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(
             HttpSecurity http,
             @Value("${auth.jwt.secret}") String jwtSecret,
+            @Value("${spring.profiles.active:}") String activeProfiles,
             Clock clock
     ) throws Exception {
+        boolean localProfileActive = Arrays.stream(activeProfiles.split(","))
+                .map(String::trim)
+                .anyMatch("local"::equals);
+
         http
                 .cors(Customizer.withDefaults())
                 .csrf(AbstractHttpConfigurer::disable)
@@ -66,6 +73,13 @@ public class SecurityConfig {
                         new JwtAccessTokenAuthenticationFilter(jwtSecret, clock),
                         UsernamePasswordAuthenticationFilter.class
                 );
+
+        if (localProfileActive) {
+            http.addFilterBefore(
+                    new LocalMockUserAuthenticationFilter(),
+                    JwtAccessTokenAuthenticationFilter.class
+            );
+        }
 
         return http.build();
     }

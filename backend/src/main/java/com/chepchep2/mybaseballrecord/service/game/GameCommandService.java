@@ -85,6 +85,7 @@ public class GameCommandService {
                         .opponentName("")
                         .memo(null)
                         .userId(userId)
+                        .createdByUserId(userId)
                         .participationType(ParticipationType.BATTER)
                         .build()
         );
@@ -97,6 +98,7 @@ public class GameCommandService {
         BatterRecord savedBatter = batterRecordRepository.save(
                 BatterRecord.builder()
                         .gameId(savedGame.id())
+                        .userId(userId)
                         .plateAppearances(request.plateAppearances())
                         .atBats(atBats)
                         .singles(request.singles())
@@ -138,7 +140,7 @@ public class GameCommandService {
         GameRecord savedGame = gameRecordRepository.save(game);
 
         if (request.batter() != null) {
-            batterRecordRepository.findByGameId(gameId)
+            batterRecordRepository.findByGameIdAndUserId(gameId, userId)
                     .ifPresentOrElse(
                             existing -> existing.update(
                                     request.batter().plateAppearances(),
@@ -159,6 +161,7 @@ public class GameCommandService {
                             () -> batterRecordRepository.save(
                                     BatterRecord.builder()
                                             .gameId(gameId)
+                                            .userId(userId)
                                             .plateAppearances(request.batter().plateAppearances())
                                             .atBats(request.batter().atBats())
                                             .singles(request.batter().singles())
@@ -177,7 +180,7 @@ public class GameCommandService {
                             )
                     );
         } else {
-            batterRecordRepository.deleteByGameId(gameId);
+            batterRecordRepository.deleteByGameIdAndUserId(gameId, userId);
         }
 
         if (request.pitcher() != null) {
@@ -223,7 +226,7 @@ public class GameCommandService {
             pitcherRecordRepository.deleteByGameId(gameId);
         }
 
-        GameBatterResponse batterResponse = batterRecordRepository.findByGameId(gameId)
+        GameBatterResponse batterResponse = batterRecordRepository.findByGameIdAndUserId(gameId, userId)
                 .map(this::toBatterResponse)
                 .orElse(null);
         GamePitcherResponse pitcherResponse = pitcherRecordRepository.findByGameId(gameId)

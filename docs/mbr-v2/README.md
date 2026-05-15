@@ -15,6 +15,7 @@
 - [scenario.md](/Users/chosangwoo/dev/projects/my-baseball-record/docs/mbr-v2/scenario.md)
 - [screen-design.md](/Users/chosangwoo/dev/projects/my-baseball-record/docs/mbr-v2/screen-design.md)
 - [ASCII-LAYOUT.md](/Users/chosangwoo/dev/projects/my-baseball-record/docs/mbr-v2/ASCII-LAYOUT.md)
+- [current-erd.md](/Users/chosangwoo/dev/projects/my-baseball-record/docs/mbr-v2/current-erd.md)
 
 ## 현재 연결된 v2 하위 spec
 
@@ -27,4 +28,5 @@
 3. scenario
 4. screen-design
 5. ASCII-LAYOUT
-6. 구조/ERD/API 문서
+6. current-erd
+7. 구조/API 문서

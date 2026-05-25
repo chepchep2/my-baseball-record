@@ -48,7 +48,7 @@ export default function HomePageClient({ selectedScope = "season" }) {
         }
 
         if (result.isEmpty) {
-          router.replace("/games/new");
+          router.replace("/matches/new");
           return;
         }
 
@@ -79,7 +79,7 @@ export default function HomePageClient({ selectedScope = "season" }) {
 
   return (
     <AppPageLayout showTabs={false} frameClassName="milestone-home-frame">
-      <Link href="/games/new" className="milestone-home-fab" aria-label="새 경기 기록 추가">
+      <Link href="/matches/new" className="milestone-home-fab" aria-label="새 경기 기록 추가">
         +
       </Link>
       <section className="panel milestone-home-panel">
@@ -109,17 +109,22 @@ export default function HomePageClient({ selectedScope = "season" }) {
                 <SummaryList items={activeSummaryItems} />
               </section>
 
-              <section className="milestone-home-recent-panel" aria-label="최근 경기 기록 리스트">
+              <section className="milestone-home-recent-panel" aria-label="최근 경기">
                 <div className="milestone-home-section-header">
-                  <h2 className="milestone-home-section-title">최근 경기 기록 리스트</h2>
-                  <Link href="/games" className="milestone-home-more-link">
+                  <h2 className="milestone-home-section-title">최근 경기</h2>
+                  <Link href="/matches" className="milestone-home-more-link">
                     더보기
                   </Link>
                 </div>
                 <div className="milestone-home-recent-list">
                   {dashboard?.recentGames.map((game) => (
-                    <Link key={game.id} href={`/games/${game.id}`} className="milestone-home-recent-card">
-                      <p className="milestone-home-recent-date">{game.playedLabel}</p>
+                    <Link key={game.id} href={game.href} className="milestone-home-recent-card">
+                      <div className="milestone-home-recent-head">
+                        <p className="milestone-home-recent-date">{game.playedLabel}</p>
+                        <span className={game.verified ? "milestone-home-status verified" : "milestone-home-status pending"}>
+                          {game.verified ? "인증됨" : "인증 전"}
+                        </span>
+                      </div>
                       <p className="milestone-home-recent-summary">{game.summaryLabel}</p>
                     </Link>
                   ))}

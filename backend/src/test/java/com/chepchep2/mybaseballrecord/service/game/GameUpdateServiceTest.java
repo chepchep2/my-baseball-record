@@ -1,9 +1,9 @@
 package com.chepchep2.mybaseballrecord.service.game;
 
+import com.chepchep2.mybaseballrecord.domain.game.BatterRecord;
 import com.chepchep2.mybaseballrecord.domain.game.GameRecord;
 import com.chepchep2.mybaseballrecord.domain.game.GameType;
 import com.chepchep2.mybaseballrecord.domain.game.ParticipationType;
-import com.chepchep2.mybaseballrecord.domain.game.BatterRecord;
 import com.chepchep2.mybaseballrecord.domain.game.PitcherRecord;
 import com.chepchep2.mybaseballrecord.dto.game.request.BatterRecordRequest;
 import com.chepchep2.mybaseballrecord.dto.game.request.GameUpdateInfoRequest;
@@ -27,7 +27,6 @@ import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -80,9 +79,7 @@ class GameUpdateServiceTest {
         );
 
         when(gameRecordRepository.save(any(GameRecord.class))).thenAnswer(invocation -> invocation.getArgument(0));
-        when(batterRecordRepository.findByGameId(101L)).thenReturn(Optional.of(
-                new BatterRecord(101L, 4, 3, 1, 1, 0, 1, 1, 0, 0, 3, 2, 0, 0, 0)
-        ));
+        when(batterRecordRepository.findByGameIdAndUserId(101L, 1L)).thenReturn(Optional.of(existingBatter(101L)));
         when(pitcherRecordRepository.findByGameId(101L)).thenReturn(Optional.empty());
 
         var response = gameCommandService.update(101L, request);
@@ -109,9 +106,7 @@ class GameUpdateServiceTest {
         when(currentUserProvider.getCurrentUserId()).thenReturn(1L);
         when(gameRecordRepository.findByIdAndUserId(101L, 1L)).thenReturn(Optional.of(existing));
         when(gameRecordRepository.save(any(GameRecord.class))).thenAnswer(invocation -> invocation.getArgument(0));
-        when(batterRecordRepository.findByGameId(101L)).thenReturn(Optional.of(
-                new BatterRecord(101L, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
-        ));
+        when(batterRecordRepository.findByGameIdAndUserId(101L, 1L)).thenReturn(Optional.of(emptyBatter(101L)));
         when(pitcherRecordRepository.findByGameId(101L)).thenReturn(Optional.of(
                 new PitcherRecord(101L, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
         ));
@@ -154,9 +149,7 @@ class GameUpdateServiceTest {
         when(currentUserProvider.getCurrentUserId()).thenReturn(1L);
         when(gameRecordRepository.findByIdAndUserId(101L, 1L)).thenReturn(Optional.of(existing));
         when(gameRecordRepository.save(any(GameRecord.class))).thenAnswer(invocation -> invocation.getArgument(0));
-        when(batterRecordRepository.findByGameId(101L)).thenReturn(Optional.of(
-                new BatterRecord(101L, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
-        ));
+        when(batterRecordRepository.findByGameIdAndUserId(101L, 1L)).thenReturn(Optional.of(emptyBatter(101L)));
         when(pitcherRecordRepository.findByGameId(101L)).thenReturn(Optional.empty());
 
         GameUpdateRequest request = new GameUpdateRequest(
@@ -195,9 +188,7 @@ class GameUpdateServiceTest {
         when(currentUserProvider.getCurrentUserId()).thenReturn(1L);
         when(gameRecordRepository.findByIdAndUserId(101L, 1L)).thenReturn(Optional.of(existing));
         when(gameRecordRepository.save(any(GameRecord.class))).thenAnswer(invocation -> invocation.getArgument(0));
-        when(batterRecordRepository.findByGameId(101L)).thenReturn(Optional.of(
-                new BatterRecord(101L, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
-        ));
+        when(batterRecordRepository.findByGameIdAndUserId(101L, 1L)).thenReturn(Optional.of(emptyBatter(101L)));
         when(pitcherRecordRepository.findByGameId(101L)).thenReturn(Optional.empty());
 
         GameUpdateRequest request = new GameUpdateRequest(
@@ -244,5 +235,47 @@ class GameUpdateServiceTest {
         idField.setAccessible(true);
         idField.set(game, id);
         return game;
+    }
+
+    private BatterRecord existingBatter(long gameId) {
+        return BatterRecord.builder()
+                .gameId(gameId)
+                .userId(1L)
+                .plateAppearances(4)
+                .atBats(3)
+                .singles(1)
+                .doubles(1)
+                .triples(0)
+                .homeRuns(1)
+                .walks(1)
+                .strikeOuts(0)
+                .hitByPitch(0)
+                .runsBattedIn(3)
+                .runs(2)
+                .stolenBases(0)
+                .caughtStealing(0)
+                .sacrificeHits(0)
+                .build();
+    }
+
+    private BatterRecord emptyBatter(long gameId) {
+        return BatterRecord.builder()
+                .gameId(gameId)
+                .userId(1L)
+                .plateAppearances(1)
+                .atBats(1)
+                .singles(0)
+                .doubles(0)
+                .triples(0)
+                .homeRuns(0)
+                .walks(0)
+                .strikeOuts(0)
+                .hitByPitch(0)
+                .runsBattedIn(0)
+                .runs(0)
+                .stolenBases(0)
+                .caughtStealing(0)
+                .sacrificeHits(0)
+                .build();
     }
 }

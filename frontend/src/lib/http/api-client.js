@@ -44,7 +44,16 @@ function buildHeaders(initialHeaders, accessToken) {
   const headers = new Headers(initialHeaders || {});
   headers.set("Content-Type", "application/json");
 
-  if (accessToken) {
+  const mockAuthEnabled =
+    typeof process !== "undefined" &&
+    process.env &&
+    process.env.NEXT_PUBLIC_ENABLE_MOCK_AUTH === "true";
+
+  if (mockAuthEnabled) {
+    headers.set("X-Dev-User-Id", "1");
+  }
+
+  if (accessToken && !mockAuthEnabled) {
     headers.set("Authorization", `Bearer ${accessToken}`);
   } else {
     headers.delete("Authorization");

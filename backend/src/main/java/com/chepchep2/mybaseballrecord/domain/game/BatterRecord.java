@@ -15,8 +15,11 @@ public class BatterRecord {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "game_id", nullable = false, unique = true)
+    @Column(name = "game_id", nullable = false)
     private Long gameId;
+
+    @Column(name = "user_id")
+    private Long userId;
 
     @Column(name = "plate_appearances", nullable = false)
     private int plateAppearances;
@@ -63,6 +66,7 @@ public class BatterRecord {
     @Builder
     public BatterRecord(
             Long gameId,
+            Long userId,
             int plateAppearances,
             int atBats,
             int singles,
@@ -79,6 +83,7 @@ public class BatterRecord {
             int sacrificeHits
     ) {
         this.gameId = gameId;
+        this.userId = userId;
         this.plateAppearances = plateAppearances;
         this.atBats = atBats;
         this.singles = singles;
@@ -95,11 +100,56 @@ public class BatterRecord {
         this.sacrificeHits = sacrificeHits;
     }
 
+    public BatterRecord(
+            Long gameId,
+            int plateAppearances,
+            int atBats,
+            int singles,
+            int doubles,
+            int triples,
+            int homeRuns,
+            int walks,
+            int strikeOuts,
+            int hitByPitch,
+            int runsBattedIn,
+            int runs,
+            int stolenBases,
+            int caughtStealing,
+            int sacrificeHits
+    ) {
+        this(
+                gameId,
+                null,
+                plateAppearances,
+                atBats,
+                singles,
+                doubles,
+                triples,
+                homeRuns,
+                walks,
+                strikeOuts,
+                hitByPitch,
+                runsBattedIn,
+                runs,
+                stolenBases,
+                caughtStealing,
+                sacrificeHits
+        );
+    }
+
     protected BatterRecord() {
+    }
+
+    public Long id() {
+        return id;
     }
 
     public Long gameId() {
         return gameId;
+    }
+
+    public Long userId() {
+        return userId;
     }
 
     public int plateAppearances() {

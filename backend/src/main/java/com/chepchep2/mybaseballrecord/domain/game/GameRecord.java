@@ -44,6 +44,21 @@ public class GameRecord {
     @Column(name = "user_id")
     private Long userId;
 
+    @Column(name = "created_by_user_id")
+    private Long createdByUserId;
+
+    @Column(name = "city_name", length = 100)
+    private String cityName;
+
+    @Column(name = "district_name", length = 100)
+    private String districtName;
+
+    @Column(name = "stadium_id")
+    private Long stadiumId;
+
+    @Column(name = "stadium_name_snapshot", length = 150)
+    private String stadiumNameSnapshot;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "participation_type", nullable = false, length = 20)
     private ParticipationType participationType;
@@ -63,6 +78,11 @@ public class GameRecord {
             String opponentName,
             String memo,
             Long userId,
+            Long createdByUserId,
+            String cityName,
+            String districtName,
+            Long stadiumId,
+            String stadiumNameSnapshot,
             ParticipationType participationType
     ) {
         this.playedAt = playedAt;
@@ -72,7 +92,39 @@ public class GameRecord {
         this.opponentName = opponentName;
         this.memo = memo;
         this.userId = userId;
+        this.createdByUserId = createdByUserId;
+        this.cityName = cityName;
+        this.districtName = districtName;
+        this.stadiumId = stadiumId;
+        this.stadiumNameSnapshot = stadiumNameSnapshot;
         this.participationType = participationType;
+    }
+
+    public GameRecord(
+            LocalDateTime playedAt,
+            Integer seasonYear,
+            GameType gameType,
+            String teamName,
+            String opponentName,
+            String memo,
+            Long userId,
+            ParticipationType participationType
+    ) {
+        this(
+                playedAt,
+                seasonYear,
+                gameType,
+                teamName,
+                opponentName,
+                memo,
+                userId,
+                null,
+                null,
+                null,
+                null,
+                null,
+                participationType
+        );
     }
 
     protected GameRecord() {
@@ -124,6 +176,26 @@ public class GameRecord {
 
     public ParticipationType participationType() {
         return participationType;
+    }
+
+    public Long createdByUserId() {
+        return createdByUserId;
+    }
+
+    public String cityName() {
+        return cityName;
+    }
+
+    public String districtName() {
+        return districtName;
+    }
+
+    public Long stadiumId() {
+        return stadiumId;
+    }
+
+    public String stadiumNameSnapshot() {
+        return stadiumNameSnapshot;
     }
 
     public void updateMutableFields(

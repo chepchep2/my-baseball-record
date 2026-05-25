@@ -79,6 +79,7 @@ class GameCreateServiceTest {
 
         assertThat(gameCaptor.getValue().playedAt()).isEqualTo(LocalDateTime.of(2026, 3, 27, 19, 0));
         assertThat(gameCaptor.getValue().userId()).isEqualTo(5L);
+        assertThat(batterCaptor.getValue().userId()).isEqualTo(5L);
         assertThat(batterCaptor.getValue().plateAppearances()).isEqualTo(5);
         assertThat(batterCaptor.getValue().atBats()).isEqualTo(4);
         assertThat(batterCaptor.getValue().hitByPitch()).isEqualTo(0);

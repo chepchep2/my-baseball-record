@@ -2,6 +2,9 @@ package com.chepchep2.mybaseballrecord.dto.game.response;
 
 public record RecentGameItemResponse(
         long gameId,
+        boolean sharedMatch,
+        Long myBatterRecordId,
+        boolean verified,
         String playedDate,
         int playedHour,
         int playedMinute,

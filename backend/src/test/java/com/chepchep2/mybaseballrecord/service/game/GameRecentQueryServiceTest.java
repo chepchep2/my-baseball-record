@@ -49,9 +49,9 @@ class GameRecentQueryServiceTest {
         GameRecord older = createGame(100L, LocalDateTime.parse("2026-03-20T14:10:00"));
 
         when(currentUserProvider.getCurrentUserId()).thenReturn(1L);
-        when(gameRecordRepository.findByUserIdOrderByPlayedAtDesc(1L, PageRequest.of(0, 3))).thenReturn(List.of(newer, older));
-        when(batterRecordRepository.findByGameId(101L)).thenReturn(Optional.of(createBatter(101L, 5, 4, 2, 0, 0, 1, 1)));
-        when(batterRecordRepository.findByGameId(100L)).thenReturn(Optional.of(createBatter(100L, 4, 4, 1, 1, 0, 0, 0)));
+        when(gameRecordRepository.findVisibleByUserIdOrderByPlayedAtDesc(1L, PageRequest.of(0, 3))).thenReturn(List.of(newer, older));
+        when(batterRecordRepository.findByGameIdAndUserId(101L, 1L)).thenReturn(Optional.of(createBatter(101L, 5, 4, 2, 0, 0, 1, 1)));
+        when(batterRecordRepository.findByGameIdAndUserId(100L, 1L)).thenReturn(Optional.of(createBatter(100L, 4, 4, 1, 1, 0, 0, 0)));
 
         RecentGamesResponse response = gameQueryService.getRecent(3);
 
@@ -68,12 +68,12 @@ class GameRecentQueryServiceTest {
         GameRecord aprilGame = createGame(201L, LocalDateTime.parse("2026-04-05T11:30:00"));
 
         when(currentUserProvider.getCurrentUserId()).thenReturn(1L);
-        when(gameRecordRepository.findByUserIdAndPlayedAtBetweenOrderByPlayedAtDesc(
+        when(gameRecordRepository.findVisibleByUserIdAndPlayedAtBetweenOrderByPlayedAtDesc(
                 1L,
                 LocalDateTime.parse("2026-04-01T00:00:00"),
                 LocalDateTime.parse("2026-05-01T00:00:00")
         )).thenReturn(List.of(aprilGame));
-        when(batterRecordRepository.findByGameId(201L)).thenReturn(Optional.of(createBatter(201L, 4, 3, 1, 0, 0, 0, 1)));
+        when(batterRecordRepository.findByGameIdAndUserId(201L, 1L)).thenReturn(Optional.of(createBatter(201L, 4, 3, 1, 0, 0, 0, 1)));
 
         RecentGamesResponse response = gameQueryService.getGames(2026, 4);
 
@@ -84,7 +84,27 @@ class GameRecentQueryServiceTest {
         assertThat(response.items().get(0).ops()).isEqualTo("0.833");
     }
 
+    @Test
+    @DisplayName("최근 경기 목록은 생성자가 아닌 shared 경기 참여자도 볼 수 있다")
+    void getRecentIncludesSharedGameByBatterOwner() throws Exception {
+        GameRecord shared = createGame(301L, LocalDateTime.parse("2026-04-07T20:00:00"), 99L);
+
+        when(currentUserProvider.getCurrentUserId()).thenReturn(1L);
+        when(gameRecordRepository.findVisibleByUserIdOrderByPlayedAtDesc(1L, PageRequest.of(0, 5))).thenReturn(List.of(shared));
+        when(batterRecordRepository.findByGameIdAndUserId(301L, 1L)).thenReturn(Optional.of(createBatter(301L, 4, 3, 1, 0, 0, 1, 1)));
+
+        RecentGamesResponse response = gameQueryService.getRecent(5);
+
+        assertThat(response.items()).hasSize(1);
+        assertThat(response.items().get(0).gameId()).isEqualTo(301L);
+        assertThat(response.items().get(0).playedAtLabel()).isEqualTo("4/7 20:00");
+    }
+
     private GameRecord createGame(long id, LocalDateTime playedAt) throws Exception {
+        return createGame(id, playedAt, 1L);
+    }
+
+    private GameRecord createGame(long id, LocalDateTime playedAt, long userId) throws Exception {
         GameRecord game = GameRecord.builder()
                 .playedAt(playedAt)
                 .seasonYear(playedAt.getYear())
@@ -92,7 +112,7 @@ class GameRecentQueryServiceTest {
                 .teamName("")
                 .opponentName("")
                 .memo(null)
-                .userId(1L)
+                .userId(userId)
                 .participationType(ParticipationType.BATTER)
                 .build();
         var idField = GameRecord.class.getDeclaredField("id");
@@ -104,6 +124,7 @@ class GameRecentQueryServiceTest {
     private BatterRecord createBatter(long gameId, int plateAppearances, int atBats, int singles, int doubles, int triples, int homeRuns, int walks) {
         return BatterRecord.builder()
                 .gameId(gameId)
+                .userId(1L)
                 .plateAppearances(plateAppearances)
                 .atBats(atBats)
                 .singles(singles)

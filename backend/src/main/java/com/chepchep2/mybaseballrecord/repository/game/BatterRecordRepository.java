@@ -9,7 +9,15 @@ import java.util.Optional;
 public interface BatterRecordRepository extends JpaRepository<BatterRecord, Long> {
     Optional<BatterRecord> findByGameId(Long gameId);
 
+    Optional<BatterRecord> findByGameIdAndUserId(Long gameId, Long userId);
+
+    List<BatterRecord> findAllByGameId(Long gameId);
+
     List<BatterRecord> findAllByGameIdIn(List<Long> gameIds);
 
+    List<BatterRecord> findAllByUserIdAndGameIdIn(Long userId, List<Long> gameIds);
+
     void deleteByGameId(Long gameId);
+
+    void deleteByGameIdAndUserId(Long gameId, Long userId);
 }

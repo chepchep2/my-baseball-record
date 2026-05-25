@@ -48,6 +48,7 @@ class GameDetailServiceTest {
         GameRecord game = createGame(101L);
         BatterRecord batter = BatterRecord.builder()
                 .gameId(101L)
+                .userId(1L)
                 .plateAppearances(4)
                 .atBats(3)
                 .singles(1)
@@ -65,7 +66,7 @@ class GameDetailServiceTest {
                 .build();
         when(currentUserProvider.getCurrentUserId()).thenReturn(1L);
         when(gameRecordRepository.findByIdAndUserId(101L, 1L)).thenReturn(Optional.of(game));
-        when(batterRecordRepository.findByGameId(101L)).thenReturn(Optional.of(batter));
+        when(batterRecordRepository.findByGameIdAndUserId(101L, 1L)).thenReturn(Optional.of(batter));
 
         var response = gameQueryService.getDetail(101L);
 
@@ -92,7 +93,6 @@ class GameDetailServiceTest {
         GameRecord game = createGame(102L);
         when(currentUserProvider.getCurrentUserId()).thenReturn(1L);
         when(gameRecordRepository.findByIdAndUserId(102L, 1L)).thenReturn(Optional.of(game));
-        when(batterRecordRepository.findByGameId(102L)).thenReturn(Optional.empty());
 
         var response = gameQueryService.getDetail(102L);
 

@@ -8,6 +8,7 @@ import com.chepchep2.mybaseballrecord.dto.game.response.RecentGameItemResponse;
 import com.chepchep2.mybaseballrecord.dto.game.response.RecentGamesResponse;
 import com.chepchep2.mybaseballrecord.exception.game.GameNotFoundException;
 import com.chepchep2.mybaseballrecord.repository.game.BatterRecordRepository;
+import com.chepchep2.mybaseballrecord.repository.game.BatterRecordVerificationRepository;
 import com.chepchep2.mybaseballrecord.repository.game.GameRecordRepository;
 import com.chepchep2.mybaseballrecord.service.auth.CurrentUserProvider;
 import org.springframework.data.domain.PageRequest;
@@ -24,15 +25,18 @@ public class GameQueryService {
 
     private final GameRecordRepository gameRecordRepository;
     private final BatterRecordRepository batterRecordRepository;
+    private final BatterRecordVerificationRepository batterRecordVerificationRepository;
     private final CurrentUserProvider currentUserProvider;
 
     public GameQueryService(
             GameRecordRepository gameRecordRepository,
             BatterRecordRepository batterRecordRepository,
+            BatterRecordVerificationRepository batterRecordVerificationRepository,
             CurrentUserProvider currentUserProvider
     ) {
         this.gameRecordRepository = gameRecordRepository;
         this.batterRecordRepository = batterRecordRepository;
+        this.batterRecordVerificationRepository = batterRecordVerificationRepository;
         this.currentUserProvider = currentUserProvider;
     }
 
@@ -41,7 +45,7 @@ public class GameQueryService {
         GameRecord game = gameRecordRepository.findByIdAndUserId(gameId, userId)
                 .orElseThrow(() -> new GameNotFoundException(gameId));
 
-        BatterRecord batter = batterRecordRepository.findByGameId(gameId).orElse(null);
+        BatterRecord batter = batterRecordRepository.findByGameIdAndUserId(gameId, userId).orElse(null);
 
         return toMilestoneDetail(game, batter);
     }
@@ -51,17 +55,19 @@ public class GameQueryService {
         List<GameRecord> games;
 
         if (year == null) {
-            games = gameRecordRepository.findByUserIdOrderByPlayedAtDesc(userId);
+            games = gameRecordRepository.findAllVisibleByUserId(userId).stream()
+                    .sorted(java.util.Comparator.comparing(GameRecord::playedAt).reversed())
+                    .toList();
         } else if (month == null) {
             LocalDate start = LocalDate.of(year, 1, 1);
-            games = gameRecordRepository.findByUserIdAndPlayedAtBetweenOrderByPlayedAtDesc(
+            games = gameRecordRepository.findVisibleByUserIdAndPlayedAtBetweenOrderByPlayedAtDesc(
                     userId,
                     start.atStartOfDay(),
                     start.plusYears(1).atStartOfDay()
             );
         } else {
             LocalDate start = LocalDate.of(year, month, 1);
-            games = gameRecordRepository.findByUserIdAndPlayedAtBetweenOrderByPlayedAtDesc(
+            games = gameRecordRepository.findVisibleByUserIdAndPlayedAtBetweenOrderByPlayedAtDesc(
                     userId,
                     start.atStartOfDay(),
                     start.plusMonths(1).atStartOfDay()
@@ -74,7 +80,7 @@ public class GameQueryService {
     public RecentGamesResponse getRecent(int limit) {
         long userId = currentUserProvider.getCurrentUserId();
         int boundedLimit = Math.max(1, Math.min(limit, 20));
-        List<GameRecord> games = gameRecordRepository.findByUserIdOrderByPlayedAtDesc(
+        List<GameRecord> games = gameRecordRepository.findVisibleByUserIdOrderByPlayedAtDesc(
                 userId,
                 PageRequest.of(0, boundedLimit)
         );
@@ -102,7 +108,8 @@ public class GameQueryService {
     }
 
     private RecentGameItemResponse toRecentItem(GameRecord game) {
-        BatterRecord batter = batterRecordRepository.findByGameId(game.id()).orElse(null);
+        long userId = currentUserProvider.getCurrentUserId();
+        BatterRecord batter = batterRecordRepository.findByGameIdAndUserId(game.id(), userId).orElse(null);
         int plateAppearances = batter == null ? 0 : batter.plateAppearances();
         int walksAndHitByPitch = batter == null ? 0 : batter.walks() + batter.hitByPitch();
         int singles = batter == null ? 0 : batter.singles();
@@ -116,9 +123,16 @@ public class GameQueryService {
         String onBasePercentage = formatDecimal(ratio(hits + walksAndHitByPitch, atBats + walksAndHitByPitch), 3);
         String sluggingPercentage = formatDecimal(ratio(totalBases, atBats), 3);
         String ops = formatDecimal(Double.parseDouble(onBasePercentage) + Double.parseDouble(sluggingPercentage), 3);
+        boolean verified = batter != null
+                && !batterRecordVerificationRepository.findAllByBatterRecordIdIn(List.of(batter.id())).isEmpty();
+
+        boolean sharedMatch = game.cityName() != null && game.districtName() != null && game.stadiumNameSnapshot() != null;
 
         return new RecentGameItemResponse(
                 game.id(),
+                sharedMatch,
+                batter == null ? null : batter.id(),
+                verified,
                 game.playedAt().toLocalDate().toString(),
                 game.playedAt().getHour(),
                 game.playedAt().getMinute(),

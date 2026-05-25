@@ -30,6 +30,10 @@ export function toHomeSummaryItems(summary) {
 export function toRecentGameItems(games) {
   return (games ?? []).slice(0, 3).map((game) => ({
     id: game.gameId ?? game.id,
+    href: game.myBatterRecordId
+      ? `/matches/${game.gameId ?? game.id}/records/${game.myBatterRecordId}`
+      : `/matches/${game.gameId ?? game.id}`,
+    verified: Boolean(game.verified),
     playedLabel: game.playedAtLabel ?? game.playedLabel,
     summaryLabel: game.summaryLabel ?? toRecentSummaryLabel(game),
   }));

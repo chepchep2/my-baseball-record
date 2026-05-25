@@ -1,0 +1,515 @@
+.frame {
+  display: grid;
+  gap: 18px;
+}
+
+.panel {
+  padding: 22px 20px 26px;
+  display: grid;
+  gap: 18px;
+}
+
+.flowPanel {
+  border: 1px solid var(--color-border);
+  border-radius: 24px;
+  background: rgba(255, 255, 255, 0.56);
+  box-shadow: var(--shadow-card);
+  padding: 22px 20px 26px;
+  min-height: calc(100dvh - 16px);
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.detailFlowPanel {
+  height: calc(100dvh - 16px);
+  overflow: hidden;
+}
+
+.hero {
+  display: grid;
+  gap: 8px;
+}
+
+.topRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.eyebrow {
+  color: var(--color-accent);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.title {
+  margin: 0;
+  font-size: 1.8rem;
+  line-height: 1.15;
+}
+
+.copy {
+  margin: 0;
+  color: var(--color-muted);
+  line-height: 1.55;
+}
+
+.backButton,
+.stepPill {
+  min-height: 38px;
+  border-radius: 999px;
+  padding: 0 14px;
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.backButton {
+  border: 1px solid rgba(69, 67, 45, 0.12);
+  background: rgba(255, 252, 246, 0.72);
+  color: var(--color-text);
+  cursor: pointer;
+}
+
+.stepPill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(66, 107, 72, 0.1);
+  color: var(--color-accent);
+}
+
+.section {
+  display: grid;
+  gap: 10px;
+}
+
+.candidateSection {
+  gap: 12px;
+}
+
+.candidateStage {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.recordStage {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.recordSection {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.sectionTitle {
+  margin: 0;
+  font-size: 0.98rem;
+}
+
+.sectionHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.sectionDivider {
+  height: 1px;
+  background: rgba(69, 67, 45, 0.12);
+  margin: 2px 2px 0;
+}
+
+.recordTools {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.fieldGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.regionGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.fieldLabel {
+  display: block;
+  margin-bottom: 6px;
+  color: var(--color-muted);
+  font-size: 0.95rem;
+  font-weight: 700;
+}
+
+.fieldCard,
+.candidateCard,
+.recordCard,
+.hintCard {
+  border: 1px solid rgba(69, 67, 45, 0.1);
+  border-radius: 18px;
+  background: #fffdf8;
+}
+
+.candidateCardButton {
+  border: 1px solid rgba(69, 67, 45, 0.1);
+  border-radius: 18px;
+  background: #fffdf8;
+  padding: 14px;
+  display: grid;
+  gap: 8px;
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
+}
+
+.candidateCardButton:focus-visible {
+  outline: 2px solid rgba(66, 107, 72, 0.45);
+  outline-offset: 2px;
+}
+
+.recordCardButton {
+  cursor: pointer;
+}
+
+.recordCardButton:focus-visible {
+  outline: 2px solid rgba(66, 107, 72, 0.45);
+  outline-offset: 2px;
+}
+
+.fieldCard {
+  padding: 12px 14px;
+  display: grid;
+  gap: 4px;
+}
+
+.fieldLabel {
+  color: var(--color-muted);
+  font-size: 0.82rem;
+}
+
+.fieldValue {
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.candidateList,
+.recordList,
+.suggestionList {
+  display: grid;
+  gap: 10px;
+}
+
+.candidateListBox {
+  flex: 1 1 auto;
+  height: 520px;
+  min-height: 520px;
+  max-height: 520px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.recordListBox {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.candidateList {
+  min-height: 0;
+  align-content: start;
+}
+
+.emptyCandidateList {
+  border: 1px solid rgba(69, 67, 45, 0.1);
+  border-radius: 18px;
+  background: rgba(248, 244, 236, 0.9);
+  padding: 16px;
+  align-content: start;
+}
+
+.candidateCard,
+.recordCard,
+.hintCard {
+  padding: 14px;
+  display: grid;
+  gap: 8px;
+}
+
+.candidateMeta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  color: var(--color-muted);
+  font-size: 0.82rem;
+}
+
+.candidateName,
+.recordName {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.candidateActions,
+.detailActions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: auto;
+}
+
+.recordActions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.hiddenCandidatesNotice {
+  margin: -2px 4px 0;
+  color: var(--color-muted);
+  font-size: 0.88rem;
+  font-weight: 700;
+  line-height: 1.4;
+  text-align: center;
+}
+
+.ghostAction,
+.primaryAction,
+.wideGhostAction,
+.inlineGhostAction,
+.compactAction,
+.compactPrimaryAction {
+  min-height: 46px;
+  border-radius: 16px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.actionLink {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+}
+
+.ghostAction,
+.wideGhostAction,
+.inlineGhostAction {
+  border: 1px solid rgba(69, 67, 45, 0.14);
+  background: rgba(255, 252, 246, 0.7);
+  color: var(--color-text);
+}
+
+.inlineGhostAction {
+  min-height: 36px;
+  padding: 0 12px;
+  border-radius: 999px;
+  font-size: 0.82rem;
+  white-space: nowrap;
+}
+
+.primaryAction {
+  border: none;
+  background: var(--color-accent);
+  color: #f8f5ee;
+}
+
+.compactAction,
+.compactPrimaryAction {
+  min-height: 56px;
+  width: 100%;
+  padding: 0 14px;
+  border-radius: 18px;
+  font-size: 0.92rem;
+}
+
+.compactAction {
+  border: 1px solid rgba(69, 67, 45, 0.14);
+  background: rgba(255, 252, 246, 0.7);
+  color: var(--color-text);
+}
+
+.compactPrimaryAction {
+  border: none;
+  background: var(--color-accent);
+  color: #f8f5ee;
+}
+
+.emptyStateCard {
+  min-height: 0;
+  height: auto;
+  padding: 20px 0 0;
+  display: grid;
+  place-content: start center;
+  gap: 8px;
+  text-align: center;
+}
+
+.emptyStateTitle {
+  margin: 0;
+  color: var(--color-text);
+  font-size: 1rem;
+  font-weight: 700;
+  line-height: 1.4;
+}
+
+.emptyStateCopy {
+  margin: 0;
+  color: var(--color-muted);
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.wideGhostAction {
+  width: 100%;
+}
+
+.inputCard {
+  border: 1px solid rgba(69, 67, 45, 0.1);
+  border-radius: 18px;
+  background: rgba(248, 244, 236, 0.9);
+  padding: 14px;
+  display: grid;
+  gap: 10px;
+}
+
+.inputLabel {
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.textInput {
+  width: 100%;
+  min-height: 48px;
+  border-radius: 14px;
+  border: 1px solid rgba(69, 67, 45, 0.14);
+  background: rgba(255, 252, 246, 0.92);
+  padding: 0 14px;
+  color: var(--color-text);
+}
+
+.hintCard {
+  gap: 12px;
+}
+
+.hintTitle {
+  margin: 0;
+  font-size: 0.95rem;
+}
+
+.duplicateCandidateCard {
+  border: 1px solid rgba(69, 67, 45, 0.1);
+  border-radius: 16px;
+  background: rgba(255, 252, 246, 0.7);
+  padding: 12px 14px;
+  display: grid;
+  gap: 8px;
+}
+
+.pillRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.pill {
+  border-radius: 999px;
+  padding: 8px 12px;
+  background: rgba(66, 107, 72, 0.1);
+  color: var(--color-accent);
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.suggestionPill {
+  border: none;
+  border-radius: 999px;
+  padding: 10px 14px;
+  background: rgba(66, 107, 72, 0.12);
+  color: var(--color-accent);
+  font-size: 0.88rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.recordRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.recordStats {
+  color: var(--color-muted);
+  font-size: 0.88rem;
+}
+
+.verifiedBadge,
+.pendingBadge {
+  border-radius: 999px;
+  padding: 6px 10px;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.verifiedBadge {
+  background: rgba(66, 107, 72, 0.12);
+  color: var(--color-accent);
+}
+
+.pendingBadge {
+  background: rgba(113, 104, 83, 0.12);
+  color: var(--color-muted);
+}
+
+.helper {
+  margin: 0;
+  color: var(--color-muted);
+  font-size: 0.88rem;
+  line-height: 1.5;
+}
+
+@media (max-width: 420px) {
+  .panel {
+    padding-inline: 16px;
+  }
+
+  .fieldGrid,
+  .regionGrid,
+  .candidateActions,
+  .detailActions {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .ghostAction,
+  .primaryAction,
+  .wideGhostAction {
+    min-height: 44px;
+    font-size: 0.92rem;
+  }
+
+  .fieldCard,
+  .candidateCard,
+  .recordCard,
+  .hintCard,
+  .inputCard {
+    padding: 12px;
+  }
+}

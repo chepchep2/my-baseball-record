@@ -8,6 +8,7 @@ import com.chepchep2.mybaseballrecord.dto.game.response.RecentGameItemResponse;
 import com.chepchep2.mybaseballrecord.dto.game.response.RecentGamesResponse;
 import com.chepchep2.mybaseballrecord.exception.game.GameNotFoundException;
 import com.chepchep2.mybaseballrecord.repository.game.BatterRecordRepository;
+import com.chepchep2.mybaseballrecord.repository.game.BatterRecordVerificationRepository;
 import com.chepchep2.mybaseballrecord.repository.game.GameRecordRepository;
 import com.chepchep2.mybaseballrecord.service.auth.CurrentUserProvider;
 import org.springframework.data.domain.PageRequest;
@@ -24,15 +25,18 @@ public class GameQueryService {
 
     private final GameRecordRepository gameRecordRepository;
     private final BatterRecordRepository batterRecordRepository;
+    private final BatterRecordVerificationRepository batterRecordVerificationRepository;
     private final CurrentUserProvider currentUserProvider;
 
     public GameQueryService(
             GameRecordRepository gameRecordRepository,
             BatterRecordRepository batterRecordRepository,
+            BatterRecordVerificationRepository batterRecordVerificationRepository,
             CurrentUserProvider currentUserProvider
     ) {
         this.gameRecordRepository = gameRecordRepository;
         this.batterRecordRepository = batterRecordRepository;
+        this.batterRecordVerificationRepository = batterRecordVerificationRepository;
         this.currentUserProvider = currentUserProvider;
     }
 
@@ -119,9 +123,16 @@ public class GameQueryService {
         String onBasePercentage = formatDecimal(ratio(hits + walksAndHitByPitch, atBats + walksAndHitByPitch), 3);
         String sluggingPercentage = formatDecimal(ratio(totalBases, atBats), 3);
         String ops = formatDecimal(Double.parseDouble(onBasePercentage) + Double.parseDouble(sluggingPercentage), 3);
+        boolean verified = batter != null
+                && !batterRecordVerificationRepository.findAllByBatterRecordIdIn(List.of(batter.id())).isEmpty();
+
+        boolean sharedMatch = game.cityName() != null && game.districtName() != null && game.stadiumNameSnapshot() != null;
 
         return new RecentGameItemResponse(
                 game.id(),
+                sharedMatch,
+                batter == null ? null : batter.id(),
+                verified,
                 game.playedAt().toLocalDate().toString(),
                 game.playedAt().getHour(),
                 game.playedAt().getMinute(),

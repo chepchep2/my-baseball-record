@@ -4,6 +4,8 @@ import com.chepchep2.mybaseballrecord.dto.match.request.MatchCreateRequest;
 import com.chepchep2.mybaseballrecord.dto.match.request.MatchRecordCreateRequest;
 import com.chepchep2.mybaseballrecord.dto.match.response.MatchCandidatesResponse;
 import com.chepchep2.mybaseballrecord.dto.match.response.MatchDetailResponse;
+import com.chepchep2.mybaseballrecord.dto.match.response.MatchListResponse;
+import com.chepchep2.mybaseballrecord.dto.match.response.MatchRecordDetailResponse;
 import com.chepchep2.mybaseballrecord.dto.match.response.MatchStadiumSuggestionsResponse;
 import com.chepchep2.mybaseballrecord.service.game.MatchCommandService;
 import com.chepchep2.mybaseballrecord.service.game.MatchQueryService;
@@ -11,7 +13,9 @@ import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -28,6 +32,11 @@ public class MatchController {
     public MatchController(MatchQueryService matchQueryService, MatchCommandService matchCommandService) {
         this.matchQueryService = matchQueryService;
         this.matchCommandService = matchCommandService;
+    }
+
+    @GetMapping
+    public ResponseEntity<MatchListResponse> getMatches() {
+        return ResponseEntity.ok(matchQueryService.getMatches());
     }
 
     @GetMapping("/candidates")
@@ -62,6 +71,14 @@ public class MatchController {
         return ResponseEntity.ok(matchQueryService.getDetail(gameId));
     }
 
+    @GetMapping("/{gameId}/records/{batterRecordId}")
+    public ResponseEntity<MatchRecordDetailResponse> getRecordDetail(
+            @PathVariable long gameId,
+            @PathVariable long batterRecordId
+    ) {
+        return ResponseEntity.ok(matchQueryService.getRecordDetail(gameId, batterRecordId));
+    }
+
     @PostMapping
     public ResponseEntity<MatchDetailResponse> create(@Valid @RequestBody MatchCreateRequest request) {
         return ResponseEntity.status(201).body(matchCommandService.create(request));
@@ -76,6 +93,25 @@ public class MatchController {
         return ResponseEntity.status(201).build();
     }
 
+    @PutMapping("/{gameId}/records/{batterRecordId}")
+    public ResponseEntity<Void> updateRecord(
+            @PathVariable long gameId,
+            @PathVariable long batterRecordId,
+            @Valid @RequestBody MatchRecordCreateRequest request
+    ) {
+        matchCommandService.updateRecord(gameId, batterRecordId, request);
+        return ResponseEntity.noContent().build();
+    }
+
+    @DeleteMapping("/{gameId}/records/{batterRecordId}")
+    public ResponseEntity<Void> deleteRecord(
+            @PathVariable long gameId,
+            @PathVariable long batterRecordId
+    ) {
+        matchCommandService.deleteRecord(gameId, batterRecordId);
+        return ResponseEntity.noContent().build();
+    }
+
     @PostMapping("/{gameId}/records/{batterRecordId}/verification")
     public ResponseEntity<Void> verifyRecord(
             @PathVariable long gameId,
@@ -84,4 +120,5 @@ public class MatchController {
         matchCommandService.verifyRecord(gameId, batterRecordId);
         return ResponseEntity.noContent().build();
     }
+
 }

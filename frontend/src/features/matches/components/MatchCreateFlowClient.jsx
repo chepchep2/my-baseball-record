@@ -316,7 +316,7 @@ export default function MatchCreateFlowClient() {
                       setSelectedSuggestion(null);
                       setErrorMessage(null);
                     }}
-                    placeholder="예: 맥도 C"
+                    placeholder="예: 드림볼 메인"
                   />
                 </article>
               </section>

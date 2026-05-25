@@ -13,7 +13,7 @@ const candidateGames = [
     date: "2026년 5월 20일",
     time: "10:30",
     region: "부산시 강서구",
-    stadium: "맥도A",
+    stadium: "드림볼 메인",
     creator: "조상우",
   },
   {
@@ -21,12 +21,12 @@ const candidateGames = [
     date: "2026년 5월 20일",
     time: "10:50",
     region: "부산시 강서구",
-    stadium: "맥도B",
+    stadium: "드림볼 보조1",
     creator: "김영훈",
   },
 ];
 
-const stadiumSuggestions = ["맥도A", "맥도B", "대저A"];
+const stadiumSuggestions = ["드림볼 메인", "드림볼 보조1", "드림볼 보조2"];
 
 const initialRecords = [
   {
@@ -227,7 +227,7 @@ function CreateStep({
             className={styles.textInput}
             value={customName}
             onChange={(event) => onChangeCustomName(event.target.value)}
-            placeholder="예: 맥도 C"
+            placeholder="예: 드림볼 메인"
           />
         </article>
       </section>
@@ -236,7 +236,7 @@ function CreateStep({
         <article className={styles.hintCard}>
           <p className={styles.hintTitle}>비슷한 구장이 있습니다</p>
           <div className={styles.candidateActions}>
-            <button type="button" className={styles.ghostAction} onClick={() => onUseExistingSuggestion("맥도A")}>
+            <button type="button" className={styles.ghostAction} onClick={() => onUseExistingSuggestion("드림볼 메인")}>
               기존 구장 선택
             </button>
             <button type="button" className={styles.primaryAction} onClick={onConfirmNewGame}>
@@ -346,7 +346,7 @@ function EntryLandingStep({ onBack }) {
 export default function GameMatchmakingPrototype() {
   const [step, setStep] = useState("search");
   const [widened, setWidened] = useState(false);
-  const [customName, setCustomName] = useState("맥도C");
+  const [customName, setCustomName] = useState("드림볼 보조3");
   const [selectedGame, setSelectedGame] = useState(candidateGames[0]);
   const [region, setRegion] = useState({
     city: "부산시",
@@ -364,7 +364,7 @@ export default function GameMatchmakingPrototype() {
 
   const needsDisambiguation = useMemo(() => {
     const normalized = customName.toLowerCase().replace(/\s+/g, "");
-    return normalized.includes("맥도") && normalized.length > 0;
+    return normalized.includes("드림볼") && normalized.length > 0;
   }, [customName]);
 
   function updateRegion(level, value) {

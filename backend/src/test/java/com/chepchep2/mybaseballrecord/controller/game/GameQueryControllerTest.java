@@ -34,12 +34,12 @@ class GameQueryControllerTest {
         given(gameQueryService.getRecent(3))
                 .willReturn(new RecentGamesResponse(List.of(
                         new RecentGameItemResponse(
-                                101L, "2026-03-27", 19, 0, "3/27 19:00",
+                                101L, true, 501L, false, "2026-03-27", 19, 0, "3/27 19:00",
                                 5, 1, 2, 0, 0, 1,
                                 4, 3, "0.750", "0.800", "1.500", "2.300"
                         ),
                         new RecentGameItemResponse(
-                                100L, "2026-03-20", 14, 10, "3/20 14:10",
+                                100L, true, 500L, true, "2026-03-20", 14, 10, "3/20 14:10",
                                 4, 0, 1, 1, 0, 0,
                                 4, 2, "0.500", "0.500", "0.750", "1.250"
                         )
@@ -59,7 +59,7 @@ class GameQueryControllerTest {
         given(gameQueryService.getGames(2026, 4))
                 .willReturn(new RecentGamesResponse(List.of(
                         new RecentGameItemResponse(
-                                201L, "2026-04-05", 11, 30, "4/5 11:30",
+                                201L, true, 601L, false, "2026-04-05", 11, 30, "4/5 11:30",
                                 4, 1, 1, 0, 0, 0,
                                 3, 1, "0.333", "0.500", "0.333", "0.833"
                         )

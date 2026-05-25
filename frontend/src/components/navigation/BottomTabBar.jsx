@@ -6,8 +6,8 @@ import { usePathname } from "next/navigation";
 const TABS = [
   { href: "/home", label: "홈" },
   { href: "/records", label: "기록" },
-  { href: "/games/new", label: "생성" },
-  { href: "/games", label: "경기" },
+  { href: "/matches/new", label: "생성" },
+  { href: "/matches", label: "경기" },
   { href: "/account", label: "내 정보" },
 ];
 
@@ -16,16 +16,20 @@ function isActive(pathname, href) {
     return pathname === "/home";
   }
 
-  if (href === "/games/new") {
-    return pathname === "/games/new";
+  if (href === "/matches/new") {
+    return pathname === "/matches/new";
   }
 
-  if (href === "/games") {
-    if (pathname === "/games/new" || /^\/games\/[^/]+\/edit$/.test(pathname)) {
+  if (href === "/matches") {
+    if (pathname === "/matches/new") {
       return false;
     }
 
-    return pathname === "/games" || /^\/games\/[^/]+$/.test(pathname);
+    return pathname === "/matches"
+      || /^\/matches\/[^/]+$/.test(pathname)
+      || /^\/matches\/[^/]+\/record$/.test(pathname)
+      || /^\/matches\/[^/]+\/records\/[^/]+$/.test(pathname)
+      || /^\/matches\/[^/]+\/records\/[^/]+\/edit$/.test(pathname);
   }
 
   return pathname === href;

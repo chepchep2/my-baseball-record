@@ -1,12 +1,15 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import AppPageLayout from "@/components/layout/AppPageLayout";
 import styles from "@/components/prototypes/GameMatchmakingPrototype.module.css";
 import { ApiError } from "@/features/auth/api/auth-api";
 import { useAuthSession } from "@/features/auth/session/useAuthSession";
-import { getMatchDetail, verifyMatchRecord } from "@/features/matches/api/matches-api";
+import {
+  getMatchDetail,
+  verifyMatchRecord,
+} from "@/features/matches/api/matches-api";
 
 function FlowHeader({ title }) {
   return <h1 className="entry-step-title">{title}</h1>;
@@ -19,6 +22,7 @@ export default function MatchDetailPageClient({ gameId }) {
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState(null);
   const [isVerifyingId, setIsVerifyingId] = useState(null);
+  const [showAllRecords, setShowAllRecords] = useState(false);
 
   useEffect(() => {
     let active = true;
@@ -51,6 +55,25 @@ export default function MatchDetailPageClient({ gameId }) {
     };
   }, [apiClient, gameId]);
 
+  const sortedRecords = useMemo(() => {
+    if (!match) {
+      return [];
+    }
+
+    const currentUserId = user?.id ?? null;
+    return [...match.records].sort((left, right) => {
+      const leftIsMine = currentUserId !== null && left.userId === currentUserId;
+      const rightIsMine = currentUserId !== null && right.userId === currentUserId;
+      if (leftIsMine && !rightIsMine) {
+        return -1;
+      }
+      if (!leftIsMine && rightIsMine) {
+        return 1;
+      }
+      return right.batterRecordId - left.batterRecordId;
+    });
+  }, [match, user?.id]);
+
   async function handleVerify(batterRecordId) {
     setIsVerifyingId(batterRecordId);
     setErrorMessage(null);
@@ -70,8 +93,8 @@ export default function MatchDetailPageClient({ gameId }) {
     return (
       <AppPageLayout showTabs={false} frameClassName="milestone-entry-frame">
         <div className="entry-flow-shell">
-          <div className={styles.panel}>
-            <FlowHeader title="경기 화면" />
+          <div className={`${styles.flowPanel} ${styles.detailFlowPanel}`}>
+            <FlowHeader title="경기 정보" />
             <p className={styles.helper}>경기 정보를 불러오는 중입니다.</p>
           </div>
         </div>
@@ -83,8 +106,8 @@ export default function MatchDetailPageClient({ gameId }) {
     return (
       <AppPageLayout showTabs={false} frameClassName="milestone-entry-frame">
         <div className="entry-flow-shell">
-          <div className={styles.panel}>
-            <FlowHeader title="경기 화면" />
+          <div className={`${styles.flowPanel} ${styles.detailFlowPanel}`}>
+            <FlowHeader title="경기 정보" />
             <p className={styles.helper}>{errorMessage ?? "경기 정보를 찾을 수 없습니다."}</p>
           </div>
         </div>
@@ -93,12 +116,14 @@ export default function MatchDetailPageClient({ gameId }) {
   }
 
   const canVerify = Boolean(match.createdByCurrentUser || match.myRecordExists);
+  const visibleRecords = showAllRecords ? sortedRecords : sortedRecords.slice(0, 5);
+  const hiddenRecordCount = Math.max(sortedRecords.length - visibleRecords.length, 0);
 
   return (
     <AppPageLayout showTabs={false} frameClassName="milestone-entry-frame">
       <div className="entry-flow-shell">
-        <div className={styles.panel}>
-          <FlowHeader title="경기 화면" />
+        <div className={`${styles.flowPanel} ${styles.detailFlowPanel}`}>
+          <FlowHeader title="경기 정보" />
 
           <section className={styles.section}>
             <div className={styles.fieldGrid}>
@@ -121,56 +146,85 @@ export default function MatchDetailPageClient({ gameId }) {
             </div>
           </section>
 
-          <section className={styles.section}>
-            <h2 className={styles.sectionTitle}>기록을 남긴 사람</h2>
-            <div className={styles.recordList}>
-              {match.records.map((record) => {
-                const isMine = user?.id === record.userId;
-                return (
-                  <article key={record.batterRecordId} className={styles.recordCard}>
-                    <div className={styles.recordRow}>
-                      <p className={styles.recordName}>{record.displayName}</p>
-                      <span className={record.verified ? styles.verifiedBadge : styles.pendingBadge}>
-                        {record.verified ? "인증 기록" : "인증 전"}
-                      </span>
-                    </div>
-                    <div className={styles.recordStats}>
-                      타석 {record.plateAppearances} · 안타 {record.hits} · 타율 {record.battingAverage}
-                    </div>
-                    {canVerify && !record.verified && !isMine ? (
-                      <button
-                        type="button"
-                        className={styles.ghostAction}
-                        onClick={() => handleVerify(record.batterRecordId)}
-                        disabled={isVerifyingId === record.batterRecordId}
+          <div className={styles.sectionDivider} aria-hidden="true" />
+
+          <section className={styles.recordSection}>
+            <div className={styles.recordStage}>
+              <div className={styles.recordListBox}>
+                <div className={styles.recordList}>
+                  {visibleRecords.map((record) => {
+                    const isMine = user?.id === record.userId;
+                    return (
+                      <article
+                        key={record.batterRecordId}
+                        className={`${styles.recordCard} ${styles.recordCardButton}`}
+                        role="button"
+                        tabIndex={0}
+                        onClick={() => router.push(`/matches/${gameId}/records/${record.batterRecordId}`)}
+                        onKeyDown={(event) => {
+                          if (event.key === "Enter" || event.key === " ") {
+                            event.preventDefault();
+                            router.push(`/matches/${gameId}/records/${record.batterRecordId}`);
+                          }
+                        }}
                       >
-                        인증
-                      </button>
-                    ) : null}
-                  </article>
-                );
-              })}
+                        <div className={styles.recordRow}>
+                          <p className={styles.recordName}>{record.displayName}</p>
+                          <span className={record.verified ? styles.verifiedBadge : styles.pendingBadge}>
+                            {record.verified ? "인증 기록" : "인증 전"}
+                          </span>
+                        </div>
+                        <div className={styles.recordStats}>
+                          타석 {record.plateAppearances} · 안타 {record.hits} · 타율 {record.battingAverage}
+                        </div>
+                        {canVerify && !record.verified && !isMine ? (
+                          <button
+                            type="button"
+                            className={styles.ghostAction}
+                            onClick={(event) => {
+                              event.stopPropagation();
+                              handleVerify(record.batterRecordId);
+                            }}
+                            disabled={isVerifyingId === record.batterRecordId}
+                          >
+                            인증
+                          </button>
+                        ) : null}
+                      </article>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {hiddenRecordCount > 0 ? (
+                <p className={styles.hiddenCandidatesNotice}>{hiddenRecordCount}개의 기록이 더 있습니다.</p>
+              ) : null}
+
+              <div className={styles.recordActions}>
+                <button
+                  type="button"
+                  className={styles.ghostAction}
+                  onClick={() => setShowAllRecords((current) => !current)}
+                  disabled={sortedRecords.length <= 5}
+                >
+                  {showAllRecords ? "기본 보기" : "더 보기"}
+                </button>
+                {match.myRecordExists ? (
+                  <button type="button" className={styles.ghostAction} disabled>
+                    내 기록 있음
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    className={styles.primaryAction}
+                    onClick={() => router.push(`/matches/${gameId}/record`)}
+                  >
+                    내 기록 입력하기
+                  </button>
+                )}
+              </div>
             </div>
           </section>
-
-          <div className={styles.detailActions}>
-            <button type="button" className={styles.ghostAction} disabled>
-              더 보기
-            </button>
-            {match.myRecordExists ? (
-              <button type="button" className={styles.ghostAction} disabled>
-                내 기록 있음
-              </button>
-            ) : (
-              <button
-                type="button"
-                className={styles.primaryAction}
-                onClick={() => router.push(`/matches/${gameId}/record`)}
-              >
-                내 기록 입력하기
-              </button>
-            )}
-          </div>
 
           {errorMessage ? <p className="entry-error-message">{errorMessage}</p> : null}
         </div>

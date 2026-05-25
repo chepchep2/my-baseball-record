@@ -121,6 +121,25 @@ class MatchCommandServiceTest {
     }
 
     @Test
+    @DisplayName("인증된 기록을 수정하면 기존 인증이 해제된다")
+    void updateRecordClearsExistingVerification() throws Exception {
+        MatchRecordCreateRequest request = new MatchRecordCreateRequest(4, 0, 3, 0, 0, 0);
+        GameRecord game = gameWithId(21L, 9L, "부산시", "강서구", "맥도A");
+        BatterRecord target = batterWithId(31L, 21L, 1L);
+
+        when(currentUserProvider.getCurrentUserId()).thenReturn(1L);
+        when(gameRecordRepository.findById(21L)).thenReturn(Optional.of(game));
+        when(batterRecordRepository.findById(31L)).thenReturn(Optional.of(target));
+
+        matchCommandService.updateRecord(21L, 31L, request);
+
+        verify(batterRecordVerificationRepository).deleteByBatterRecordId(31L);
+        assertThat(target.plateAppearances()).isEqualTo(4);
+        assertThat(target.atBats()).isEqualTo(4);
+        assertThat(target.singles()).isEqualTo(3);
+    }
+
+    @Test
     @DisplayName("기록 인증은 경기 생성자가 다른 사람 기록을 인증할 수 있다")
     void verifyRecordAllowsCreator() throws Exception {
         GameRecord game = gameWithId(21L, 9L, "부산시", "강서구", "맥도A");

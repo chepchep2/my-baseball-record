@@ -144,8 +144,62 @@ public class MatchCommandService {
                         .stolenBases(0)
                         .caughtStealing(0)
                         .sacrificeHits(0)
-                        .build()
+                            .build()
         );
+    }
+
+    @Transactional
+    public void updateRecord(long gameId, long batterRecordId, MatchRecordCreateRequest request) {
+        long currentUserId = currentUserProvider.getCurrentUserId();
+        GameRecord game = gameRecordRepository.findById(gameId)
+                .orElseThrow(() -> new GameNotFoundException(gameId));
+        BatterRecord batterRecord = batterRecordRepository.findById(batterRecordId)
+                .orElseThrow(() -> new BatterRecordNotFoundException(batterRecordId));
+
+        if (!batterRecord.gameId().equals(game.id()) || currentUserId != safeLong(batterRecord.userId())) {
+            throw new BatterRecordNotFoundException(batterRecordId);
+        }
+
+        int walks = request.walksAndHitByPitch();
+        int atBats = request.plateAppearances() - request.walksAndHitByPitch();
+        if (atBats < 0) {
+            throw new InvalidGameCreateException("walksAndHitByPitch", "사사구는 타석보다 클 수 없습니다.");
+        }
+
+        batterRecord.update(
+                request.plateAppearances(),
+                atBats,
+                request.singles(),
+                request.doubles(),
+                request.triples(),
+                request.homeRuns(),
+                walks,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0
+        );
+
+        batterRecordVerificationRepository.deleteByBatterRecordId(batterRecordId);
+    }
+
+    @Transactional
+    public void deleteRecord(long gameId, long batterRecordId) {
+        long currentUserId = currentUserProvider.getCurrentUserId();
+        GameRecord game = gameRecordRepository.findById(gameId)
+                .orElseThrow(() -> new GameNotFoundException(gameId));
+        BatterRecord batterRecord = batterRecordRepository.findById(batterRecordId)
+                .orElseThrow(() -> new BatterRecordNotFoundException(batterRecordId));
+
+        if (!batterRecord.gameId().equals(game.id()) || currentUserId != safeLong(batterRecord.userId())) {
+            throw new BatterRecordNotFoundException(batterRecordId);
+        }
+
+        batterRecordVerificationRepository.deleteByBatterRecordId(batterRecordId);
+        batterRecordRepository.delete(batterRecord);
     }
 
     @Transactional

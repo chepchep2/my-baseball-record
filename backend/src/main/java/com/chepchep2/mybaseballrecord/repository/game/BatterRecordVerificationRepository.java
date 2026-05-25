@@ -9,4 +9,6 @@ public interface BatterRecordVerificationRepository extends JpaRepository<Batter
     List<BatterRecordVerification> findAllByBatterRecordIdIn(List<Long> batterRecordIds);
 
     boolean existsByBatterRecordIdAndVerifiedByUserId(long batterRecordId, long verifiedByUserId);
+
+    void deleteByBatterRecordId(long batterRecordId);
 }

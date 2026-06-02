@@ -7,17 +7,12 @@ import PrototypeEntryStepDateTime from "@/components/prototypes/PrototypeEntrySt
 import { ApiError } from "@/features/auth/api/auth-api";
 import { useAuthSession } from "@/features/auth/session/useAuthSession";
 import { buildEntryDraft } from "@/features/entry/model/entry-form";
+import { KOREA_REGION_TREE } from "@/features/matches/constants/korea-regions";
 import {
   createMatch,
   getMatchCandidates,
   getMatchStadiumSuggestions,
 } from "@/features/matches/api/matches-api";
-
-const REGION_TREE = {
-  부산시: ["강서구", "사상구"],
-  김해시: ["김해시"],
-  창원시: ["진해구", "마산회원구"],
-};
 
 function FlowHeader({ title }) {
   return <h1 className="entry-step-title">{title}</h1>;
@@ -81,7 +76,7 @@ export default function MatchCreateFlowClient() {
     if (key === "city") {
       setRegion({
         city: value,
-        district: REGION_TREE[value][0],
+        district: KOREA_REGION_TREE[value][0],
       });
       return;
     }
@@ -173,7 +168,7 @@ export default function MatchCreateFlowClient() {
     }
   }
 
-  const districtOptions = REGION_TREE[region.city] ?? [];
+  const districtOptions = KOREA_REGION_TREE[region.city] ?? [];
 
   return (
     <div className="entry-flow-shell">
@@ -189,7 +184,7 @@ export default function MatchCreateFlowClient() {
             <label className="entry-select-field">
               <span className={styles.fieldLabel}>시/도</span>
               <select value={region.city} onChange={(event) => updateRegion("city", event.target.value)}>
-                {Object.keys(REGION_TREE).map((city) => (
+                {Object.keys(KOREA_REGION_TREE).map((city) => (
                   <option key={city} value={city}>
                     {city}
                   </option>
@@ -197,7 +192,7 @@ export default function MatchCreateFlowClient() {
               </select>
             </label>
             <label className="entry-select-field">
-              <span className={styles.fieldLabel}>구/군</span>
+              <span className={styles.fieldLabel}>시/군/구</span>
               <select value={region.district} onChange={(event) => updateRegion("district", event.target.value)}>
                 {districtOptions.map((district) => (
                   <option key={district} value={district}>

@@ -60,7 +60,7 @@
 - Create: `backend/src/main/java/com/chepchep2/mybaseballrecord/service/game/StadiumNameNormalizer.java`
 
 - [ ] 후보 조회 로직을 구현한다.
-- [ ] `expandScope=false`면 같은 시/도+구/군, `true`면 같은 시/도까지 확장한다.
+- [ ] `expandScope=false`면 같은 시/도+시/군/구, `true`면 같은 시/도까지 확장한다.
 - [ ] shared 경기 생성 시 기존 `stadium` exact normalized match를 우선 사용하고, 없으면 생성한다.
 - [ ] 경기 상세는 creator 여부와 batter record 참여 여부를 함께 계산한다.
 

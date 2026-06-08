@@ -199,6 +199,9 @@ public class MatchCommandService {
         }
 
         batterRecordVerificationRepository.deleteByBatterRecordId(batterRecordId);
+        if (currentUserId != safeLong(game.createdByUserId())) {
+            batterRecordVerificationRepository.deleteByGameIdAndVerifiedByUserId(gameId, currentUserId);
+        }
         batterRecordRepository.delete(batterRecord);
     }
 

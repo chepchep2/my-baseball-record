@@ -28,6 +28,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -137,6 +138,40 @@ class MatchCommandServiceTest {
         assertThat(target.plateAppearances()).isEqualTo(4);
         assertThat(target.atBats()).isEqualTo(4);
         assertThat(target.singles()).isEqualTo(3);
+    }
+
+    @Test
+    @DisplayName("참여자가 자기 기록을 삭제하면 해당 경기에서 본인이 남긴 인증도 해제된다")
+    void deleteRecordClearsVerificationsMadeByParticipant() throws Exception {
+        GameRecord game = gameWithId(21L, 9L, "부산시", "강서구", "맥도A");
+        BatterRecord myRecord = batterWithId(41L, 21L, 1L);
+
+        when(currentUserProvider.getCurrentUserId()).thenReturn(1L);
+        when(gameRecordRepository.findById(21L)).thenReturn(Optional.of(game));
+        when(batterRecordRepository.findById(41L)).thenReturn(Optional.of(myRecord));
+
+        matchCommandService.deleteRecord(21L, 41L);
+
+        verify(batterRecordVerificationRepository).deleteByBatterRecordId(41L);
+        verify(batterRecordVerificationRepository).deleteByGameIdAndVerifiedByUserId(21L, 1L);
+        verify(batterRecordRepository).delete(myRecord);
+    }
+
+    @Test
+    @DisplayName("경기 생성자가 자기 기록을 삭제해도 생성자 자격으로 남긴 인증은 유지된다")
+    void deleteRecordKeepsVerificationsMadeByCreator() throws Exception {
+        GameRecord game = gameWithId(21L, 1L, "부산시", "강서구", "맥도A");
+        BatterRecord creatorRecord = batterWithId(41L, 21L, 1L);
+
+        when(currentUserProvider.getCurrentUserId()).thenReturn(1L);
+        when(gameRecordRepository.findById(21L)).thenReturn(Optional.of(game));
+        when(batterRecordRepository.findById(41L)).thenReturn(Optional.of(creatorRecord));
+
+        matchCommandService.deleteRecord(21L, 41L);
+
+        verify(batterRecordVerificationRepository).deleteByBatterRecordId(41L);
+        verify(batterRecordVerificationRepository, never()).deleteByGameIdAndVerifiedByUserId(21L, 1L);
+        verify(batterRecordRepository).delete(creatorRecord);
     }
 
     @Test

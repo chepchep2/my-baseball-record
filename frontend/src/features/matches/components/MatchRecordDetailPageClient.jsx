@@ -207,6 +207,48 @@ export default function MatchRecordDetailPageClient({ gameId, batterRecordId }) 
           </div>
         </section>
       </div>
+
+      {showDeleteModal ? (
+        <div className={detailStyles.modalOverlay} role="presentation">
+          <div
+            className={detailStyles.modalCard}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="match-record-delete-title"
+            aria-describedby="match-record-delete-description"
+          >
+            <h2 className={detailStyles.modalTitle} id="match-record-delete-title">
+              이 기록을 삭제할까요?
+            </h2>
+            <p className={detailStyles.modalText} id="match-record-delete-description">
+              삭제 후에는 복구할 수 없습니다.
+            </p>
+            {errorMessage ? (
+              <p className={detailStyles.modalText} role="alert">
+                {errorMessage}
+              </p>
+            ) : null}
+            <div className={detailStyles.modalActions}>
+              <button
+                type="button"
+                className="ghost-button full-width-button"
+                disabled={isDeleting}
+                onClick={() => setShowDeleteModal(false)}
+              >
+                취소
+              </button>
+              <button
+                type="button"
+                className="primary-button full-width-button"
+                disabled={isDeleting}
+                onClick={handleDelete}
+              >
+                {isDeleting ? "삭제 중..." : "삭제하기"}
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
     </AppPageLayout>
   );
 }

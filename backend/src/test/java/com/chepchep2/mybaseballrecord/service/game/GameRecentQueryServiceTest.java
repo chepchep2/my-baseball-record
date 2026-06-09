@@ -7,8 +7,9 @@ import com.chepchep2.mybaseballrecord.domain.game.ParticipationType;
 import com.chepchep2.mybaseballrecord.dto.game.response.RecentGamesResponse;
 import com.chepchep2.mybaseballrecord.repository.game.BatterRecordRepository;
 import com.chepchep2.mybaseballrecord.repository.game.GameRecordRepository;
-import com.chepchep2.mybaseballrecord.repository.game.PitcherRecordRepository;
+import com.chepchep2.mybaseballrecord.repository.game.BatterRecordVerificationRepository;
 import com.chepchep2.mybaseballrecord.service.auth.CurrentUserProvider;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -22,6 +23,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -34,13 +36,18 @@ class GameRecentQueryServiceTest {
     private BatterRecordRepository batterRecordRepository;
 
     @Mock
-    private PitcherRecordRepository pitcherRecordRepository;
+    private BatterRecordVerificationRepository batterRecordVerificationRepository;
 
     @Mock
     private CurrentUserProvider currentUserProvider;
 
     @InjectMocks
     private GameQueryService gameQueryService;
+
+    @BeforeEach
+    void setUp() {
+        when(batterRecordVerificationRepository.findAllByBatterRecordIdIn(anyList())).thenReturn(List.of());
+    }
 
     @Test
     @DisplayName("최근 경기 목록은 현재 사용자 기준 playedAt desc로 반환한다")
@@ -50,8 +57,8 @@ class GameRecentQueryServiceTest {
 
         when(currentUserProvider.getCurrentUserId()).thenReturn(1L);
         when(gameRecordRepository.findVisibleByUserIdOrderByPlayedAtDesc(1L, PageRequest.of(0, 3))).thenReturn(List.of(newer, older));
-        when(batterRecordRepository.findByGameIdAndUserId(101L, 1L)).thenReturn(Optional.of(createBatter(101L, 5, 4, 2, 0, 0, 1, 1)));
-        when(batterRecordRepository.findByGameIdAndUserId(100L, 1L)).thenReturn(Optional.of(createBatter(100L, 4, 4, 1, 1, 0, 0, 0)));
+        when(batterRecordRepository.findByGameIdAndUserId(101L, 1L)).thenReturn(Optional.of(createBatter(1001L, 101L, 5, 4, 2, 0, 0, 1, 1)));
+        when(batterRecordRepository.findByGameIdAndUserId(100L, 1L)).thenReturn(Optional.of(createBatter(1000L, 100L, 4, 4, 1, 1, 0, 0, 0)));
 
         RecentGamesResponse response = gameQueryService.getRecent(3);
 
@@ -73,7 +80,7 @@ class GameRecentQueryServiceTest {
                 LocalDateTime.parse("2026-04-01T00:00:00"),
                 LocalDateTime.parse("2026-05-01T00:00:00")
         )).thenReturn(List.of(aprilGame));
-        when(batterRecordRepository.findByGameIdAndUserId(201L, 1L)).thenReturn(Optional.of(createBatter(201L, 4, 3, 1, 0, 0, 0, 1)));
+        when(batterRecordRepository.findByGameIdAndUserId(201L, 1L)).thenReturn(Optional.of(createBatter(2001L, 201L, 4, 3, 1, 0, 0, 0, 1)));
 
         RecentGamesResponse response = gameQueryService.getGames(2026, 4);
 
@@ -91,7 +98,7 @@ class GameRecentQueryServiceTest {
 
         when(currentUserProvider.getCurrentUserId()).thenReturn(1L);
         when(gameRecordRepository.findVisibleByUserIdOrderByPlayedAtDesc(1L, PageRequest.of(0, 5))).thenReturn(List.of(shared));
-        when(batterRecordRepository.findByGameIdAndUserId(301L, 1L)).thenReturn(Optional.of(createBatter(301L, 4, 3, 1, 0, 0, 1, 1)));
+        when(batterRecordRepository.findByGameIdAndUserId(301L, 1L)).thenReturn(Optional.of(createBatter(3001L, 301L, 4, 3, 1, 0, 0, 1, 1)));
 
         RecentGamesResponse response = gameQueryService.getRecent(5);
 
@@ -121,8 +128,8 @@ class GameRecentQueryServiceTest {
         return game;
     }
 
-    private BatterRecord createBatter(long gameId, int plateAppearances, int atBats, int singles, int doubles, int triples, int homeRuns, int walks) {
-        return BatterRecord.builder()
+    private BatterRecord createBatter(long id, long gameId, int plateAppearances, int atBats, int singles, int doubles, int triples, int homeRuns, int walks) throws Exception {
+        BatterRecord batter = BatterRecord.builder()
                 .gameId(gameId)
                 .userId(1L)
                 .plateAppearances(plateAppearances)
@@ -140,5 +147,9 @@ class GameRecentQueryServiceTest {
                 .caughtStealing(0)
                 .sacrificeHits(0)
                 .build();
+        var idField = BatterRecord.class.getDeclaredField("id");
+        idField.setAccessible(true);
+        idField.set(batter, id);
+        return batter;
     }
 }

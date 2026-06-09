@@ -33,3 +33,12 @@ jobs:
         run: flyctl deploy --remote-only --config fly.toml
         env:
           FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+
+      - name: Verify health endpoint
+        run: |
+          for attempt in {1..12}; do
+            response=$(curl --silent --show-error --fail https://my-baseball-record.fly.dev/health) && break
+            echo "health check retry ${attempt}/12"
+            sleep 10
+          done
+          echo "$response" | grep '"status":"ok"'

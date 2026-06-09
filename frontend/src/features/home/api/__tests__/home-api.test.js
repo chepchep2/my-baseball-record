@@ -1,15 +1,8 @@
 import { describe, expect, it, vi } from "vitest";
 import { getHomeDashboard } from "../home-api";
 
-vi.mock("@/features/auth/api/auth-api", () => ({
-  isMockAuthMode: vi.fn(() => false),
-}));
-
-import { isMockAuthMode } from "@/features/auth/api/auth-api";
-
 describe("home-api", () => {
   it("season/career stats와 recent games를 합쳐 홈 대시보드를 만든다", async () => {
-    isMockAuthMode.mockReturnValue(false);
     const apiClient = {
       get: vi.fn()
         .mockResolvedValueOnce({
@@ -74,14 +67,13 @@ describe("home-api", () => {
       ["장타율", ".400"],
     ]);
     expect(result.recentGames).toEqual([
-      { id: 1, playedLabel: "3/22 14:10", summaryLabel: "타석 4 · 안타 1 · 타율 .333" },
-      { id: 2, playedLabel: "3/15 09:30", summaryLabel: "타석 5 · 안타 2 · 타율 .500" },
+      { id: 1, href: "/matches/1", verified: false, playedLabel: "3/22 14:10", summaryLabel: "타석 4 · 안타 1 · 타율 .333" },
+      { id: 2, href: "/matches/2", verified: false, playedLabel: "3/15 09:30", summaryLabel: "타석 5 · 안타 2 · 타율 .500" },
     ]);
     expect(result.isEmpty).toBe(false);
   });
 
   it("recent games가 비어 있으면 빈 홈 모델을 반환한다", async () => {
-    isMockAuthMode.mockReturnValue(false);
     const apiClient = {
       get: vi.fn()
         .mockResolvedValueOnce({
@@ -114,26 +106,5 @@ describe("home-api", () => {
     expect(result.isEmpty).toBe(true);
     expect(result.recentGames).toEqual([]);
     expect(result.tabs[1].active).toBe(true);
-  });
-
-  it("mock auth mode면 로컬 목데이터로 홈 대시보드를 만든다", async () => {
-    isMockAuthMode.mockReturnValue(true);
-    const apiClient = { get: vi.fn() };
-
-    const result = await getHomeDashboard(apiClient, { selectedScope: "season" });
-
-    expect(apiClient.get).not.toHaveBeenCalled();
-    expect(result.seasonSummaryItems).toEqual([
-      ["경기", "3"],
-      ["타석", "12"],
-      ["타율", ".400"],
-      ["OPS", "1.300"],
-      ["안타", "4"],
-      ["사사구", "2"],
-      ["출루율", ".500"],
-      ["장타율", ".800"],
-    ]);
-    expect(result.recentGames).toHaveLength(3);
-    expect(result.isEmpty).toBe(false);
   });
 });

@@ -67,9 +67,9 @@ describe("HomePageClient", () => {
         ["장타율", ".390"],
       ],
       recentGames: [
-        { id: 1, playedLabel: "3/22 14:10", summaryLabel: "타석 4 · 안타 1 · 타율 .333" },
-        { id: 2, playedLabel: "3/15 09:30", summaryLabel: "타석 5 · 안타 2 · 타율 .500" },
-        { id: 3, playedLabel: "3/10 11:00", summaryLabel: "타석 3 · 안타 0 · 타율 .000" },
+        { id: 1, href: "/matches/1/records/11", verified: true, playedLabel: "3/22 14:10", summaryLabel: "타석 4 · 안타 1 · 타율 .333" },
+        { id: 2, href: "/matches/2/records/22", verified: false, playedLabel: "3/15 09:30", summaryLabel: "타석 5 · 안타 2 · 타율 .500" },
+        { id: 3, href: "/matches/3/records/33", verified: false, playedLabel: "3/10 11:00", summaryLabel: "타석 3 · 안타 0 · 타율 .000" },
       ],
       isEmpty: false,
     });
@@ -90,9 +90,11 @@ describe("HomePageClient", () => {
     expect(screen.getByText(".280")).toBeInTheDocument();
     expect(screen.getByText("사사구")).toBeInTheDocument();
     expect(screen.getByText("7")).toBeInTheDocument();
-    expect(screen.getByText("최근 경기 기록 리스트")).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "더보기" })).toHaveAttribute("href", "/games");
-    expect(screen.getByRole("link", { name: /3\/22 14:10/ })).toHaveAttribute("href", "/games/1");
+    expect(screen.getByText("최근 경기")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "더보기" })).toHaveAttribute("href", "/matches");
+    expect(screen.getByRole("link", { name: /3\/22 14:10/ })).toHaveAttribute("href", "/matches/1/records/11");
+    expect(screen.getByText("인증됨")).toBeInTheDocument();
+    expect(screen.getAllByText("인증 전")).toHaveLength(2);
     expect(screen.getByText("3/22 14:10")).toBeInTheDocument();
     expect(screen.getByText("타석 5 · 안타 2 · 타율 .500")).toBeInTheDocument();
     expect(screen.getByText("3/10 11:00")).toBeInTheDocument();
@@ -109,7 +111,7 @@ describe("HomePageClient", () => {
 
     render(<HomePageClient selectedScope="career" />);
 
-    await waitFor(() => expect(replaceMock).toHaveBeenCalledWith("/games/new"));
+    await waitFor(() => expect(replaceMock).toHaveBeenCalledWith("/matches/new"));
   });
 
   it("세션 bootstrap 중에는 홈 조회를 시작하지 않는다", () => {

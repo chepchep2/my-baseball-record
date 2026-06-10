@@ -156,3 +156,6 @@
 - 기준 브랜치: `main`
 - 현재 공개 백엔드는 `https://api.mybaseball.cloud`
 - 인증 없는 `GET /api/auth/session` 호출은 `401`이 정상이다
+- 인증 없는 `GET /health` 호출은 `200`과 `{"status":"ok"}`가 정상이다
+- `main`에 backend 변경이 머지되면 GitHub Actions `Backend Deploy`가 Fly.io 배포를 수행한다
+- 배포 성공 판정은 deploy step과 health check step 성공까지 포함한다

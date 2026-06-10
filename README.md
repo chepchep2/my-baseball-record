@@ -24,6 +24,14 @@
 - 프론트 배포: `https://app.mybaseball.cloud`
 - 백엔드 배포: `https://api.mybaseball.cloud`
 
+## Delivery
+
+- PR 검사: GitHub Actions `PR Check`
+- 대상 브랜치: `develop`, `main`
+- 백엔드 자동 배포: `main`에 머지된 backend 변경 시 Fly.io 배포
+- 프론트 자동 배포: `main` 머지 후 Vercel 자동 배포
+- 백엔드 배포 검증: `https://my-baseball-record.fly.dev/health`
+
 ## Naming
 
 - 서비스 이름: `마이베이스볼레코드`

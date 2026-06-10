@@ -8,7 +8,7 @@
 검증 기준:
 
 - 기준 브랜치: `main`
-- 외부 응답 확인 시점: `2026-05-12`
+- 외부 응답 확인 시점: `2026-06-10`
 
 ## 도메인 설계도
 
@@ -65,6 +65,7 @@ sequenceDiagram
 
 - 플랫폼: Vercel
 - 서비스 주소: `app.mybaseball.cloud`
+- 배포 방식: `main` 기준 Vercel 자동 배포
 
 역할:
 
@@ -75,6 +76,7 @@ sequenceDiagram
 
 - 플랫폼: Fly.io
 - 서비스 주소: `api.mybaseball.cloud`
+- 배포 방식: `main`에 backend 변경이 들어오면 GitHub Actions에서 `flyctl deploy`
 
 역할:
 
@@ -113,6 +115,61 @@ sequenceDiagram
 - `api.mybaseball.cloud` 연결
 - `fly certs add api.mybaseball.cloud`
 - 인증서 발급 및 API 라우팅
+
+## 현재 배포 자동화
+
+### PR 검증
+
+- 워크플로우: `.github/workflows/pr-check.yml`
+- 트리거:
+  - `develop` 대상 PR
+  - `main` 대상 PR
+- 실행 항목:
+  - `Backend Tests`
+  - `Frontend Build`
+- 목적:
+  - 머지 전 기본 회귀를 PR 단계에서 차단
+
+### 프론트 배포
+
+- 배포 주체: Vercel
+- 기준 브랜치: `main`
+- 특징:
+  - `main` 머지 후 자동 반영
+  - 프론트 배포 성공 여부는 GitHub PR 체크의 `Vercel` 상태로 확인
+
+### 백엔드 배포
+
+- 워크플로우: `.github/workflows/backend-deploy.yml`
+- 트리거:
+  - `main` push
+  - 변경 경로가 `backend/**` 또는 workflow 파일일 때만 실행
+- 실행 순서:
+  - `flyctl deploy --remote-only --config fly.toml`
+  - `https://my-baseball-record.fly.dev/health` 검증
+- 운영 기준:
+  - 배포 job과 health check가 모두 성공해야 실제 반영으로 본다
+
+## 운영 확인 포인트
+
+- 프론트 운영 주소: `https://app.mybaseball.cloud`
+- 백엔드 운영 주소: `https://api.mybaseball.cloud`
+- Fly 기본 도메인 health check: `https://my-baseball-record.fly.dev/health`
+- health 응답: `{"status":"ok"}`
+
+## 브랜치 보호 규칙
+
+- 보호 브랜치: `develop`, `main`
+- 필수 체크:
+  - `Backend Tests`
+  - `Frontend Build`
+  - `Vercel`
+- 정책:
+  - strict status checks 사용
+  - 관리자 포함 적용
+  - force push 금지
+  - branch deletion 금지
+  - conversation resolution 필요
 
 ## 카카오 로그인 연결 구조
 
@@ -164,3 +221,9 @@ sequenceDiagram
   - `AUTH_COOKIE_DOMAIN`
 - backend CORS 허용 origin
 - 카카오 디벨로퍼스 redirect URI
+
+## 수동 운영 예외
+
+- 프론트는 일반적으로 수동 배포를 사용하지 않는다.
+- 백엔드는 장애 대응이나 workflow 점검이 필요할 때만 수동으로 `fly deploy`를 사용한다.
+- 다만 정상 경로는 항상 `main` 머지 후 GitHub Actions 자동 배포다.

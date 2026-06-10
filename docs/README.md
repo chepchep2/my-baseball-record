@@ -2,7 +2,7 @@
 
 현재 배포 기준 문서 허브다.
 
-이 저장소의 기준 배포 브랜치는 `main`이며, 이 문서들은 2026-05-12 시점의 `main`과 공개 배포 상태를 기준으로 정리한다.
+이 저장소의 기준 배포 브랜치는 `main`이며, 이 문서들은 2026-06-10 시점의 `main`과 공개 배포 상태를 기준으로 정리한다.
 
 ## Start Here
 
@@ -27,3 +27,7 @@
 - `docs/archive/`는 이전 설계와 폐기된 문서를 보관한다.
 - `docs/milestone-1/`가 현재 제품과 가장 가까운 활성 문서 묶음이다.
 - 구현과 문서가 충돌하면 우선 `main`과 실제 배포 상태를 확인한 뒤 문서를 갱신한다.
+- 현재 운영 자동화 기준:
+  - PR to `develop` / `main`: GitHub Actions `PR Check`
+  - push to `main` with backend changes: GitHub Actions `Backend Deploy`
+  - push to `main`: Vercel 프론트 자동 배포

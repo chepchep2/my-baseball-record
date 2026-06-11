@@ -183,7 +183,7 @@ curl https://api.mybaseball.cloud/health
 
 ## 현재 남아 있는 운영 과제
 
-- Fly deploy 성공 후 `api.mybaseball.cloud/health`까지 같은 workflow에서 직접 검증할지 결정
-- 운영용 장애 대응 체크리스트를 별도 문서로 분리할지 결정
-- 백엔드 배포 실패 시 알림 채널을 붙일지 결정
-- DB migration 적용 절차를 런북에 더 구체화할지 결정
+- [ ] Fly deploy 성공 후 `api.mybaseball.cloud/health`까지 같은 workflow에서 직접 검증할지 결정
+- [ ] 운영용 장애 대응 체크리스트를 별도 문서로 분리할지 결정
+- [ ] 백엔드 배포 실패 시 알림 채널을 붙일지 결정
+- [ ] DB migration 적용 절차를 런북에 더 구체화할지 결정

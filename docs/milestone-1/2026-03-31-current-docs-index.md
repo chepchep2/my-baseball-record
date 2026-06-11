@@ -8,16 +8,19 @@
 2. 도메인/배포 구조
 - `/Users/chosangwoo/dev/projects/my-baseball-record/docs/milestone-1/2026-03-31-domain-deployment-structure.md`
 
-3. 프론트 상태관리
+3. CI/CD 및 브랜치 보호 런북
+- `/Users/chosangwoo/dev/projects/my-baseball-record/docs/milestone-1/2026-06-11-ci-cd-and-branch-protection-runbook.md`
+
+4. 프론트 상태관리
 - `/Users/chosangwoo/dev/projects/my-baseball-record/docs/milestone-1/2026-03-31-frontend-state-management.md`
 
-4. 프론트 API 연결 구조
+5. 프론트 API 연결 구조
 - `/Users/chosangwoo/dev/projects/my-baseball-record/docs/milestone-1/2026-03-31-frontend-api-integration-structure.md`
 
-5. 백엔드 API 구조
+6. 백엔드 API 구조
 - `/Users/chosangwoo/dev/projects/my-baseball-record/docs/milestone-1/2026-03-31-backend-api-structure.md`
 
-6. 문서 허브
+7. 문서 허브
 - `/Users/chosangwoo/dev/projects/my-baseball-record/docs/README.md`
 
 ## 추천 읽는 순서
@@ -25,6 +28,7 @@
 - 구조를 처음 볼 때:
   - ERD
   - 도메인/배포 구조
+  - CI/CD 및 브랜치 보호 런북
   - 백엔드 API 구조
 
 - 프론트 연동을 볼 때:
@@ -33,12 +37,13 @@
 
 - 운영/도메인 변경을 볼 때:
   - 도메인/배포 구조
+  - CI/CD 및 브랜치 보호 런북
   - ERD
 
 ## 확인 기준
 
 - 기준 브랜치: `main`
-- 확인 시점: `2026-05-12`
+- 확인 시점: `2026-06-11`
 - 공개 배포 주소:
   - `https://app.mybaseball.cloud`
   - `https://api.mybaseball.cloud`

@@ -15,6 +15,7 @@
 
 3. 현재 운영 구조
 - [2026-03-31-domain-deployment-structure.md](/Users/chosangwoo/dev/projects/my-baseball-record/docs/milestone-1/2026-03-31-domain-deployment-structure.md)
+- [2026-06-11-ci-cd-and-branch-protection-runbook.md](/Users/chosangwoo/dev/projects/my-baseball-record/docs/milestone-1/2026-06-11-ci-cd-and-branch-protection-runbook.md)
 - [2026-03-31-current-erd.md](/Users/chosangwoo/dev/projects/my-baseball-record/docs/milestone-1/2026-03-31-current-erd.md)
 - [2026-03-31-backend-api-structure.md](/Users/chosangwoo/dev/projects/my-baseball-record/docs/milestone-1/2026-03-31-backend-api-structure.md)
 

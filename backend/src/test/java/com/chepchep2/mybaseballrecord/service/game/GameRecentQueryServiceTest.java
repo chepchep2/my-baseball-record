@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.when;
 
@@ -46,7 +47,7 @@ class GameRecentQueryServiceTest {
 
     @BeforeEach
     void setUp() {
-        when(batterRecordVerificationRepository.findAllByBatterRecordIdIn(anyList())).thenReturn(List.of());
+        lenient().when(batterRecordVerificationRepository.findAllByBatterRecordIdIn(anyList())).thenReturn(List.of());
     }
 
     @Test
@@ -56,7 +57,7 @@ class GameRecentQueryServiceTest {
         GameRecord older = createGame(100L, LocalDateTime.parse("2026-03-20T14:10:00"));
 
         when(currentUserProvider.getCurrentUserId()).thenReturn(1L);
-        when(gameRecordRepository.findVisibleByUserIdOrderByPlayedAtDesc(1L, PageRequest.of(0, 3))).thenReturn(List.of(newer, older));
+        when(gameRecordRepository.findRecordedByUserIdOrderByPlayedAtDesc(1L, PageRequest.of(0, 3))).thenReturn(List.of(newer, older));
         when(batterRecordRepository.findByGameIdAndUserId(101L, 1L)).thenReturn(Optional.of(createBatter(1001L, 101L, 5, 4, 2, 0, 0, 1, 1)));
         when(batterRecordRepository.findByGameIdAndUserId(100L, 1L)).thenReturn(Optional.of(createBatter(1000L, 100L, 4, 4, 1, 1, 0, 0, 0)));
 
@@ -75,7 +76,7 @@ class GameRecentQueryServiceTest {
         GameRecord aprilGame = createGame(201L, LocalDateTime.parse("2026-04-05T11:30:00"));
 
         when(currentUserProvider.getCurrentUserId()).thenReturn(1L);
-        when(gameRecordRepository.findVisibleByUserIdAndPlayedAtBetweenOrderByPlayedAtDesc(
+        when(gameRecordRepository.findRecordedByUserIdAndPlayedAtBetweenOrderByPlayedAtDesc(
                 1L,
                 LocalDateTime.parse("2026-04-01T00:00:00"),
                 LocalDateTime.parse("2026-05-01T00:00:00")
@@ -97,7 +98,7 @@ class GameRecentQueryServiceTest {
         GameRecord shared = createGame(301L, LocalDateTime.parse("2026-04-07T20:00:00"), 99L);
 
         when(currentUserProvider.getCurrentUserId()).thenReturn(1L);
-        when(gameRecordRepository.findVisibleByUserIdOrderByPlayedAtDesc(1L, PageRequest.of(0, 5))).thenReturn(List.of(shared));
+        when(gameRecordRepository.findRecordedByUserIdOrderByPlayedAtDesc(1L, PageRequest.of(0, 5))).thenReturn(List.of(shared));
         when(batterRecordRepository.findByGameIdAndUserId(301L, 1L)).thenReturn(Optional.of(createBatter(3001L, 301L, 4, 3, 1, 0, 0, 1, 1)));
 
         RecentGamesResponse response = gameQueryService.getRecent(5);
@@ -105,6 +106,30 @@ class GameRecentQueryServiceTest {
         assertThat(response.items()).hasSize(1);
         assertThat(response.items().get(0).gameId()).isEqualTo(301L);
         assertThat(response.items().get(0).playedAtLabel()).isEqualTo("4/7 20:00");
+    }
+
+    @Test
+    @DisplayName("최근 경기 목록은 기록 없이 생성만 한 경기를 제외한다")
+    void getRecentExcludesCreatedOnlyMatchWithoutMyRecord() throws Exception {
+        GameRecord createdOnly = createGame(401L, LocalDateTime.parse("2026-05-15T10:30:00"));
+
+        when(currentUserProvider.getCurrentUserId()).thenReturn(1L);
+        when(gameRecordRepository.findRecordedByUserIdOrderByPlayedAtDesc(1L, PageRequest.of(0, 3))).thenReturn(List.of());
+
+        RecentGamesResponse response = gameQueryService.getRecent(3);
+
+        assertThat(response.items()).isEmpty();
+    }
+
+    @Test
+    @DisplayName("전체 경기 목록은 기록 없이 생성만 한 경기를 제외한다")
+    void getGamesExcludesCreatedOnlyMatchWithoutMyRecord() throws Exception {
+        when(currentUserProvider.getCurrentUserId()).thenReturn(1L);
+        when(gameRecordRepository.findAllRecordedByUserId(1L)).thenReturn(List.of());
+
+        RecentGamesResponse response = gameQueryService.getGames(null, null);
+
+        assertThat(response.items()).isEmpty();
     }
 
     private GameRecord createGame(long id, LocalDateTime playedAt) throws Exception {

@@ -55,19 +55,17 @@ public class GameQueryService {
         List<GameRecord> games;
 
         if (year == null) {
-            games = gameRecordRepository.findAllVisibleByUserId(userId).stream()
-                    .sorted(java.util.Comparator.comparing(GameRecord::playedAt).reversed())
-                    .toList();
+            games = gameRecordRepository.findAllRecordedByUserId(userId);
         } else if (month == null) {
             LocalDate start = LocalDate.of(year, 1, 1);
-            games = gameRecordRepository.findVisibleByUserIdAndPlayedAtBetweenOrderByPlayedAtDesc(
+            games = gameRecordRepository.findRecordedByUserIdAndPlayedAtBetweenOrderByPlayedAtDesc(
                     userId,
                     start.atStartOfDay(),
                     start.plusYears(1).atStartOfDay()
             );
         } else {
             LocalDate start = LocalDate.of(year, month, 1);
-            games = gameRecordRepository.findVisibleByUserIdAndPlayedAtBetweenOrderByPlayedAtDesc(
+            games = gameRecordRepository.findRecordedByUserIdAndPlayedAtBetweenOrderByPlayedAtDesc(
                     userId,
                     start.atStartOfDay(),
                     start.plusMonths(1).atStartOfDay()
@@ -80,7 +78,7 @@ public class GameQueryService {
     public RecentGamesResponse getRecent(int limit) {
         long userId = currentUserProvider.getCurrentUserId();
         int boundedLimit = Math.max(1, Math.min(limit, 20));
-        List<GameRecord> games = gameRecordRepository.findVisibleByUserIdOrderByPlayedAtDesc(
+        List<GameRecord> games = gameRecordRepository.findRecordedByUserIdOrderByPlayedAtDesc(
                 userId,
                 PageRequest.of(0, boundedLimit)
         );

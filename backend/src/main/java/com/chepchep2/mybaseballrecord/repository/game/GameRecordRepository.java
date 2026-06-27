@@ -29,6 +29,39 @@ public interface GameRecordRepository extends JpaRepository<GameRecord, Long> {
     @Query("""
             select distinct g
             from GameRecord g
+            join BatterRecord b on b.gameId = g.id
+            where b.userId = :userId
+            order by g.playedAt desc
+            """)
+    List<GameRecord> findAllRecordedByUserId(@Param("userId") Long userId);
+
+    @Query("""
+            select distinct g
+            from GameRecord g
+            join BatterRecord b on b.gameId = g.id
+            where b.userId = :userId
+              and g.playedAt >= :startInclusive
+              and g.playedAt < :endExclusive
+            order by g.playedAt desc
+            """)
+    List<GameRecord> findRecordedByUserIdAndPlayedAtBetweenOrderByPlayedAtDesc(
+            @Param("userId") Long userId,
+            @Param("startInclusive") java.time.LocalDateTime startInclusive,
+            @Param("endExclusive") java.time.LocalDateTime endExclusive
+    );
+
+    @Query("""
+            select distinct g
+            from GameRecord g
+            join BatterRecord b on b.gameId = g.id
+            where b.userId = :userId
+            order by g.playedAt desc
+            """)
+    List<GameRecord> findRecordedByUserIdOrderByPlayedAtDesc(@Param("userId") Long userId, Pageable pageable);
+
+    @Query("""
+            select distinct g
+            from GameRecord g
             where g.userId = :userId
                or exists (
                     select 1

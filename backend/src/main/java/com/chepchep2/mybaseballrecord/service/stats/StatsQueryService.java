@@ -15,6 +15,7 @@ import java.math.RoundingMode;
 import java.time.Clock;
 import java.time.Year;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class StatsQueryService {
@@ -50,6 +51,10 @@ public class StatsQueryService {
         List<BatterRecord> batters = gameIds.isEmpty()
                 ? List.of()
                 : batterRecordRepository.findAllByUserIdAndGameIdIn(userId, gameIds);
+        int recordedGames = batters.stream()
+                .map(BatterRecord::gameId)
+                .collect(Collectors.toSet())
+                .size();
 
         int atBats = sumBatters(batters, BatterRecord::atBats);
         int plateAppearances = sumBatters(batters, BatterRecord::plateAppearances);
@@ -70,7 +75,7 @@ public class StatsQueryService {
 
         return new BatterStatsSummaryResponse(
                 scope,
-                games.size(),
+                recordedGames,
                 plateAppearances,
                 walksAndHitByPitch,
                 formatDecimal(battingAverage, 3),

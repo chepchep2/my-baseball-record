@@ -185,6 +185,24 @@ class StatsQueryServiceTest {
         assertThat(response.ops()).isEqualTo("2.417");
     }
 
+    @Test
+    @DisplayName("기록을 아직 작성하지 않은 생성 전용 경기는 경기 수에 포함하지 않는다")
+    void queryCareerSummaryExcludesCreatedOnlyMatchWithoutMyRecord() throws Exception {
+        GameRecord createdOnlyMatch = createGame(30L, 2026, LocalDateTime.parse("2026-05-15T10:30:00"));
+
+        when(currentUserProvider.getCurrentUserId()).thenReturn(1L);
+        when(gameRecordRepository.findAllVisibleByUserId(1L)).thenReturn(List.of(createdOnlyMatch));
+        when(batterRecordRepository.findAllByUserIdAndGameIdIn(1L, List.of(30L))).thenReturn(List.of());
+
+        BatterStatsSummaryResponse response = statsQueryService.query("career");
+
+        assertThat(response.games()).isEqualTo(0);
+        assertThat(response.plateAppearances()).isEqualTo(0);
+        assertThat(response.hits()).isEqualTo(0);
+        assertThat(response.battingAverage()).isEqualTo("0.000");
+        assertThat(response.ops()).isEqualTo("0.000");
+    }
+
     private GameRecord createGame(long id, int seasonYear, LocalDateTime playedAt) throws Exception {
         return createGame(id, seasonYear, playedAt, 1L);
     }

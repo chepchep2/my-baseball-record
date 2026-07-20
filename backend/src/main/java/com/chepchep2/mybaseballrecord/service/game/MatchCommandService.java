@@ -120,11 +120,9 @@ public class MatchCommandService {
             throw new DuplicateMatchRecordException(gameId);
         }
 
+        validatePlateAppearanceBreakdown(request);
         int walks = request.walksAndHitByPitch();
-        int atBats = request.plateAppearances() - request.walksAndHitByPitch();
-        if (atBats < 0) {
-            throw new InvalidGameCreateException("walksAndHitByPitch", "사사구는 타석보다 클 수 없습니다.");
-        }
+        int atBats = calculateAtBats(request);
 
         batterRecordRepository.save(
                 BatterRecord.builder()
@@ -144,7 +142,9 @@ public class MatchCommandService {
                         .stolenBases(0)
                         .caughtStealing(0)
                         .sacrificeHits(0)
-                            .build()
+                        .sacrificeBunts(request.sacrificeBunts())
+                        .sacrificeFlies(request.sacrificeFlies())
+                        .build()
         );
     }
 
@@ -160,11 +160,9 @@ public class MatchCommandService {
             throw new BatterRecordNotFoundException(batterRecordId);
         }
 
+        validatePlateAppearanceBreakdown(request);
         int walks = request.walksAndHitByPitch();
-        int atBats = request.plateAppearances() - request.walksAndHitByPitch();
-        if (atBats < 0) {
-            throw new InvalidGameCreateException("walksAndHitByPitch", "사사구는 타석보다 클 수 없습니다.");
-        }
+        int atBats = calculateAtBats(request);
 
         batterRecord.update(
                 request.plateAppearances(),
@@ -180,7 +178,9 @@ public class MatchCommandService {
                 0,
                 0,
                 0,
-                0
+                0,
+                request.sacrificeBunts(),
+                request.sacrificeFlies()
         );
 
         batterRecordVerificationRepository.deleteByBatterRecordId(batterRecordId);
@@ -240,6 +240,25 @@ public class MatchCommandService {
         if (stadiumName == null || stadiumName.isBlank()) {
             throw new InvalidGameCreateException("stadiumName", "구장명을 입력해주세요.");
         }
+    }
+
+    private void validatePlateAppearanceBreakdown(MatchRecordCreateRequest request) {
+        int excludedPlateAppearances = request.walksAndHitByPitch()
+                + request.sacrificeBunts()
+                + request.sacrificeFlies();
+        if (excludedPlateAppearances > request.plateAppearances()) {
+            throw new InvalidGameCreateException(
+                    "walksAndHitByPitch",
+                    "사사구, 희생번트, 희생플라이는 타석보다 클 수 없습니다."
+            );
+        }
+    }
+
+    private int calculateAtBats(MatchRecordCreateRequest request) {
+        return request.plateAppearances()
+                - request.walksAndHitByPitch()
+                - request.sacrificeBunts()
+                - request.sacrificeFlies();
     }
 
     private long safeLong(Long value) {

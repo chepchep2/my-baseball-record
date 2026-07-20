@@ -103,7 +103,7 @@ class MatchCommandServiceTest {
     @Test
     @DisplayName("기록 생성은 해당 경기 아래 현재 사용자 batter record를 추가한다")
     void createRecordAddsBatterRecordToExistingMatch() throws Exception {
-        MatchRecordCreateRequest request = new MatchRecordCreateRequest(5, 1, 1, 1, 0, 0);
+        MatchRecordCreateRequest request = new MatchRecordCreateRequest(5, 1, 1, 1, 0, 0, 1, 1);
         GameRecord game = gameWithId(21L, 9L, "부산시", "강서구", "맥도A");
 
         when(currentUserProvider.getCurrentUserId()).thenReturn(1L);
@@ -117,14 +117,16 @@ class MatchCommandServiceTest {
         assertThat(batterCaptor.getValue().gameId()).isEqualTo(21L);
         assertThat(batterCaptor.getValue().userId()).isEqualTo(1L);
         assertThat(batterCaptor.getValue().plateAppearances()).isEqualTo(5);
-        assertThat(batterCaptor.getValue().atBats()).isEqualTo(4);
+        assertThat(batterCaptor.getValue().atBats()).isEqualTo(2);
         assertThat(batterCaptor.getValue().walks()).isEqualTo(1);
+        assertThat(batterCaptor.getValue().sacrificeBunts()).isEqualTo(1);
+        assertThat(batterCaptor.getValue().sacrificeFlies()).isEqualTo(1);
     }
 
     @Test
     @DisplayName("인증된 기록을 수정하면 기존 인증이 해제된다")
     void updateRecordClearsExistingVerification() throws Exception {
-        MatchRecordCreateRequest request = new MatchRecordCreateRequest(4, 0, 3, 0, 0, 0);
+        MatchRecordCreateRequest request = new MatchRecordCreateRequest(4, 0, 3, 0, 0, 0, 1, 0);
         GameRecord game = gameWithId(21L, 9L, "부산시", "강서구", "맥도A");
         BatterRecord target = batterWithId(31L, 21L, 1L);
 
@@ -136,8 +138,10 @@ class MatchCommandServiceTest {
 
         verify(batterRecordVerificationRepository).deleteByBatterRecordId(31L);
         assertThat(target.plateAppearances()).isEqualTo(4);
-        assertThat(target.atBats()).isEqualTo(4);
+        assertThat(target.atBats()).isEqualTo(3);
         assertThat(target.singles()).isEqualTo(3);
+        assertThat(target.sacrificeBunts()).isEqualTo(1);
+        assertThat(target.sacrificeFlies()).isZero();
     }
 
     @Test

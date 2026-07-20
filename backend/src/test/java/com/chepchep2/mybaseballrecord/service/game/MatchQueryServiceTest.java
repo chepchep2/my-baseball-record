@@ -9,6 +9,7 @@ import com.chepchep2.mybaseballrecord.domain.game.ParticipationType;
 import com.chepchep2.mybaseballrecord.domain.game.Stadium;
 import com.chepchep2.mybaseballrecord.dto.match.response.MatchCandidatesResponse;
 import com.chepchep2.mybaseballrecord.dto.match.response.MatchDetailResponse;
+import com.chepchep2.mybaseballrecord.dto.match.response.MatchRecordDetailResponse;
 import com.chepchep2.mybaseballrecord.dto.match.response.MatchStadiumSuggestionsResponse;
 import com.chepchep2.mybaseballrecord.repository.auth.UserRepository;
 import com.chepchep2.mybaseballrecord.repository.game.BatterRecordRepository;
@@ -166,6 +167,52 @@ class MatchQueryServiceTest {
         assertThat(response.items().get(1).stadiumId()).isEqualTo(72L);
     }
 
+    @Test
+    @DisplayName("기록 상세는 희생번트와 희생플라이를 분리하고 출루율은 희생플라이만 반영한다")
+    void getRecordDetailSeparatesSacrificeStats() throws Exception {
+        GameRecord game = gameWithId(
+                21L,
+                LocalDateTime.parse("2026-05-20T10:30:00"),
+                9L,
+                "부산시",
+                "강서구",
+                "맥도A"
+        );
+        BatterRecord record = BatterRecord.builder()
+                .gameId(21L)
+                .userId(1L)
+                .plateAppearances(6)
+                .atBats(3)
+                .singles(1)
+                .doubles(1)
+                .triples(0)
+                .homeRuns(0)
+                .walks(1)
+                .strikeOuts(0)
+                .hitByPitch(0)
+                .runsBattedIn(0)
+                .runs(0)
+                .stolenBases(0)
+                .caughtStealing(0)
+                .sacrificeHits(0)
+                .sacrificeBunts(1)
+                .sacrificeFlies(1)
+                .build();
+        setId(record, BatterRecord.class, 31L);
+        User user = User.existing(1L, "sub-1", "one@example.com", "조상우", "KAKAO", null);
+
+        when(gameRecordRepository.findById(21L)).thenReturn(Optional.of(game));
+        when(batterRecordRepository.findById(31L)).thenReturn(Optional.of(record));
+        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
+        when(batterRecordVerificationRepository.findAllByBatterRecordIdIn(List.of(31L))).thenReturn(List.of());
+
+        MatchRecordDetailResponse response = matchQueryService.getRecordDetail(21L, 31L);
+
+        assertThat(response.sacrificeBunts()).isEqualTo(1);
+        assertThat(response.sacrificeFlies()).isEqualTo(1);
+        assertThat(response.onBasePercentage()).isEqualTo("0.600");
+    }
+
     private GameRecord gameWithId(
             long id,
             LocalDateTime playedAt,
@@ -221,6 +268,8 @@ class MatchQueryServiceTest {
                 .stolenBases(0)
                 .caughtStealing(0)
                 .sacrificeHits(0)
+                .sacrificeBunts(0)
+                .sacrificeFlies(0)
                 .build();
         setId(batter, BatterRecord.class, id);
         return batter;

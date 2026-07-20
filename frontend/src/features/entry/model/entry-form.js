@@ -22,6 +22,8 @@ export function buildEntryDraft(now = new Date()) {
     minute: pad(rounded.getMinutes()),
     plateAppearances: "0",
     walksAndHitByPitch: "0",
+    sacrificeBunts: "0",
+    sacrificeFlies: "0",
     singles: "0",
     doubles: "0",
     triples: "0",

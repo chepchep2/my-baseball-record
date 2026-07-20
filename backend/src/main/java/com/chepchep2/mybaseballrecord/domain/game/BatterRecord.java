@@ -63,6 +63,12 @@ public class BatterRecord {
     @Column(name = "sacrifice_hits", nullable = false)
     private int sacrificeHits;
 
+    @Column(name = "sacrifice_bunts", nullable = false)
+    private int sacrificeBunts;
+
+    @Column(name = "sacrifice_flies", nullable = false)
+    private int sacrificeFlies;
+
     @Builder
     public BatterRecord(
             Long gameId,
@@ -80,7 +86,9 @@ public class BatterRecord {
             int runs,
             int stolenBases,
             int caughtStealing,
-            int sacrificeHits
+            int sacrificeHits,
+            int sacrificeBunts,
+            int sacrificeFlies
     ) {
         this.gameId = gameId;
         this.userId = userId;
@@ -98,6 +106,8 @@ public class BatterRecord {
         this.stolenBases = stolenBases;
         this.caughtStealing = caughtStealing;
         this.sacrificeHits = sacrificeHits;
+        this.sacrificeBunts = sacrificeBunts;
+        this.sacrificeFlies = sacrificeFlies;
     }
 
     public BatterRecord(
@@ -119,6 +129,46 @@ public class BatterRecord {
     ) {
         this(
                 gameId,
+                plateAppearances,
+                atBats,
+                singles,
+                doubles,
+                triples,
+                homeRuns,
+                walks,
+                strikeOuts,
+                hitByPitch,
+                runsBattedIn,
+                runs,
+                stolenBases,
+                caughtStealing,
+                sacrificeHits,
+                0,
+                0
+        );
+    }
+
+    public BatterRecord(
+            Long gameId,
+            int plateAppearances,
+            int atBats,
+            int singles,
+            int doubles,
+            int triples,
+            int homeRuns,
+            int walks,
+            int strikeOuts,
+            int hitByPitch,
+            int runsBattedIn,
+            int runs,
+            int stolenBases,
+            int caughtStealing,
+            int sacrificeHits,
+            int sacrificeBunts,
+            int sacrificeFlies
+    ) {
+        this(
+                gameId,
                 null,
                 plateAppearances,
                 atBats,
@@ -133,7 +183,9 @@ public class BatterRecord {
                 runs,
                 stolenBases,
                 caughtStealing,
-                sacrificeHits
+                sacrificeHits,
+                sacrificeBunts,
+                sacrificeFlies
         );
     }
 
@@ -208,6 +260,14 @@ public class BatterRecord {
         return sacrificeHits;
     }
 
+    public int sacrificeBunts() {
+        return sacrificeBunts;
+    }
+
+    public int sacrificeFlies() {
+        return sacrificeFlies;
+    }
+
     public void update(
             int plateAppearances,
             int atBats,
@@ -224,6 +284,44 @@ public class BatterRecord {
             int caughtStealing,
             int sacrificeHits
     ) {
+        update(
+                plateAppearances,
+                atBats,
+                singles,
+                doubles,
+                triples,
+                homeRuns,
+                walks,
+                strikeOuts,
+                hitByPitch,
+                runsBattedIn,
+                runs,
+                stolenBases,
+                caughtStealing,
+                sacrificeHits,
+                0,
+                0
+        );
+    }
+
+    public void update(
+            int plateAppearances,
+            int atBats,
+            int singles,
+            int doubles,
+            int triples,
+            int homeRuns,
+            int walks,
+            int strikeOuts,
+            int hitByPitch,
+            int runsBattedIn,
+            int runs,
+            int stolenBases,
+            int caughtStealing,
+            int sacrificeHits,
+            int sacrificeBunts,
+            int sacrificeFlies
+    ) {
         this.plateAppearances = plateAppearances;
         this.atBats = atBats;
         this.singles = singles;
@@ -238,5 +336,7 @@ public class BatterRecord {
         this.stolenBases = stolenBases;
         this.caughtStealing = caughtStealing;
         this.sacrificeHits = sacrificeHits;
+        this.sacrificeBunts = sacrificeBunts;
+        this.sacrificeFlies = sacrificeFlies;
     }
 }

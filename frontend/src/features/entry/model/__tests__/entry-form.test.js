@@ -9,6 +9,8 @@ describe("entry-form", () => {
     expect(result.hour).toBe("14");
     expect(result.minute).toBe("00");
     expect(result.plateAppearances).toBe("0");
+    expect(result.sacrificeBunts).toBe("0");
+    expect(result.sacrificeFlies).toBe("0");
   });
 
   it("시간 helper는 14:08을 14:00으로 내린다", () => {

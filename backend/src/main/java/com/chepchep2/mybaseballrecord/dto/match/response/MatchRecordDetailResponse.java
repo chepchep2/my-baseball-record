@@ -23,6 +23,8 @@ public record MatchRecordDetailResponse(
         int stolenBases,
         int caughtStealing,
         int sacrificeHits,
+        int sacrificeBunts,
+        int sacrificeFlies,
         int hits,
         int walksAndHitByPitch,
         String battingAverage,

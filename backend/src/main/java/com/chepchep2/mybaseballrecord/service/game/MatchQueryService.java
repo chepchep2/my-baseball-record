@@ -154,7 +154,10 @@ public class MatchQueryService {
 
         int hits = record.singles() + record.doubles() + record.triples() + record.homeRuns();
         int walksAndHitByPitch = record.walks() + record.hitByPitch();
-        double onBasePercentage = ratio(hits + walksAndHitByPitch, record.atBats() + walksAndHitByPitch + record.sacrificeHits());
+        double onBasePercentage = ratio(
+                hits + walksAndHitByPitch,
+                record.atBats() + walksAndHitByPitch + record.sacrificeFlies()
+        );
         double sluggingPercentage = ratio(
                 record.singles() + (record.doubles() * 2) + (record.triples() * 3) + (record.homeRuns() * 4),
                 record.atBats()
@@ -183,6 +186,8 @@ public class MatchQueryService {
                 record.stolenBases(),
                 record.caughtStealing(),
                 record.sacrificeHits(),
+                record.sacrificeBunts(),
+                record.sacrificeFlies(),
                 hits,
                 walksAndHitByPitch,
                 formatDecimal(ratio(hits, record.atBats()), 3),

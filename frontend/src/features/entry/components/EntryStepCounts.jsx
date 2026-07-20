@@ -107,15 +107,16 @@ export default function EntryStepCounts({
   showProgress = true,
   onSecondaryAction = null,
   secondaryActionLabel = "취소",
+  hitFieldStartIndex = 2,
 }) {
   const inputRefs = useRef({});
   const keyboardInset = useKeyboardInset();
   const [activeFieldKey, setActiveFieldKey] = useState(fields[0]?.key ?? null);
   const [iosFloatingTop, setIosFloatingTop] = useState(null);
-  const hitFields = useMemo(() => fields.slice(2), [fields]);
+  const hitFields = useMemo(() => fields.slice(hitFieldStartIndex), [fields, hitFieldStartIndex]);
   const editableFieldKeys = useMemo(
-    () => getEditableFieldKeys(fields, hitFields, values),
-    [fields, hitFields, values],
+    () => getEditableFieldKeys(fields, hitFields, values, hitFieldStartIndex),
+    [fields, hitFields, values, hitFieldStartIndex],
   );
   const editableFields = useMemo(
     () => fields.filter((field) => editableFieldKeys.includes(field.key)),
@@ -307,10 +308,10 @@ export default function EntryStepCounts({
   );
 }
 
-function getEditableFieldKeys(fields, hitFields, values) {
+function getEditableFieldKeys(fields, hitFields, values, hitFieldStartIndex) {
   const atBats = calculateAtBats(values);
   const totalHits = calculateHits(values);
-  const baseFields = fields.slice(0, 2).map((field) => field.key);
+  const baseFields = fields.slice(0, hitFieldStartIndex).map((field) => field.key);
 
   if (atBats === 0) {
     return baseFields;

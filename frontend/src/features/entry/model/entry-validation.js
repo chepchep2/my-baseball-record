@@ -11,9 +11,16 @@ function buildResult(message = null) {
 }
 
 const HITS_OVER_AT_BATS_MESSAGE = "안타의 합은 타수보다 클 수 없습니다.";
+const PLATE_APPEARANCE_BREAKDOWN_MESSAGE = "사사구, 희생번트, 희생플라이는 타석보다 클 수 없습니다.";
 
 export function calculateAtBats(draft) {
-  return Math.max(0, toNumber(draft.plateAppearances) - toNumber(draft.walksAndHitByPitch));
+  return Math.max(
+    0,
+    toNumber(draft.plateAppearances)
+      - toNumber(draft.walksAndHitByPitch)
+      - toNumber(draft.sacrificeBunts)
+      - toNumber(draft.sacrificeFlies),
+  );
 }
 
 export function calculateHits(draft) {
@@ -21,8 +28,12 @@ export function calculateHits(draft) {
 }
 
 export function validateStep2(draft) {
-  if (toNumber(draft.walksAndHitByPitch) > toNumber(draft.plateAppearances)) {
-    return buildResult("사사구는 타석보다 클 수 없습니다.");
+  const excludedPlateAppearances = toNumber(draft.walksAndHitByPitch)
+    + toNumber(draft.sacrificeBunts)
+    + toNumber(draft.sacrificeFlies);
+
+  if (excludedPlateAppearances > toNumber(draft.plateAppearances)) {
+    return buildResult(PLATE_APPEARANCE_BREAKDOWN_MESSAGE);
   }
 
   return buildResult();

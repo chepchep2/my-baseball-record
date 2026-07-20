@@ -34,6 +34,34 @@ function buildValues(overrides = {}) {
   };
 }
 
+const matchFields = [
+  { key: "plateAppearances", label: "타석" },
+  { key: "walksAndHitByPitch", label: "사사구" },
+  { key: "sacrificeBunts", label: "희생번트" },
+  { key: "sacrificeFlies", label: "희생플라이" },
+  { key: "singles", label: "1루타" },
+  { key: "doubles", label: "2루타" },
+  { key: "triples", label: "3루타" },
+  { key: "homeRuns", label: "홈런" },
+];
+
+function buildMatchValues(overrides = {}) {
+  return {
+    date: "2026-03-27",
+    hour: "19",
+    minute: "00",
+    plateAppearances: "6",
+    walksAndHitByPitch: "0",
+    sacrificeBunts: "0",
+    sacrificeFlies: "0",
+    singles: "0",
+    doubles: "0",
+    triples: "0",
+    homeRuns: "0",
+    ...overrides,
+  };
+}
+
 describe("EntryStepCounts keyboard accessory", () => {
   afterEach(() => {
     Object.defineProperty(window.navigator, "userAgent", {
@@ -102,5 +130,33 @@ describe("EntryStepCounts keyboard accessory", () => {
     );
 
     expect(screen.queryByRole("button", { name: "다음" })).not.toBeInTheDocument();
+  });
+
+  it("matches 입력에서는 타수가 0이어도 희생플라이를 다시 수정할 수 있다", async () => {
+    Object.defineProperty(window.navigator, "userAgent", {
+      configurable: true,
+      value: "Mozilla/5.0 (iPhone; CPU iPhone OS 18_2 like Mac OS X)",
+    });
+
+    render(
+      <EntryStepCounts
+        fields={matchFields}
+        values={buildMatchValues({ sacrificeFlies: "6" })}
+        error={null}
+        canProceed
+        onChange={vi.fn()}
+        onSubmit={vi.fn()}
+        hitFieldStartIndex={4}
+      />,
+    );
+
+    const sacrificeFliesInput = screen.getByLabelText("희생플라이");
+    const singlesInput = screen.getByLabelText("1루타");
+
+    expect(sacrificeFliesInput).toBeEnabled();
+    expect(singlesInput).toBeDisabled();
+
+    await userEvent.click(screen.getByLabelText("희생번트"));
+    await waitFor(() => expect(screen.getByLabelText("희생번트")).toHaveFocus());
   });
 });

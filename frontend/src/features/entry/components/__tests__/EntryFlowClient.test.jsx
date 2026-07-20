@@ -77,7 +77,7 @@ describe("EntryFlowClient", () => {
     await activateField("사사구");
     fireEvent.change(screen.getByLabelText("사사구"), { target: { value: "2" } });
 
-    expect(screen.getByText("사사구는 타석보다 클 수 없습니다.")).toBeInTheDocument();
+    expect(screen.getByText("사사구, 희생번트, 희생플라이는 타석보다 클 수 없습니다.")).toBeInTheDocument();
     expect(screen.getByLabelText("사사구")).toHaveFocus();
     expect(pushMock).not.toHaveBeenCalled();
   });

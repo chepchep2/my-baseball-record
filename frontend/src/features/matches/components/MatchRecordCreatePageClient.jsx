@@ -59,7 +59,7 @@ export default function MatchRecordCreatePageClient({ gameId }) {
         triples: Number(draft.triples),
         homeRuns: Number(draft.homeRuns),
       });
-      router.push(`/matches/${gameId}`);
+      router.push("/home");
     } catch (error) {
       setSubmitError(error instanceof ApiError ? error.message : "기록을 저장하지 못했습니다.");
     } finally {

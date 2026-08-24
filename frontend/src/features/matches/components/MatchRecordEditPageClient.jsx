@@ -15,6 +15,8 @@ import { validateEntrySubmission } from "@/features/entry/model/entry-validation
 const ENTRY_FIELDS = [
   { key: "plateAppearances", label: "타석" },
   { key: "walksAndHitByPitch", label: "사사구" },
+  { key: "sacrificeBunts", label: "희생번트" },
+  { key: "sacrificeFlies", label: "희생플라이" },
   { key: "singles", label: "1루타" },
   { key: "doubles", label: "2루타" },
   { key: "triples", label: "3루타" },
@@ -25,6 +27,8 @@ function buildDraftFromRecord(record) {
   return {
     plateAppearances: String(record.plateAppearances ?? 0),
     walksAndHitByPitch: String(record.walksAndHitByPitch ?? 0),
+    sacrificeBunts: String(record.sacrificeBunts ?? 0),
+    sacrificeFlies: String(record.sacrificeFlies ?? 0),
     singles: String(record.singles ?? 0),
     doubles: String(record.doubles ?? 0),
     triples: String(record.triples ?? 0),
@@ -108,6 +112,8 @@ export default function MatchRecordEditPageClient({ gameId, batterRecordId }) {
       await updateMatchRecord(apiClient, gameId, batterRecordId, {
         plateAppearances: Number(draft.plateAppearances),
         walksAndHitByPitch: Number(draft.walksAndHitByPitch),
+        sacrificeBunts: Number(draft.sacrificeBunts),
+        sacrificeFlies: Number(draft.sacrificeFlies),
         singles: Number(draft.singles),
         doubles: Number(draft.doubles),
         triples: Number(draft.triples),
@@ -138,6 +144,7 @@ export default function MatchRecordEditPageClient({ gameId, batterRecordId }) {
       <div className="entry-flow-shell">
         <PrototypeEntryStepCounts
           fields={ENTRY_FIELDS}
+          hitFieldStartIndex={4}
           values={draft}
           error={errorMessage ?? stepError}
           canProceed={stepError === null && !isSubmitting}

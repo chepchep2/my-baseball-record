@@ -123,6 +123,8 @@ export default function MatchRecordDetailPageClient({ gameId, batterRecordId }) 
   const countItems = [
     ["타석", record.plateAppearances],
     ["사사구", record.walksAndHitByPitch],
+    ["희생번트", record.sacrificeBunts],
+    ["희생플라이", record.sacrificeFlies],
     ["1루타", record.singles],
     ["2루타", record.doubles],
     ["3루타", record.triples],
